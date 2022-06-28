@@ -1,5 +1,5 @@
-let dotenv = require('dotenv');
-require('express');
+import { Sequelize, Model, DataTypes } from 'sequelize';
+import 'dotenv/config';
+import 'express';
 
-dotenv.config();
 console.log(process.env);
