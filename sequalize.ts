@@ -1,10 +1,46 @@
-const { Sequelize } = require('sequelize');
+const { Sequelize, Model, DataTypes } = require('sequelize');
 
 // Option 3: Passing parameters separately (other dialects)
 const sequelize = new Sequelize('centrovax', 'root', '', {
-  user:'localhost',
-  dialect: 'mysql'
-});
+    user:'localhost',
+    dialect: 'mysql'
+  });
+
+  const User = sequelize.define("user", {
+    id: {
+        type: DataTypes.BIGINT(20),
+        autoIncrement: true,
+        primaryKey: true
+    }, 
+    cf: {type:DataTypes.STRING},
+    username: {type:DataTypes.STRING},
+    password: {type:DataTypes.STRING},
+    tipo:{type:DataTypes.INTEGER}
+  }, {
+    tableName: 'users',
+    timestamps: false
+  } );
+  
+  async function prova(){
+    const users = await User.findAll();
+    console.log(users.every(user => user instanceof User)); // true
+    console.log("All users:", JSON.stringify(users, null, 2));
+  }
+
+prova();
+
+
+
+
+
+
+
+
+
+
+
+//Metodo grezzo
+/*
 
 async function prova(){
     try {
@@ -38,4 +74,4 @@ async function prova3(){
     }
 }
 
-prova()
+prova()*/

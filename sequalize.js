@@ -34,76 +34,75 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var Sequelize = require('sequelize').Sequelize;
+var _a = require('sequelize'), Sequelize = _a.Sequelize, Model = _a.Model, DataTypes = _a.DataTypes;
 // Option 3: Passing parameters separately (other dialects)
 var sequelize = new Sequelize('centrovax', 'root', '', {
     user: 'localhost',
     dialect: 'mysql'
 });
+var User = sequelize.define("user", {
+    id: {
+        type: DataTypes.BIGINT(20),
+        autoIncrement: true,
+        primaryKey: true
+    },
+    cf: { type: DataTypes.STRING },
+    username: { type: DataTypes.STRING },
+    password: { type: DataTypes.STRING },
+    tipo: { type: DataTypes.INTEGER }
+}, {
+    tableName: 'users',
+    timestamps: false
+});
 function prova() {
     return __awaiter(this, void 0, void 0, function () {
-        var error_1;
+        var users;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0:
-                    _a.trys.push([0, 2, , 3]);
-                    return [4 /*yield*/, sequelize.authenticate()];
-                case 1:
-                    _a.sent();
-                    console.log('Connection has been established successfully.');
-                    prova2();
-                    prova3();
-                    return [3 /*break*/, 3];
-                case 2:
-                    error_1 = _a.sent();
-                    console.error('Unable to connect to the database:', error_1);
-                    return [3 /*break*/, 3];
-                case 3: return [2 /*return*/];
-            }
-        });
-    });
-}
-function prova2() {
-    return __awaiter(this, void 0, void 0, function () {
-        var users, error_2;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    _a.trys.push([0, 2, , 3]);
-                    return [4 /*yield*/, sequelize.query("SELECT * FROM `users`", { type: Sequelize.SELECT })];
+                case 0: return [4 /*yield*/, User.findAll()];
                 case 1:
                     users = _a.sent();
-                    console.log(users);
-                    return [3 /*break*/, 3];
-                case 2:
-                    error_2 = _a.sent();
-                    console.error('Abbiamo un problema:', error_2);
-                    return [3 /*break*/, 3];
-                case 3: return [2 /*return*/];
-            }
-        });
-    });
-}
-function prova3() {
-    return __awaiter(this, void 0, void 0, function () {
-        var users, error_3;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    _a.trys.push([0, 2, , 3]);
-                    return [4 /*yield*/, sequelize.query("INSERT INTO `users`(`cf`, `username`, `password`, `tipo`) VALUES ('LCULLL07B55F205T','luca','luca','0')", { type: Sequelize.INSERT })];
-                case 1:
-                    users = _a.sent();
-                    console.log(users);
-                    console.log("inserimento riuscito");
-                    return [3 /*break*/, 3];
-                case 2:
-                    error_3 = _a.sent();
-                    console.error('Abbiamo un problema:', error_3);
-                    return [3 /*break*/, 3];
-                case 3: return [2 /*return*/];
+                    console.log(users.every(function (user) { return user instanceof User; })); // true
+                    console.log("All users:", JSON.stringify(users, null, 2));
+                    return [2 /*return*/];
             }
         });
     });
 }
 prova();
+//Metodo grezzo
+/*
+
+async function prova(){
+    try {
+        await sequelize.authenticate();
+        console.log('Connection has been established successfully.');
+        prova2();
+        prova3();
+        //sequelize.close();
+        //console.log('Ho chiuso la connessione');
+      } catch (error) {
+        console.error('Unable to connect to the database:', error);
+      }
+}
+
+async function prova2(){
+    try{
+        const users = await sequelize.query("SELECT * FROM `users`", { type: Sequelize.SELECT });
+        console.log(users)
+    } catch(error){
+        console.error('Abbiamo un problema:', error);
+    }
+}
+
+async function prova3(){
+    try{
+        const users = await sequelize.query("INSERT INTO `users`(`cf`, `username`, `password`, `tipo`) VALUES ('LCULLL07B55F205T','luca','luca','0')", { type: Sequelize.INSERT });
+        console.log(users);
+        console.log("inserimento riuscito")
+    } catch(error){
+        console.error('Abbiamo un problema:', error);
+    }
+}
+
+prova()*/ 
