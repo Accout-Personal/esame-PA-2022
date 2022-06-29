@@ -13,12 +13,12 @@ export class Users {
             id: {
                 type: DataTypes.BIGINT(20),
                 autoIncrement: true,
-                primaryKey: true,
+                primaryKey: true
             }, 
             cf: {type:DataTypes.STRING},
             username: {type:DataTypes.STRING},
             password: {type:DataTypes.STRING},
-            tipo:{type:DataTypes.INTEGER,}
+            tipo:{type:DataTypes.INTEGER}
           }, {
             tableName: 'users',
             timestamps: false
