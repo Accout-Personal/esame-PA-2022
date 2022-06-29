@@ -1,33 +1,45 @@
-const { Sequelize, Model, DataTypes } = require('sequelize');
+var { Sequelize, Model, DataTypes } = require('sequelize');
 
 // Option 3: Passing parameters separately (other dialects)
 const sequelize = new Sequelize('centrovax', 'root', '', {
     user:'localhost',
-    dialect: 'mysql'
+    dialect: 'mysql',
+    logging: false
   });
 
-  const User = sequelize.define("user", {
+  var User = sequelize.define("user", {
     id: {
         type: DataTypes.BIGINT(20),
         autoIncrement: true,
-        primaryKey: true
+        primaryKey: true,
     }, 
     cf: {type:DataTypes.STRING},
     username: {type:DataTypes.STRING},
     password: {type:DataTypes.STRING},
-    tipo:{type:DataTypes.INTEGER}
+    tipo:{
+      type:DataTypes.INTEGER,
+      allowNull: false
+    }
   }, {
     tableName: 'users',
     timestamps: false
   } );
   
   async function prova(){
+    console.log(typeof sequelize)
+    console.log('il tipo sta sopra')
     const users = await User.findAll();
     console.log(users.every(user => user instanceof User)); // true
     console.log("All users:", JSON.stringify(users, null, 2));
   }
+  async function prova2(){
+    const jane = await User.create({ id: "0",cf: "YCPNBF97P21D302R", username: "francesco",password: "francesco",tipo: "1" },
+    { fields: ['cf','username','password','tipo'] });
+    console.log("Jane's auto-generated ID:", jane.id);
+  }
 
 prova();
+//prova2();
 
 
 

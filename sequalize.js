@@ -38,7 +38,8 @@ var _a = require('sequelize'), Sequelize = _a.Sequelize, Model = _a.Model, DataT
 // Option 3: Passing parameters separately (other dialects)
 var sequelize = new Sequelize('centrovax', 'root', '', {
     user: 'localhost',
-    dialect: 'mysql'
+    dialect: 'mysql',
+    logging: false
 });
 var User = sequelize.define("user", {
     id: {
@@ -49,7 +50,10 @@ var User = sequelize.define("user", {
     cf: { type: DataTypes.STRING },
     username: { type: DataTypes.STRING },
     password: { type: DataTypes.STRING },
-    tipo: { type: DataTypes.INTEGER }
+    tipo: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    }
 }, {
     tableName: 'users',
     timestamps: false
@@ -59,7 +63,10 @@ function prova() {
         var users;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, User.findAll()];
+                case 0:
+                    console.log(typeof sequelize);
+                    console.log('il tipo sta sopra');
+                    return [4 /*yield*/, User.findAll()];
                 case 1:
                     users = _a.sent();
                     console.log(users.every(function (user) { return user instanceof User; })); // true
@@ -69,7 +76,22 @@ function prova() {
         });
     });
 }
+function prova2() {
+    return __awaiter(this, void 0, void 0, function () {
+        var jane;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, User.create({ id: "0", cf: "YCPNBF97P21D302R", username: "francesco", password: "francesco", tipo: "1" }, { fields: ['cf', 'username', 'password', 'tipo'] })];
+                case 1:
+                    jane = _a.sent();
+                    console.log("Jane's auto-generated ID:", jane.id);
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
 prova();
+//prova2();
 //Metodo grezzo
 /*
 
