@@ -2,7 +2,7 @@ var { Sequelize, Model, DataTypes } = require('sequelize');
 /**
  *  Classe model che rappresenta la tabella 'vaccino' nel database 
  */
-class Vaccini {
+export class Vaccini {
 
     private vaccino: any;
 
@@ -32,5 +32,10 @@ class Vaccini {
         } catch{
             return false;
         }
+      }
+
+      // Metodo per ottenere il modello
+      public getModel(): any {
+        return this.vaccino;
       }
 }

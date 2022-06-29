@@ -37,4 +37,9 @@ export class Users {
     public async trovaTutto(connessione: object){
         return await this.user.findAll();
     }
+
+    // Metodo per ottenere il modello
+    public getModel():any{
+      return this.user;
+    }
 }

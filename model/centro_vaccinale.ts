@@ -2,7 +2,7 @@ var { Sequelize, Model, DataTypes } = require('sequelize');
 /**
  *  Classe model che rappresenta la tabella 'centro_vaccinale' nel database 
  */
-class Centro_vaccinale {
+export class Centro_vaccinale {
 
     private centro_vaccinale:any;
 
@@ -37,4 +37,8 @@ class Centro_vaccinale {
             return false;}
       }
 
+// Metodo per ottenere il modello
+      public getModel():any{
+        return this.centro_vaccinale;
+      }
 }
