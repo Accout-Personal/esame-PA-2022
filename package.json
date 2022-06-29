@@ -4,6 +4,7 @@
   "description": "Esame di programmazione avanzata univpm 2022\r first commit",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -15,6 +16,7 @@
     "jsonwebtoken": "^8.5.1",
     "mysql": "^2.18.1",
     "mysql2": "^2.3.3",
+    "package.json": "^2.0.1",
     "sequelize": "^6.21.1",
     "sqlite3": "^5.0.8"
   },

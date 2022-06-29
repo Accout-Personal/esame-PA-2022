@@ -3,7 +3,6 @@ var { Sequelize, Model, DataTypes } = require('sequelize');
  *  Classe model che rappresenta la tabella 'users' nel database 
  */
 export class Users {
-
     private user: any;
     constructor(sequelize:any){
 
@@ -34,4 +33,8 @@ export class Users {
         } catch{
             return false;}
       }
+    
+    public async trovaTutto(connessione: object){
+        return await this.user.findAll();
+    }
 }

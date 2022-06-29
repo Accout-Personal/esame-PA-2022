@@ -1,0 +1,27 @@
+version: '3.7'
+services:
+    dbpg:
+        image: mysql
+        restart: always
+        environment:
+          - MYSQL_USER=sql_user
+          - MYSQL_PASSWORD=sqlpassword
+          - MYSQL_ALLOW_EMPTY_PASSWORD=true
+          - MYSQL_ROOT_PASSWORD=rootpassword
+        ports:
+          - 5432:5432
+        volumes: 
+          # copy the sql script to create tables
+          - ./seeder:/docker-entrypoint-initdb.d          
+    node:
+        build: .
+        ports:
+          - 8080:8080
+        environment:
+          - PGUSER=postgres
+          - PGDATABASE=pa
+          - PGHOST=dbpg
+          - PGPASSWORD=postgres
+          - PGPORT=5432
+        depends_on:
+          - dbpg
