@@ -2,7 +2,7 @@ var { Sequelize, Model, DataTypes } = require('sequelize');
 /**
  *  Classe model che rappresenta la tabella 'users' nel database 
  */
-class Users {
+export class Users {
 
     private user: any;
     constructor(sequelize:any){
