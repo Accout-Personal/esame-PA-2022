@@ -15,13 +15,13 @@ class Centro_vaccinale {
             id: {
                 type: DataTypes.BIGINT(20),
                 autoIncrement: true,
-                primaryKey: true,
+                primaryKey: true
             }, 
             lati: {type:DataTypes.DOUBLE},
             longi: {type:DataTypes.DOUBLE},
             nome: {type:DataTypes.STRING},
-            maxf1:{type:DataTypes.INTEGER,},
-            maxf2:{type:DataTypes.INTEGER,}
+            maxf1:{type:DataTypes.INTEGER},
+            maxf2:{type:DataTypes.INTEGER}
           }, {
             tableName: 'centro_vaccinale',
             timestamps: false

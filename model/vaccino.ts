@@ -15,10 +15,10 @@ class Vaccini {
             id: {
                 type: DataTypes.BIGINT(20),
                 autoIncrement: true,
-                primaryKey: true,
+                primaryKey: true
             }, 
             nome: {type:DataTypes.STRING},
-            validita:{type:DataTypes.INTEGER,},
+            validita:{type:DataTypes.INTEGER},
           }, {
             tableName: 'vaccino',
             timestamps: false

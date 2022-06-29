@@ -35,12 +35,21 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 var _a = require('sequelize'), Sequelize = _a.Sequelize, Model = _a.Model, DataTypes = _a.DataTypes;
-// Option 3: Passing parameters separately (other dialects)
-var sequelize = new Sequelize('centrovax', 'root', '', {
-    user: 'localhost',
-    dialect: 'mysql',
-    logging: false
+var sequelize = new Sequelize({
+    username: 'centrovax',
+    host: '37.187.126.183',
+    //port:'888',
+    //logging: console.log,
+    database: 'centrovax',
+    password: 'pa2022',
+    dialect: 'mysql'
 });
+// Option 3: Passing parameters separately (other dialects)
+/*const sequelize = new Sequelize('centrovax', 'root', '', {
+    host:'localhost',
+    dialect: 'mysql'
+    //logging: false
+  });*/
 var User = sequelize.define("user", {
     id: {
         type: DataTypes.BIGINT(20),
@@ -58,6 +67,25 @@ var User = sequelize.define("user", {
     tableName: 'users',
     timestamps: false
 });
+var pren = sequelize.define("prenotazione", {
+    id: {
+        type: DataTypes.BIGINT(20),
+        autoIncrement: true,
+        primaryKey: true
+    },
+    data: { type: DataTypes.DATE },
+    fascia: { type: DataTypes.INTEGER },
+    slot: { type: DataTypes.INTEGER },
+    centro_vac: { type: DataTypes.BIGINT(20) },
+    vaccino: { type: DataTypes.BIGINT(20) },
+    user: {
+        type: DataTypes.BIGINT(20)
+    },
+    stato: { type: DataTypes.BIGINT(20) }
+}, {
+    tableName: 'prenotazione',
+    timestamps: false
+});
 function prova() {
     return __awaiter(this, void 0, void 0, function () {
         var users;
@@ -66,10 +94,10 @@ function prova() {
                 case 0:
                     console.log(typeof sequelize);
                     console.log('il tipo sta sopra');
-                    return [4 /*yield*/, User.findAll()];
+                    return [4 /*yield*/, pren.findAll()];
                 case 1:
                     users = _a.sent();
-                    console.log(users.every(function (user) { return user instanceof User; })); // true
+                    console.log(users.every(function (pre) { return pre instanceof pren; })); // true
                     console.log("All users:", JSON.stringify(users, null, 2));
                     return [2 /*return*/];
             }
@@ -78,19 +106,43 @@ function prova() {
 }
 function prova2() {
     return __awaiter(this, void 0, void 0, function () {
-        var jane;
+        var jane, pr;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, User.create({ id: "0", cf: "YCPNBF97P21D302R", username: "francesco", password: "francesco", tipo: "1" }, { fields: ['cf', 'username', 'password', 'tipo'] })];
+                case 0: return [4 /*yield*/, User.create({ id: "1", cf: "YCPNBF97P21D302R", username: "francesco", password: "francesco", tipo: "1" }, { fields: ['cf', 'username', 'password', 'tipo'] })];
                 case 1:
                     jane = _a.sent();
+                    return [4 /*yield*/, pren.create({ id: "0", data: '2022-07-06', fascia: 1, slot: 14, centro_vac: 8, vaccino: 1, user: 1, stato: 0 }, { fields: ['data', 'fascia', 'slot', 'centro_vac', 'vaccino', 'user', 'stato'] })];
+                case 2:
+                    pr = _a.sent();
                     console.log("Jane's auto-generated ID:", jane.id);
                     return [2 /*return*/];
             }
         });
     });
+} //1
+function prova3() {
+    return __awaiter(this, void 0, void 0, function () {
+        var error_1;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 2, , 3]);
+                    return [4 /*yield*/, sequelize.authenticate()];
+                case 1:
+                    _a.sent();
+                    console.log('Connection has been established successfully.');
+                    return [3 /*break*/, 3];
+                case 2:
+                    error_1 = _a.sent();
+                    console.error('Unable to connect to the database:', error_1);
+                    return [3 /*break*/, 3];
+                case 3: return [2 /*return*/];
+            }
+        });
+    });
 }
-prova();
+prova2();
 //prova2();
 //Metodo grezzo
 /*
