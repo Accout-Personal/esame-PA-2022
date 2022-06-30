@@ -1,3 +1,5 @@
+import { json } from "./node_modules/sequelize/types/sequelize";
+
 var { Sequelize, Model, DataTypes } = require('sequelize');
 
 const sequelize = new Sequelize({
@@ -59,9 +61,16 @@ const sequelize = new Sequelize({
   async function prova(){
     console.log(typeof sequelize)
     console.log('il tipo sta sopra')
+    let ok: Array<typeof pren>
     const users = await pren.findAll();
+    console.log(typeof users)
     console.log(users.every(pre => pre instanceof pren)); // true
     console.log("All users:", JSON.stringify(users, null, 2));
+    console.log(typeof users)
+    let risultato = JSON.stringify(users, null, 2);
+    console.log(typeof risultato)
+    let parse = JSON.parse(risultato)
+    console.log(typeof parse)
   }
   async function prova2(){
     const jane = await User.create({ id: "1",cf: "YCvNBF69P21D302R", username: "francesco",password: "francesco",tipo: "1" },
@@ -84,7 +93,20 @@ const sequelize = new Sequelize({
       }
 }
 
-prova2();
+async function prova4(){
+  const users = await User.findAll();
+  console.log(typeof users)
+  //console.log(users.every(user => user instanceof User)); // true
+  //console.log("All users:", JSON.stringify(users, null, 2));
+  var resultArray: Array<typeof User> = Object.keys(users).map(function(personNamedIndex){
+  let person = users[personNamedIndex];
+  //console.log(person)
+  return person
+});
+  console.log(users[1].id)
+}
+
+prova4();
 //prova2();
 
 

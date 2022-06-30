@@ -41,4 +41,13 @@ export class Centro_vaccinale {
       public getModel():any{
         return this.centro_vaccinale;
       }
+
+// Metodo per ottenere tutti i centri vaccinali
+      async getAll():Promise<any>{
+        try {
+          return await this.centro_vaccinale.findAll();
+        } catch (error) {
+          return error;
+        }
+      }
 }

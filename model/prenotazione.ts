@@ -5,7 +5,7 @@ import { Vaccini } from "./vaccino";
 /**
  *  Classe model che rappresenta la tabella 'prenotazione' nel database 
  */
-export class prenotazione {
+export class Prenotazione {
   // I model delle altre classi servono per definire i vincoli d'integrità referenziale
     private prenotazione:any;
     private centro_vaccinaleModel:any;

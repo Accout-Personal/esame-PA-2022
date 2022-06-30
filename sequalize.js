@@ -1,3 +1,4 @@
+"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -34,6 +35,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+exports.__esModule = true;
 var _a = require('sequelize'), Sequelize = _a.Sequelize, Model = _a.Model, DataTypes = _a.DataTypes;
 var sequelize = new Sequelize({
     username: 'centrovax',
@@ -88,7 +90,7 @@ var pren = sequelize.define("prenotazione", {
 });
 function prova() {
     return __awaiter(this, void 0, void 0, function () {
-        var users;
+        var ok, users, risultato, parse;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -97,8 +99,14 @@ function prova() {
                     return [4 /*yield*/, pren.findAll()];
                 case 1:
                     users = _a.sent();
+                    console.log(typeof users);
                     console.log(users.every(function (pre) { return pre instanceof pren; })); // true
                     console.log("All users:", JSON.stringify(users, null, 2));
+                    console.log(typeof users);
+                    risultato = JSON.stringify(users, null, 2);
+                    console.log(typeof risultato);
+                    parse = JSON.parse(risultato);
+                    console.log(typeof parse);
                     return [2 /*return*/];
             }
         });
@@ -109,7 +117,7 @@ function prova2() {
         var jane, pr;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, User.create({ id: "1", cf: "YCPNBF97P21D302R", username: "francesco", password: "francesco", tipo: "1" }, { fields: ['cf', 'username', 'password', 'tipo'] })];
+                case 0: return [4 /*yield*/, User.create({ id: "1", cf: "YCvNBF69P21D302R", username: "francesco", password: "francesco", tipo: "1" }, { fields: ['cf', 'username', 'password', 'tipo'] })];
                 case 1:
                     jane = _a.sent();
                     return [4 /*yield*/, pren.create({ id: "0", data: '2022-07-06', fascia: 1, slot: 14, centro_vac: 8, vaccino: 1, user: 1, stato: 0 }, { fields: ['data', 'fascia', 'slot', 'centro_vac', 'vaccino', 'user', 'stato'] })];
@@ -142,7 +150,27 @@ function prova3() {
         });
     });
 }
-prova2();
+function prova4() {
+    return __awaiter(this, void 0, void 0, function () {
+        var users, resultArray;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, User.findAll()];
+                case 1:
+                    users = _a.sent();
+                    console.log(typeof users);
+                    resultArray = Object.keys(users).map(function (personNamedIndex) {
+                        var person = users[personNamedIndex];
+                        //console.log(person)
+                        return person;
+                    });
+                    console.log(users[1].id);
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+prova4();
 //prova2();
 //Metodo grezzo
 /*
