@@ -1,4 +1,4 @@
-var { Sequelize, Model, DataTypes } = require('sequelize');
+import { Sequelize, Model, DataTypes } from 'sequelize';
 /**
  *  Classe model che rappresenta la tabella 'users' nel database 
  */
@@ -11,7 +11,7 @@ export class Users {
 
         this.user = sequelize.define("user", {
             id: {
-                type: DataTypes.BIGINT(20),
+                type:DataTypes.BIGINT(),
                 autoIncrement: true,
                 primaryKey: true
             }, 
