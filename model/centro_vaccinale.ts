@@ -45,7 +45,8 @@ export class Centro_vaccinale {
 // Metodo per ottenere tutti i centri vaccinali
       async getAll():Promise<any>{
         try {
-          return await this.centro_vaccinale.findAll();
+          let result = await this.centro_vaccinale.findAll()
+          return result;
         } catch (error) {
           return error;
         }
