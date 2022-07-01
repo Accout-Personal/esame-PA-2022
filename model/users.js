@@ -36,26 +36,64 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-var sequelize_1 = require("./config/sequelize");
-var users_1 = require("./model/users");
-var dotenv = require("dotenv");
-function querySemplice(connection) {
-    return __awaiter(this, void 0, void 0, function () {
-        var users;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    users = new users_1.Users(connection);
-                    console.log(users);
-                    return [4 /*yield*/, users.trovaTutto(connection)];
-                case 1: return [2 /*return*/, _a.sent()];
-            }
+exports.Users = void 0;
+var sequelize_1 = require("sequelize");
+/**
+ *  Classe model che rappresenta la tabella 'users' nel database
+ */
+var Users = /** @class */ (function () {
+    function Users(sequelize) {
+        //nel costruttore vado a definire la struttura della tabella usando sequelize,
+        // questo model mi permette di compiere varie operazioni 
+        this.user = sequelize.define("user", {
+            id: {
+                type: sequelize_1.DataTypes.BIGINT(),
+                autoIncrement: true,
+                primaryKey: true
+            },
+            cf: { type: sequelize_1.DataTypes.STRING },
+            username: { type: sequelize_1.DataTypes.STRING },
+            password: { type: sequelize_1.DataTypes.STRING },
+            tipo: { type: sequelize_1.DataTypes.INTEGER }
+        }, {
+            tableName: 'users',
+            timestamps: false
         });
-    });
-}
-console.log("hello world");
-dotenv.config();
-var connection = sequelize_1.DBConnection.getInstance().getConnection();
-querySemplice(connection).then(function (value) {
-    console.log(JSON.stringify(value));
-});
+    }
+    // Metodo per inserire un nuovo user
+    Users.prototype.insertNewUsers = function (cf, username, password, tipo) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _a;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        _b.trys.push([0, 2, , 3]);
+                        return [4 /*yield*/, this.user.create({ cf: cf, username: username, password: password, tipo: tipo.toString() })];
+                    case 1:
+                        _b.sent();
+                        return [2 /*return*/, true];
+                    case 2:
+                        _a = _b.sent();
+                        return [2 /*return*/, false];
+                    case 3: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    Users.prototype.trovaTutto = function (connessione) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.user.findAll()];
+                    case 1: return [2 /*return*/, _a.sent()];
+                }
+            });
+        });
+    };
+    // Metodo per ottenere il modello
+    Users.prototype.getModel = function () {
+        return this.user;
+    };
+    return Users;
+}());
+exports.Users = Users;

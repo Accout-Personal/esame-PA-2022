@@ -1,8 +1,10 @@
+import { proxyInterfaceCV } from "./ProxyInterface/proxyinterfaceCV";
+
 var { Sequelize, Model, DataTypes } = require('sequelize');
 /**
  *  Classe model che rappresenta la tabella 'centro_vaccinale' nel database 
  */
-export class Centro_vaccinale {
+export class Centro_vaccinale implements proxyInterfaceCV{
 
     private centro_vaccinale:any;
 
@@ -29,7 +31,7 @@ export class Centro_vaccinale {
     }
      
 // Metodo per inserire un nuovo centro centro vaccinale
-      public async inserisciCentro(lati: Number, longi: number, nome: string, maxf1:number, maxf2:number): Promise<Boolean>{
+      public async insertNewCV(lati: number, longi: number, nome: string, maxf1: number, maxf2: number): Promise<Object>{
         try{
             await this.centro_vaccinale.create({lati: lati, longi: longi, nome: nome, maxf1: maxf1, maxf2: maxf2 });
             return true;
