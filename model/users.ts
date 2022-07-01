@@ -26,7 +26,7 @@ export class Users {
     }
 
     // Metodo per inserire un nuovo user
-      public async inserisciUser(connessione: object, cf: string, username: string,password: string, tipo:number): Promise<Boolean>{
+      async insertNewUsers(cf: string, username: string,password: string, tipo:number): Promise<Object>{
         try{
             await this.user.create({cf: cf, username: username,password: password,tipo: tipo.toString() });
             return true;

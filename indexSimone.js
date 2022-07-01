@@ -39,6 +39,7 @@ exports.__esModule = true;
 var sequelize_1 = require("./config/sequelize");
 var users_1 = require("./model/users");
 var dotenv = require("dotenv");
+var proxyCV_1 = require("./model/Proxymodel/proxyCV");
 function querySemplice(connection) {
     return __awaiter(this, void 0, void 0, function () {
         var users;
@@ -56,6 +57,34 @@ function querySemplice(connection) {
 console.log("hello world");
 dotenv.config();
 var connection = sequelize_1.DBConnection.getInstance().getConnection();
-querySemplice(connection).then(function (value) {
+/*querySemplice(connection).then(value=>{
     console.log(JSON.stringify(value));
-});
+});*/
+function stampa(prova) {
+    return __awaiter(this, void 0, void 0, function () {
+        var result;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, prova.insertNewCV('ciao', 5, 'll', 10, 2)];
+                case 1:
+                    result = _a.sent();
+                    switch (typeof result) {
+                        case 'boolean': {
+                            console.log('è booleano');
+                            break;
+                        }
+                        case 'object': {
+                            console.log('non è bool');
+                            console.log(result);
+                            break;
+                        }
+                    }
+                    console.log('mi dispiace, hai generato questa eccezione');
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+var prova = new proxyCV_1.proxyCV(connection);
+stampa(prova);
+//console.log(isNaN(5))

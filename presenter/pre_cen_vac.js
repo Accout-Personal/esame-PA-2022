@@ -39,14 +39,15 @@ exports.__esModule = true;
 var centro_vaccinale_1 = require("../model/centro_vaccinale");
 var _a = require('sequelize'), Sequelize = _a.Sequelize, Model = _a.Model, DataTypes = _a.DataTypes;
 var sequelize_1 = require("../config/sequelize");
+var dotenv = require("dotenv");
 /*
 * Utilizziamo il pattern builder per implementare questa classe, in quanto abbiamo che il contenuto restituito all'utente può variare a seconda delle richieste
 */
 var PresentCV = /** @class */ (function () {
     function PresentCV() {
-        //istanza di 
-        this.model = new centro_vaccinale_1.Centro_vaccinale(sequelize_1.connection);
+        this.model = new centro_vaccinale_1.Centro_vaccinale(sequelize_1.DBConnection.getInstance().getConnection());
     }
+    //istanza di 
     //In questo metodo viene utilizzata soltanto la funzione di filtraggio relativa alla distanza
     PresentCV.prototype.producePartA = function () {
         throw new Error("Method not implemented.");
@@ -70,6 +71,8 @@ var PresentCV = /** @class */ (function () {
     };
     return PresentCV;
 }());
-var prova = new PresentCV();
-console.log(prova.mioGetAll());
-//console.log(connection)
+dotenv.config();
+console.log(process.env);
+//var prova = new PresentCV();
+//console.log(prova.mioGetAll())
+console.log(sequelize_1.DBConnection.getInstance().getConnection());

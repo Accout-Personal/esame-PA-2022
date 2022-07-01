@@ -36,26 +36,61 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-var sequelize_1 = require("./config/sequelize");
-var users_1 = require("./model/users");
-var dotenv = require("dotenv");
-function querySemplice(connection) {
-    return __awaiter(this, void 0, void 0, function () {
-        var users;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    users = new users_1.Users(connection);
-                    console.log(users);
-                    return [4 /*yield*/, users.trovaTutto(connection)];
-                case 1: return [2 /*return*/, _a.sent()];
-            }
+exports.proxyCV = void 0;
+var centro_vaccinale_1 = require("../centro_vaccinale");
+// Nel proxy andiamo a implementare tutti i controlli e le sanificazioni sui dati di input per evitare problemi e crash del sistema
+var proxyCV = /** @class */ (function () {
+    function proxyCV(connessione) {
+        this.model = new centro_vaccinale_1.Centro_vaccinale(connessione);
+    }
+    proxyCV.prototype.insertNewCV = function (lati, longi, nome, maxf1, maxf2) {
+        return __awaiter(this, void 0, void 0, function () {
+            var error_1;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        _a.trys.push([0, 3, , 4]);
+                        if (!(this.TypeCheckLati(lati) &&
+                            this.TypeCheckLati(longi) &&
+                            this.TypeCheckNome(nome) &&
+                            this.TypeCheckMaxf1(maxf1) &&
+                            this.TypeCheckMaxf2(maxf2))) return [3 /*break*/, 2];
+                        return [4 /*yield*/, this.model.insertNewCV(lati, longi, nome, maxf1, maxf2)];
+                    case 1: return [2 /*return*/, _a.sent()];
+                    case 2: return [3 /*break*/, 4];
+                    case 3:
+                        error_1 = _a.sent();
+                        return [2 /*return*/, error_1];
+                    case 4: return [2 /*return*/];
+                }
+            });
         });
-    });
-}
-console.log("hello world");
-dotenv.config();
-var connection = sequelize_1.DBConnection.getInstance().getConnection();
-querySemplice(connection).then(function (value) {
-    console.log(JSON.stringify(value));
-});
+    };
+    proxyCV.prototype.TypeCheckLati = function (lati) {
+        if (!(typeof lati === 'number'))
+            throw new Error('Questo valore di latitudine non è un numero');
+        return true;
+    };
+    proxyCV.prototype.TypeCheckLongi = function (longi) {
+        if (!(typeof longi === 'number'))
+            throw new Error('Questo valore di longitudine non è un numero');
+        return true;
+    };
+    proxyCV.prototype.TypeCheckNome = function (nome) {
+        if (!(typeof nome === 'string'))
+            throw new Error('Questo nome non è composto da lettere');
+        return true;
+    };
+    proxyCV.prototype.TypeCheckMaxf1 = function (maxf1) {
+        if (!(typeof maxf1 === 'number'))
+            throw new Error('Questo valore non è un numero');
+        return true;
+    };
+    proxyCV.prototype.TypeCheckMaxf2 = function (maxf2) {
+        if (!(typeof maxf2 === 'number'))
+            throw new Error('Questo valore non è un numero');
+        return true;
+    };
+    return proxyCV;
+}());
+exports.proxyCV = proxyCV;
