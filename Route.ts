@@ -1,9 +1,19 @@
-import {express} from 'express';
-const app = express()
-const UserRoute = app.Route();
-const AdminRoute = app.Route();
+import * as express from 'express';
+export const app = express()
+export const UserRoute = express.Router();
+export const AdminRoute = express.Router();
+export const globalRouter = express.Router();
 
-app.Route('/login');
+app.get('/test1',(req,res,next)=>{
+    console.log('test1');
+    next();
+});
+app.get('/test2',(req,res,next)=>{
+    console.log('test2');
+    next();
+});
+
+app.route('/login');
 
 UserRoute.get('/getCentro');
 UserRoute.get('/getSlotCentro')
@@ -18,5 +28,4 @@ AdminRoute.post('/verify');
 AdminRoute.get('/badPrenota');
 AdminRoute.get('/statCentro');
 
-
-app.listening(3000);
+console.log('routing initialized..');
