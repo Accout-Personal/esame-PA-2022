@@ -36,55 +36,52 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-var sequelize_1 = require("./config/sequelize");
-var users_1 = require("./model/users");
-var dotenv = require("dotenv");
-var proxyVC_1 = require("./model/Proxymodel/proxyVC");
-function querySemplice(connection) {
-    return __awaiter(this, void 0, void 0, function () {
-        var users;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    users = new users_1.Users(connection);
-                    console.log(users);
-                    return [4 /*yield*/, users.trovaTutto(connection)];
-                case 1: return [2 /*return*/, _a.sent()];
-            }
+exports.Vaccini = void 0;
+var _a = require('sequelize'), Sequelize = _a.Sequelize, Model = _a.Model, DataTypes = _a.DataTypes;
+/**
+ *  Classe model che rappresenta la tabella 'vaccino' nel database
+ */
+var Vaccini = /** @class */ (function () {
+    function Vaccini(sequelize) {
+        //nel costruttore vado a definire la struttura della tabella usando sequelize,
+        // questo model mi permette di compiere varie operazioni 
+        this.vaccino = sequelize.define("vaccino", {
+            id: {
+                type: DataTypes.BIGINT(20),
+                autoIncrement: true,
+                primaryKey: true
+            },
+            nome: { type: DataTypes.STRING },
+            validita: { type: DataTypes.INTEGER }
+        }, {
+            tableName: 'vaccino',
+            timestamps: false
         });
-    });
-}
-console.log("hello world");
-dotenv.config();
-var connection = sequelize_1.DBConnection.getInstance().getConnection();
-/*querySemplice(connection).then(value=>{
-    console.log(JSON.stringify(value));
-});*/
-function stampa(prova) {
-    return __awaiter(this, void 0, void 0, function () {
-        var result;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, prova.insertNewVacc(30, 30)];
-                case 1:
-                    result = _a.sent();
-                    switch (typeof result) {
-                        case 'boolean': {
-                            console.log('è booleano');
-                            break;
-                        }
-                        case 'object': {
-                            console.log('non è bool');
-                            console.log(result);
-                            break;
-                        }
-                    }
-                    console.log('mi dispiace, hai generato questa eccezione');
-                    return [2 /*return*/];
-            }
+    }
+    // metodo per inserire un nuovo vaccino
+    Vaccini.prototype.insertNewVacc = function (nome, validita) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _a;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        _b.trys.push([0, 2, , 3]);
+                        return [4 /*yield*/, this.vaccino.create({ nome: nome, validita: validita })];
+                    case 1:
+                        _b.sent();
+                        return [2 /*return*/, true];
+                    case 2:
+                        _a = _b.sent();
+                        return [2 /*return*/, false];
+                    case 3: return [2 /*return*/];
+                }
+            });
         });
-    });
-}
-var prova = new proxyVC_1.proxyVC(connection);
-stampa(prova);
-//console.log(isNaN(5))
+    };
+    // Metodo per ottenere il modello
+    Vaccini.prototype.getModel = function () {
+        return this.vaccino;
+    };
+    return Vaccini;
+}());
+exports.Vaccini = Vaccini;

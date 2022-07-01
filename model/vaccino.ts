@@ -1,8 +1,10 @@
+import { proxyInterfaceVac } from "./ProxyInterface/proxyinterfaceVacc";
+
 var { Sequelize, Model, DataTypes } = require('sequelize');
 /**
  *  Classe model che rappresenta la tabella 'vaccino' nel database 
  */
-export class Vaccini {
+export class Vaccini implements proxyInterfaceVac {
 
     private vaccino: any;
 
@@ -25,7 +27,7 @@ export class Vaccini {
           } );
     }
     // metodo per inserire un nuovo vaccino
-    async inserisciVaccino(nome:string, validita:Number): Promise<Boolean>{
+    async insertNewVacc(nome:string, validita:number): Promise<Object>{
         try{
             await this.vaccino.create({nome: nome, validita: validita});
             return true;

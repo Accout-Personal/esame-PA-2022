@@ -36,55 +36,41 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-var sequelize_1 = require("./config/sequelize");
-var users_1 = require("./model/users");
-var dotenv = require("dotenv");
-var proxyVC_1 = require("./model/Proxymodel/proxyVC");
-function querySemplice(connection) {
-    return __awaiter(this, void 0, void 0, function () {
-        var users;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    users = new users_1.Users(connection);
-                    console.log(users);
-                    return [4 /*yield*/, users.trovaTutto(connection)];
-                case 1: return [2 /*return*/, _a.sent()];
-            }
+exports.proxyVC = void 0;
+var vaccino_1 = require("../vaccino");
+var proxyVC = /** @class */ (function () {
+    function proxyVC(connessione) {
+        this.model = new vaccino_1.Vaccini(connessione);
+    }
+    proxyVC.prototype.insertNewVacc = function (nome, validita) {
+        return __awaiter(this, void 0, void 0, function () {
+            var error_1;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        _a.trys.push([0, 3, , 4]);
+                        if (!(this.TypeCheckNome(nome) && this.TypeCheckValidita(validita))) return [3 /*break*/, 2];
+                        return [4 /*yield*/, this.model.insertNewVacc(nome, validita)];
+                    case 1: return [2 /*return*/, _a.sent()];
+                    case 2: return [3 /*break*/, 4];
+                    case 3:
+                        error_1 = _a.sent();
+                        return [2 /*return*/, error_1];
+                    case 4: return [2 /*return*/];
+                }
+            });
         });
-    });
-}
-console.log("hello world");
-dotenv.config();
-var connection = sequelize_1.DBConnection.getInstance().getConnection();
-/*querySemplice(connection).then(value=>{
-    console.log(JSON.stringify(value));
-});*/
-function stampa(prova) {
-    return __awaiter(this, void 0, void 0, function () {
-        var result;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, prova.insertNewVacc(30, 30)];
-                case 1:
-                    result = _a.sent();
-                    switch (typeof result) {
-                        case 'boolean': {
-                            console.log('è booleano');
-                            break;
-                        }
-                        case 'object': {
-                            console.log('non è bool');
-                            console.log(result);
-                            break;
-                        }
-                    }
-                    console.log('mi dispiace, hai generato questa eccezione');
-                    return [2 /*return*/];
-            }
-        });
-    });
-}
-var prova = new proxyVC_1.proxyVC(connection);
-stampa(prova);
-//console.log(isNaN(5))
+    };
+    proxyVC.prototype.TypeCheckNome = function (nome) {
+        if ((typeof nome !== 'string' || nome.length > 255))
+            throw new Error('Questo nome non è valido');
+        return true;
+    };
+    proxyVC.prototype.TypeCheckValidita = function (validita) {
+        if (typeof validita !== 'number' || isNaN(validita))
+            throw new Error('Questo valore di validità non è un numero');
+        return true;
+    };
+    return proxyVC;
+}());
+exports.proxyVC = proxyVC;
