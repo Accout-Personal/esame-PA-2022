@@ -4,7 +4,7 @@ import { Sequelize, Model, DataTypes } from 'sequelize';
 
 export class proxyVC implements proxyInterfaceVac {
 
-    private model:Vaccini;
+    public model:Vaccini;
 
     constructor(connessione:Sequelize){
         this.model = new Vaccini(connessione)

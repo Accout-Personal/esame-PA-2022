@@ -88,5 +88,15 @@ function stampa(prova) {
 var prova = new proxyVC_1.proxyVC(connection);
 //stampa(prova);
 //console.log(isNaN(5))
-var provaData = new Date("2019-01-16");
-console.log(provaData);
+prova.model.getModel().findAll();
+console.log(prova.model.getModel().findAll({
+    where: {
+        id: 200
+    }
+}).then(function (value) {
+    if (Object.keys(value).length != 0)
+        console.log('è pieno');
+    else
+        console.log('è vuoto');
+    console.log(JSON.stringify(value));
+}));
