@@ -40,6 +40,9 @@ async function stampa(prova:proxyVC){
 }
 
 var prova = new proxyVC(connection);
-stampa(prova);
+//stampa(prova);
 //console.log(isNaN(5))
+
+let provaData:Date = new Date("2019-01-16")
+console.log(provaData)
 

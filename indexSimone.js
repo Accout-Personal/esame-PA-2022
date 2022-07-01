@@ -65,7 +65,7 @@ function stampa(prova) {
         var result;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, prova.insertNewVacc(30, 30)];
+                case 0: return [4 /*yield*/, prova.insertNewVacc('simone', 30)];
                 case 1:
                     result = _a.sent();
                     switch (typeof result) {
@@ -86,5 +86,7 @@ function stampa(prova) {
     });
 }
 var prova = new proxyVC_1.proxyVC(connection);
-stampa(prova);
+//stampa(prova);
 //console.log(isNaN(5))
+var provaData = new Date("2019-01-16");
+console.log(provaData);

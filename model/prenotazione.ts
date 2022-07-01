@@ -1,11 +1,12 @@
 var { Sequelize, Model, DataTypes } = require('sequelize');
 import { Centro_vaccinale } from "./centro_vaccinale";
+import { proxyinterfacePR } from "./ProxyInterface/proxyinterfacePren";
 import { Users } from "./users";
 import { Vaccini } from "./vaccino";
 /**
  *  Classe model che rappresenta la tabella 'prenotazione' nel database 
  */
-export class Prenotazione {
+export class Prenotazione implements proxyinterfacePR{
   // I model delle altre classi servono per definire i vincoli d'integrità referenziale
     private prenotazione:any;
     private centro_vaccinaleModel:any;
@@ -58,8 +59,9 @@ export class Prenotazione {
     }
 
     // metodo per inserire una prenotazione
-    async inserisciPrenotazione(data: string, fascia: Number, slot: Number, centro_vaccino: Number, vaccino: Number, user: Number, stato: Number):Promise<Boolean> {
+    async insertNewPr(giorno:number, mese:number,anno:number , fascia: number, slot: number, centro_vaccino: number, vaccino: number, user: number, stato: number):Promise<Object> {
       try{
+        let data = giorno.toString()+'/'+mese.toString()+'/'+anno.toString()
         await this.prenotazione.create({data: data, fascia: fascia, slot: slot, centro_vaccino: centro_vaccino, vaccino: vaccino, user: user, stato: stato});
         return true;
     } catch{
