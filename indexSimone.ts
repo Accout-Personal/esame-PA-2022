@@ -2,6 +2,8 @@ import {DBConnection} from './config/sequelize';
 import { Users } from './model/users';
 import * as dotenv from 'dotenv';
 import { proxyCV } from './model/Proxymodel/proxyCV';
+import { proxyUs } from './model/Proxymodel/proxyUs';
+import { proxyVC } from './model/Proxymodel/proxyVC';
 
 async function querySemplice(connection){
     var users = new Users(connection);
@@ -17,9 +19,9 @@ const connection = DBConnection.getInstance().getConnection();
     console.log(JSON.stringify(value));
 });*/
 
-async function stampa(prova:proxyCV){
+async function stampa(prova:proxyVC){
     
-    let result = await prova.insertNewCV(10,5,'ll',10,2);
+    let result = await prova.insertNewVacc('simone',30);
     switch(typeof result){
     case 'boolean': {
         console.log('è booleano');
@@ -37,7 +39,7 @@ async function stampa(prova:proxyCV){
     
 }
 
-var prova = new proxyCV(connection);
+var prova = new proxyVC(connection);
 stampa(prova);
 //console.log(isNaN(5))
 

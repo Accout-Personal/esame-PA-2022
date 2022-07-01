@@ -36,61 +36,52 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.proxyCV = void 0;
-var centro_vaccinale_1 = require("../centro_vaccinale");
-// Nel proxy andiamo a implementare tutti i controlli e le sanificazioni sui dati di input per evitare problemi e crash del sistema
-var proxyCV = /** @class */ (function () {
-    function proxyCV(connessione) {
-        this.model = new centro_vaccinale_1.Centro_vaccinale(connessione);
+exports.Vaccini = void 0;
+var _a = require('sequelize'), Sequelize = _a.Sequelize, Model = _a.Model, DataTypes = _a.DataTypes;
+/**
+ *  Classe model che rappresenta la tabella 'vaccino' nel database
+ */
+var Vaccini = /** @class */ (function () {
+    function Vaccini(sequelize) {
+        //nel costruttore vado a definire la struttura della tabella usando sequelize,
+        // questo model mi permette di compiere varie operazioni 
+        this.vaccino = sequelize.define("vaccino", {
+            id: {
+                type: DataTypes.BIGINT(20),
+                autoIncrement: true,
+                primaryKey: true
+            },
+            nome: { type: DataTypes.STRING },
+            validita: { type: DataTypes.INTEGER }
+        }, {
+            tableName: 'vaccino',
+            timestamps: false
+        });
     }
-    proxyCV.prototype.insertNewCV = function (lati, longi, nome, maxf1, maxf2) {
+    // metodo per inserire un nuovo vaccino
+    Vaccini.prototype.insertNewVacc = function (nome, validita) {
         return __awaiter(this, void 0, void 0, function () {
-            var error_1;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var _a;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
                     case 0:
-                        _a.trys.push([0, 3, , 4]);
-                        if (!(this.TypeCheckLati(lati) &&
-                            this.TypeCheckLati(longi) &&
-                            this.TypeCheckNome(nome) &&
-                            this.TypeCheckMaxf1(maxf1) &&
-                            this.TypeCheckMaxf2(maxf2))) return [3 /*break*/, 2];
-                        return [4 /*yield*/, this.model.insertNewCV(lati, longi, nome, maxf1, maxf2)];
-                    case 1: return [2 /*return*/, _a.sent()];
-                    case 2: return [3 /*break*/, 4];
-                    case 3:
-                        error_1 = _a.sent();
-                        return [2 /*return*/, error_1];
-                    case 4: return [2 /*return*/];
+                        _b.trys.push([0, 2, , 3]);
+                        return [4 /*yield*/, this.vaccino.create({ nome: nome, validita: validita })];
+                    case 1:
+                        _b.sent();
+                        return [2 /*return*/, true];
+                    case 2:
+                        _a = _b.sent();
+                        return [2 /*return*/, false];
+                    case 3: return [2 /*return*/];
                 }
             });
         });
     };
-    proxyCV.prototype.TypeCheckLati = function (lati) {
-        if (typeof lati !== 'number' || isNaN(lati))
-            throw new Error('Questo valore di latitudine non è un numero');
-        return true;
+    // Metodo per ottenere il modello
+    Vaccini.prototype.getModel = function () {
+        return this.vaccino;
     };
-    proxyCV.prototype.TypeCheckLongi = function (longi) {
-        if (typeof longi !== 'number' || isNaN(longi))
-            throw new Error('Questo valore di longitudine non è un numero');
-        return true;
-    };
-    proxyCV.prototype.TypeCheckNome = function (nome) {
-        if (typeof nome !== 'string' || nome.length > 255)
-            throw new Error('Questo nome non è composto da lettere');
-        return true;
-    };
-    proxyCV.prototype.TypeCheckMaxf1 = function (maxf1) {
-        if (typeof maxf1 !== 'number' || isNaN(maxf1))
-            throw new Error('Questo valore non è un numero');
-        return true;
-    };
-    proxyCV.prototype.TypeCheckMaxf2 = function (maxf2) {
-        if (typeof maxf2 !== 'number' || isNaN(maxf2))
-            throw new Error('Questo valore non è un numero');
-        return true;
-    };
-    return proxyCV;
+    return Vaccini;
 }());
-exports.proxyCV = proxyCV;
+exports.Vaccini = Vaccini;

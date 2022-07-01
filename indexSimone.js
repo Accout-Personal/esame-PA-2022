@@ -39,7 +39,7 @@ exports.__esModule = true;
 var sequelize_1 = require("./config/sequelize");
 var users_1 = require("./model/users");
 var dotenv = require("dotenv");
-var proxyCV_1 = require("./model/Proxymodel/proxyCV");
+var proxyVC_1 = require("./model/Proxymodel/proxyVC");
 function querySemplice(connection) {
     return __awaiter(this, void 0, void 0, function () {
         var users;
@@ -65,7 +65,7 @@ function stampa(prova) {
         var result;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, prova.insertNewCV('ciao', 5, 'll', 10, 2)];
+                case 0: return [4 /*yield*/, prova.insertNewVacc(30, 30)];
                 case 1:
                     result = _a.sent();
                     switch (typeof result) {
@@ -85,6 +85,6 @@ function stampa(prova) {
         });
     });
 }
-var prova = new proxyCV_1.proxyCV(connection);
+var prova = new proxyVC_1.proxyVC(connection);
 stampa(prova);
 //console.log(isNaN(5))

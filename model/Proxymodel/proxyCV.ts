@@ -27,27 +27,27 @@ export class proxyCV implements proxyInterfaceCV{
     }
 
     TypeCheckLati(lati: number): Boolean{
-        if((typeof lati !== 'number' || isNaN(lati))) throw new Error('Questo valore di latitudine non è un numero');
+        if(typeof lati !== 'number' || isNaN(lati)) throw new Error('Questo valore di latitudine non è un numero');
         return true;
     }
 
     TypeCheckLongi(longi: number): Boolean{
-        if(!(typeof longi !== 'number' || isNaN(longi))) throw new Error('Questo valore di longitudine non è un numero');
+        if(typeof longi !== 'number' || isNaN(longi)) throw new Error('Questo valore di longitudine non è un numero');
         return true;
     }
 
     TypeCheckNome(nome: string): Boolean{
-        if(!(typeof nome === 'string' && nome.length < 255)) throw new Error('Questo nome non è composto da lettere');
+        if(typeof nome !== 'string' || nome.length > 255) throw new Error('Questo nome non è composto da lettere');
         return true;
     }
 
     TypeCheckMaxf1(maxf1: number): Boolean{
-        if(!(typeof maxf1 === 'number' || isNaN(maxf1))) throw new Error('Questo valore non è un numero');
+        if(typeof maxf1 !== 'number' || isNaN(maxf1)) throw new Error('Questo valore non è un numero');
         return true;
     }
 
     TypeCheckMaxf2(maxf2: number): Boolean{
-        if(!(typeof maxf2 === 'number' || isNaN(maxf2))) throw new Error('Questo valore non è un numero');
+        if(typeof maxf2 !== 'number' || isNaN(maxf2)) throw new Error('Questo valore non è un numero');
         return true;
     }
 

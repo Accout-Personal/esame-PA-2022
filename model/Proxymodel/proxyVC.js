@@ -36,26 +36,21 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.proxyCV = void 0;
-var centro_vaccinale_1 = require("../centro_vaccinale");
-// Nel proxy andiamo a implementare tutti i controlli e le sanificazioni sui dati di input per evitare problemi e crash del sistema
-var proxyCV = /** @class */ (function () {
-    function proxyCV(connessione) {
-        this.model = new centro_vaccinale_1.Centro_vaccinale(connessione);
+exports.proxyVC = void 0;
+var vaccino_1 = require("../vaccino");
+var proxyVC = /** @class */ (function () {
+    function proxyVC(connessione) {
+        this.model = new vaccino_1.Vaccini(connessione);
     }
-    proxyCV.prototype.insertNewCV = function (lati, longi, nome, maxf1, maxf2) {
+    proxyVC.prototype.insertNewVacc = function (nome, validita) {
         return __awaiter(this, void 0, void 0, function () {
             var error_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         _a.trys.push([0, 3, , 4]);
-                        if (!(this.TypeCheckLati(lati) &&
-                            this.TypeCheckLati(longi) &&
-                            this.TypeCheckNome(nome) &&
-                            this.TypeCheckMaxf1(maxf1) &&
-                            this.TypeCheckMaxf2(maxf2))) return [3 /*break*/, 2];
-                        return [4 /*yield*/, this.model.insertNewCV(lati, longi, nome, maxf1, maxf2)];
+                        if (!(this.TypeCheckNome(nome) && this.TypeCheckValidita(validita))) return [3 /*break*/, 2];
+                        return [4 /*yield*/, this.model.insertNewVacc(nome, validita)];
                     case 1: return [2 /*return*/, _a.sent()];
                     case 2: return [3 /*break*/, 4];
                     case 3:
@@ -66,31 +61,16 @@ var proxyCV = /** @class */ (function () {
             });
         });
     };
-    proxyCV.prototype.TypeCheckLati = function (lati) {
-        if (typeof lati !== 'number' || isNaN(lati))
-            throw new Error('Questo valore di latitudine non è un numero');
+    proxyVC.prototype.TypeCheckNome = function (nome) {
+        if ((typeof nome !== 'string' || nome.length > 255))
+            throw new Error('Questo nome non è valido');
         return true;
     };
-    proxyCV.prototype.TypeCheckLongi = function (longi) {
-        if (typeof longi !== 'number' || isNaN(longi))
-            throw new Error('Questo valore di longitudine non è un numero');
+    proxyVC.prototype.TypeCheckValidita = function (validita) {
+        if (typeof validita !== 'number' || isNaN(validita))
+            throw new Error('Questo valore di validità non è un numero');
         return true;
     };
-    proxyCV.prototype.TypeCheckNome = function (nome) {
-        if (typeof nome !== 'string' || nome.length > 255)
-            throw new Error('Questo nome non è composto da lettere');
-        return true;
-    };
-    proxyCV.prototype.TypeCheckMaxf1 = function (maxf1) {
-        if (typeof maxf1 !== 'number' || isNaN(maxf1))
-            throw new Error('Questo valore non è un numero');
-        return true;
-    };
-    proxyCV.prototype.TypeCheckMaxf2 = function (maxf2) {
-        if (typeof maxf2 !== 'number' || isNaN(maxf2))
-            throw new Error('Questo valore non è un numero');
-        return true;
-    };
-    return proxyCV;
+    return proxyVC;
 }());
-exports.proxyCV = proxyCV;
+exports.proxyVC = proxyVC;

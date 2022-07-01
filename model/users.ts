@@ -1,8 +1,9 @@
 import { Sequelize, Model, DataTypes } from 'sequelize';
+import { proxyInterfaceUsers } from './ProxyInterface/proxyinterfaceUsers';
 /**
  *  Classe model che rappresenta la tabella 'users' nel database 
  */
-export class Users {
+export class Users implements proxyInterfaceUsers{
     private user: any;
     constructor(sequelize:any){
 
