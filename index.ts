@@ -1,7 +1,6 @@
 import {DBConnection} from './config/sequelize';
 import { Users } from './model/users';
 import * as dotenv from 'dotenv';
-import * as mediator from './middleware/MiddlewareMediator';
 import {app} from './Route'; 
 
 
@@ -18,5 +17,4 @@ const connection = DBConnection.getInstance().getConnection();
 querySemplice(connection).then(value=>{
     console.log(JSON.stringify(value));
 });
-mediator;
 app.listen(3000);
