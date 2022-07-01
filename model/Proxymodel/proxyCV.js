@@ -67,27 +67,27 @@ var proxyCV = /** @class */ (function () {
         });
     };
     proxyCV.prototype.TypeCheckLati = function (lati) {
-        if (!(typeof lati === 'number'))
+        if (typeof lati !== 'number' || isNaN(lati))
             throw new Error('Questo valore di latitudine non è un numero');
         return true;
     };
     proxyCV.prototype.TypeCheckLongi = function (longi) {
-        if (!(typeof longi === 'number'))
+        if (typeof longi !== 'number' || isNaN(longi))
             throw new Error('Questo valore di longitudine non è un numero');
         return true;
     };
     proxyCV.prototype.TypeCheckNome = function (nome) {
-        if (!(typeof nome === 'string'))
+        if (typeof nome !== 'string' || nome.length > 255)
             throw new Error('Questo nome non è composto da lettere');
         return true;
     };
     proxyCV.prototype.TypeCheckMaxf1 = function (maxf1) {
-        if (!(typeof maxf1 === 'number'))
+        if (typeof maxf1 !== 'number' || isNaN(maxf1))
             throw new Error('Questo valore non è un numero');
         return true;
     };
     proxyCV.prototype.TypeCheckMaxf2 = function (maxf2) {
-        if (!(typeof maxf2 === 'number'))
+        if (typeof maxf2 !== 'number' || isNaN(maxf2))
             throw new Error('Questo valore non è un numero');
         return true;
     };
