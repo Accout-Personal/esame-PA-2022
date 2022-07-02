@@ -38,10 +38,11 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 exports.__esModule = true;
 exports.proxyCV = void 0;
 var centro_vaccinale_1 = require("../centro_vaccinale");
+var sequelize_1 = require("../../config/sequelize");
 // Nel proxy andiamo a implementare tutti i controlli e le sanificazioni sui dati di input per evitare problemi e crash del sistema
 var proxyCV = /** @class */ (function () {
-    function proxyCV(connessione) {
-        this.model = new centro_vaccinale_1.Centro_vaccinale(connessione);
+    function proxyCV() {
+        this.model = new centro_vaccinale_1.Centro_vaccinale(sequelize_1.DBConnection.getInstance().getConnection());
     }
     proxyCV.prototype.insertNewCV = function (lati, longi, nome, maxf1, maxf2) {
         return __awaiter(this, void 0, void 0, function () {

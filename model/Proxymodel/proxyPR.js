@@ -41,51 +41,62 @@ var prenotazione_1 = require("../prenotazione");
 var vaccino_1 = require("../vaccino");
 var users_1 = require("../users");
 var centro_vaccinale_1 = require("../centro_vaccinale");
+var sequelize_1 = require("../../config/sequelize");
+var luxon_1 = require("luxon");
 var proxyPr = /** @class */ (function () {
-    function proxyPr(connessione) {
-        this.model = new prenotazione_1.Prenotazione(connessione);
-        this.modelV = new vaccino_1.Vaccini(connessione);
-        this.modelU = new users_1.Users(connessione);
-        this.modelCV = new centro_vaccinale_1.Centro_vaccinale(connessione);
+    function proxyPr() {
+        this.model = new prenotazione_1.Prenotazione(sequelize_1.DBConnection.getInstance().getConnection());
+        this.modelV = new vaccino_1.Vaccini(sequelize_1.DBConnection.getInstance().getConnection());
+        this.modelU = new users_1.Users(sequelize_1.DBConnection.getInstance().getConnection());
+        this.modelCV = new centro_vaccinale_1.Centro_vaccinale(sequelize_1.DBConnection.getInstance().getConnection());
     }
-    proxyPr.prototype.insertNewPr = function (giorno, mese, anno, fascia, slot, centro_vaccino, vaccino, user, stato) {
+    proxyPr.prototype.insertNewPr = function (data, fascia, slot, centro_vaccino, vaccino, user, stato) {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, error_1;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
+            var _a, _b, _c, error_1;
+            return __generator(this, function (_d) {
+                switch (_d.label) {
                     case 0:
-                        _b.trys.push([0, 5, , 6]);
-                        _a = this.TypeCheckData(giorno, mese, anno) &&
+                        _d.trys.push([0, 9, , 10]);
+                        _c = this.TypeCheckData(data) &&
                             this.TypeCheckFascia(fascia) &&
-                            this.TypeCheckSlot(slot) &&
-                            this.TypeCheckCV(centro_vaccino);
-                        if (!_a) return [3 /*break*/, 2];
-                        return [4 /*yield*/, this.TypeCheckVaccino(vaccino)];
+                            this.TypeCheckSlot(slot);
+                        if (!_c) return [3 /*break*/, 2];
+                        return [4 /*yield*/, this.TypeCheckCV(centro_vaccino)];
                     case 1:
-                        _a = (_b.sent());
-                        _b.label = 2;
+                        _c = (_d.sent());
+                        _d.label = 2;
                     case 2:
-                        if (!(_a &&
-                            this.TypeCheckUser(user) &&
-                            this.TypeCheckStato(stato))) return [3 /*break*/, 4];
-                        return [4 /*yield*/, this.model.insertNewPr(giorno, mese, anno, fascia, slot, centro_vaccino, vaccino, user, stato)];
-                    case 3: return [2 /*return*/, _b.sent()];
-                    case 4: return [3 /*break*/, 6];
+                        _b = _c;
+                        if (!_b) return [3 /*break*/, 4];
+                        return [4 /*yield*/, this.TypeCheckVaccino(vaccino)];
+                    case 3:
+                        _b = (_d.sent());
+                        _d.label = 4;
+                    case 4:
+                        _a = _b;
+                        if (!_a) return [3 /*break*/, 6];
+                        return [4 /*yield*/, this.TypeCheckUser(user)];
                     case 5:
-                        error_1 = _b.sent();
+                        _a = (_d.sent());
+                        _d.label = 6;
+                    case 6:
+                        if (!(_a &&
+                            this.TypeCheckStato(stato))) return [3 /*break*/, 8];
+                        return [4 /*yield*/, this.model.insertNewPr(data, fascia, slot, centro_vaccino, vaccino, user, stato)];
+                    case 7: return [2 /*return*/, _d.sent()];
+                    case 8: return [3 /*break*/, 10];
+                    case 9:
+                        error_1 = _d.sent();
                         return [2 /*return*/, error_1];
-                    case 6: return [2 /*return*/];
+                    case 10: return [2 /*return*/];
                 }
             });
         });
     };
-    proxyPr.prototype.TypeCheckData = function (giorno, mese, anno) {
-        if ((typeof giorno !== 'number' || isNaN(giorno)))
-            throw new Error('Questa giorno non è valido');
-        if ((typeof mese !== 'number' || isNaN(mese)))
-            throw new Error('Questa mese non è valido');
-        if ((typeof anno !== 'number' || isNaN(anno)))
-            throw new Error('Questa anno non è valido');
+    proxyPr.prototype.TypeCheckData = function (data) {
+        var dataIns = luxon_1.DateTime.fromISO(data);
+        if ((typeof data !== 'string' || !dataIns.isValid))
+            throw new Error('Questa data non è valida');
         return true;
     };
     proxyPr.prototype.TypeCheckFascia = function (fascia) {
@@ -99,9 +110,26 @@ var proxyPr = /** @class */ (function () {
         return true;
     };
     proxyPr.prototype.TypeCheckCV = function (Cv) {
-        if (typeof Cv !== 'number' || isNaN(Cv))
-            throw new Error('Questo centro vaccino non è valido');
-        return true;
+        return __awaiter(this, void 0, void 0, function () {
+            var test;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (typeof Cv !== 'number' || isNaN(Cv))
+                            throw new Error('Questo centro vaccino non è valido');
+                        return [4 /*yield*/, this.modelCV.getModel().findAll({
+                                where: {
+                                    id: Cv
+                                }
+                            })];
+                    case 1:
+                        test = _a.sent();
+                        if (Object.keys(test).length == 0)
+                            throw new Error('Questo centro vaccino non esiste');
+                        return [2 /*return*/, true];
+                }
+            });
+        });
     };
     proxyPr.prototype.TypeCheckVaccino = function (vaccino) {
         return __awaiter(this, void 0, void 0, function () {
@@ -118,7 +146,6 @@ var proxyPr = /** @class */ (function () {
                             })];
                     case 1:
                         test = _a.sent();
-                        console.log(Object.keys(test).length);
                         if (Object.keys(test).length == 0)
                             throw new Error('Questo vaccino non esiste');
                         return [2 /*return*/, true];
@@ -127,9 +154,26 @@ var proxyPr = /** @class */ (function () {
         });
     };
     proxyPr.prototype.TypeCheckUser = function (user) {
-        if (typeof user !== 'number' || isNaN(user))
-            throw new Error('Questo utente non è valido');
-        return true;
+        return __awaiter(this, void 0, void 0, function () {
+            var test;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (typeof user !== 'number' || isNaN(user))
+                            throw new Error('Questo utente non è valido');
+                        return [4 /*yield*/, this.modelU.getModel().findAll({
+                                where: {
+                                    id: user
+                                }
+                            })];
+                    case 1:
+                        test = _a.sent();
+                        if (Object.keys(test).length == 0)
+                            throw new Error('Questo utente non esiste');
+                        return [2 /*return*/, true];
+                }
+            });
+        });
     };
     proxyPr.prototype.TypeCheckStato = function (stato) {
         if (typeof stato !== 'number' || isNaN(stato))
