@@ -1,13 +1,14 @@
 import { proxyInterfaceVac } from "../ProxyInterface/proxyinterfaceVacc";
 import { Vaccini } from "../vaccino";
 import { Sequelize, Model, DataTypes } from 'sequelize';
+import {DBConnection} from "../../config/sequelize"
 
 export class proxyVC implements proxyInterfaceVac {
 
     public model:Vaccini;
 
-    constructor(connessione:Sequelize){
-        this.model = new Vaccini(connessione)
+    constructor(){
+        this.model = new Vaccini(DBConnection.getInstance().getConnection())
     }
 
     async insertNewVacc(nome:string, validita:number): Promise<Object> {  

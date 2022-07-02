@@ -4,6 +4,7 @@ import { Sequelize, Model, DataTypes } from 'sequelize';
 import { Vaccini } from "../vaccino";
 import { Users } from "../users";
 import { Centro_vaccinale } from "../centro_vaccinale";
+import {DBConnection} from "../../config/sequelize"
 
 export class proxyPr implements proxyinterfacePR {
 
@@ -12,11 +13,11 @@ export class proxyPr implements proxyinterfacePR {
     private modelU:Users;
     private modelCV:Centro_vaccinale;
 
-    constructor(connessione:Sequelize){
-        this.model = new Prenotazione(connessione);
-        this.modelV = new Vaccini(connessione);
-        this.modelU = new Users(connessione);
-        this.modelCV = new Centro_vaccinale(connessione);
+    constructor(){
+        this.model = new Prenotazione(DBConnection.getInstance().getConnection());
+        this.modelV = new Vaccini(DBConnection.getInstance().getConnection());
+        this.modelU = new Users(DBConnection.getInstance().getConnection());
+        this.modelCV = new Centro_vaccinale(DBConnection.getInstance().getConnection());
     }
 
     async insertNewPr(giorno:number, mese:number,anno:number , fascia: number, slot: number, centro_vaccino: number, vaccino: number, user: number, stato: number): Promise<Object> {  

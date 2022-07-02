@@ -1,13 +1,23 @@
 import { proxyInterfaceUsers } from "../ProxyInterface/proxyinterfaceUsers";
 import { Users } from "../users";
 import { and, Sequelize } from "../../node_modules/sequelize/types/index";
-
+import * as crypto from 'node:crypto';
+import {DBConnection} from "../../config/sequelize";
 export class proxyUs implements proxyInterfaceUsers {
 
     private model:Users;
 
-    constructor(connessione:Sequelize){
-        this.model = new Users(connessione)
+    constructor(){
+        this.model = new Users(DBConnection.getInstance().getConnection())
+    }
+
+    async getUser(username:string){
+        if(this.TypeCheckUsername(username)) 
+            return await this.model.getModel().findAll({
+                where: {
+                  username: username
+                }
+              });
     }
 
     async insertNewUsers(cf: string, username: string,password: string, tipo:number): Promise<Object> {  
@@ -18,7 +28,7 @@ export class proxyUs implements proxyInterfaceUsers {
             this.TypeCheckPassword(password) &&
             this.TypeCheckTipo(tipo)
             ) {
-                return await this.model.insertNewUsers(cf, username, password, tipo);  
+                return await this.model.insertNewUsers(cf, username, crypto.createHash('sha256').update(password).digest('hex'), tipo);  
             }     
         } catch(error) {return error;}
     }

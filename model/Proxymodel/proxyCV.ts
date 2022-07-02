@@ -1,15 +1,15 @@
 import { and, Sequelize } from "../../node_modules/sequelize/types/index";
 import { Centro_vaccinale } from "../centro_vaccinale";
 import { proxyInterfaceCV } from "../ProxyInterface/proxyinterfaceCV";
-
+import {DBConnection} from "../../config/sequelize";
 // Nel proxy andiamo a implementare tutti i controlli e le sanificazioni sui dati di input per evitare problemi e crash del sistema
 
 export class proxyCV implements proxyInterfaceCV{
 
     private model:Centro_vaccinale;
 
-    constructor(connessione:Sequelize){
-        this.model = new Centro_vaccinale(connessione)
+    constructor(){
+        this.model = new Centro_vaccinale(DBConnection.getInstance().getConnection())
     }
 
     async insertNewCV(lati: number, longi: number, nome: string, maxf1: number, maxf2: number): Promise<Object> {  
