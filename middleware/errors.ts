@@ -4,11 +4,10 @@ export function logErrors(err, req, res, next) {
   }
 
 export function errorHandler(err, req, res, next) {
+    console.log("error handling");
     if (res.headersSent) {
         return next(err)
     }
-    console.log('error handling');
-    console.log(err.message);
     res.status(403).send({"error": err.message});
 }
 

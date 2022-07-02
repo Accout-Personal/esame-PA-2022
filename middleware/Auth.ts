@@ -1,18 +1,6 @@
 import * as jwt from 'jsonwebtoken';
 import {unless} from 'express-unless';
 
-export const TestMiddle1 = (req,res,next) => {
-    console.log("test middleware1");
-    next();
-};
-TestMiddle1.unless = unless;
-
-export const TestMiddle = (req,res,next) => {
-        console.log("test middleware");
-        next();
-    }
-TestMiddle.unless = unless;
-
 export const ControllaToken = (req,res,next) => {
         const bearerHeader = req.headers.authorization;
         if(typeof bearerHeader!=='undefined'){
@@ -25,20 +13,35 @@ export const ControllaToken = (req,res,next) => {
             next(Err);
         }
     }
-TestMiddle.unless = unless;
+ControllaToken.unless = unless;
 
 export const verificaEAutorizza = (req,res,next) =>{
-        let decoded = jwt.verify(req.token, 'mysupersecretkey');
+    try {
+        let decoded = jwt.verify(req.token, process.env.JWT_SECRET_KEY);
         if(decoded !== null){
             req.user = decoded;
+            console.log("veryfied: "+ JSON.stringify(decoded));
+            console.log("user is: "+ JSON.stringify(decoded.user));
             next();
         }
         else{
             const Err = new Error('Autenticazione fallita');
             next(Err);
         }
+
+    } catch (err) {
+        var Errore:Error;
+        if(err.message == 'TokenExpiredError') {
+            Errore = new Error('Il token e\' scaduto');
+         }
+         else{
+            Errore = new Error('Autenticazione fallita');
+         }
+         next(Errore);
     }
-TestMiddle.unless = unless;
+
+    }
+verificaEAutorizza.unless = unless;
 
 
 

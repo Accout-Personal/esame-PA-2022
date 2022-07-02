@@ -1,20 +1,9 @@
-import {DBConnection} from './config/sequelize';
+import { DBConnection } from './config/sequelize';
 import { Users } from './model/users';
 import * as dotenv from 'dotenv';
-import {app} from './Route'; 
+import { app } from './Route';
 
 
-async function querySemplice(connection){
-    var users = new Users(connection);
-    console.log(users);
-    return await users.trovaTutto(connection);
-}
-
-
-console.log("hello world");
+console.log("Initialization complete");
 dotenv.config()
-const connection = DBConnection.getInstance().getConnection();
-querySemplice(connection).then(value=>{
-    console.log(JSON.stringify(value));
-});
 app.listen(3000);

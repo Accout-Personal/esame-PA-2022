@@ -7,31 +7,28 @@ import * as error from "./errors";
 import {unless} from 'express-unless';
 
 export function initMiddleware(){
-    app.use(auth.TestMiddle1);
-    app.use(auth.TestMiddle.unless({
-            path:{url:'/test1'}
+    
+    app.use(auth.ControllaToken.unless({
+            path:{url:'/login'}
+        }
+    ));
+
+    app.use(auth.verificaEAutorizza.unless({
+            path:{url:'/login'}
         }
     ));
     
-    UserRoute.use((req,res,next)=>{
-        console.log('user middleware')
-        next();
-    });
-    UserRoute.use(auth.ControllaToken);
-    //UserRoute.use(auth.verificaEAutorizza);
 
-    AdminRoute.use((req,res,next)=>{
-        console.log('admin middleware')
-        next();
-    });
-
-    //
-    //AdminRoute.use(adminAuth.ControlloPrivilegio);
-
-    UserRoute.use('*',error.errorHandler);
+    AdminRoute.use(adminAuth.ControlloPrivilegio);
+    
     
     console.log("mediator initialized..");
 
+}
+
+export function initErrorHandler(){
+    app.use(error.logErrors);
+    app.use(error.errorHandler);
 }
 
 
