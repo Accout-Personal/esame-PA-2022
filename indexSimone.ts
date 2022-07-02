@@ -6,6 +6,7 @@ import { proxyUs } from './model/Proxymodel/proxyUs';
 import { proxyVC } from './model/Proxymodel/proxyVC';
 import { proxyPr } from './model/Proxymodel/proxyPR';
 import { Prenotazione } from './model/prenotazione';
+import {PresentCV} from './presenter/pre_cen_vac'
 
 async function querySemplice(connection){
     var users = new Users(connection);
@@ -44,9 +45,10 @@ async function stampa(prova:proxyPr){
 
 
 
-var prova = new proxyPr();
+var prova = new PresentCV();
+prova.producePartA()
 //console.log(pippo.insertNewPr(20, 2,2000 , 1, 14, 8, 1, 1, 0));
-stampa(prova);
+//stampa(prova);
 //console.log(isNaN(5))
 /*prova.model.getModel().findAll()
 console.log(prova.model.getModel().findAll({

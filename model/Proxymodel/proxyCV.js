@@ -92,6 +92,10 @@ var proxyCV = /** @class */ (function () {
             throw new Error('Questo valore non è un numero');
         return true;
     };
+    // Metodo per ottenere il riferimento al model
+    proxyCV.prototype.getProxyModel = function () {
+        return this.model;
+    };
     return proxyCV;
 }());
 exports.proxyCV = proxyCV;

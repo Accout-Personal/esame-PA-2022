@@ -51,4 +51,9 @@ export class proxyCV implements proxyInterfaceCV{
         return true;
     }
 
+    // Metodo per ottenere il riferimento al model
+    public getProxyModel(){
+        return this.model;
+    }
+
 }

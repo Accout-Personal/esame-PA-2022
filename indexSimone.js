@@ -39,7 +39,7 @@ exports.__esModule = true;
 var sequelize_1 = require("./config/sequelize");
 var users_1 = require("./model/users");
 var dotenv = require("dotenv");
-var proxyPR_1 = require("./model/Proxymodel/proxyPR");
+var pre_cen_vac_1 = require("./presenter/pre_cen_vac");
 function querySemplice(connection) {
     return __awaiter(this, void 0, void 0, function () {
         var users;
@@ -86,9 +86,10 @@ function stampa(prova) {
         });
     });
 }
-var prova = new proxyPR_1.proxyPr();
+var prova = new pre_cen_vac_1.PresentCV();
+prova.producePartA();
 //console.log(pippo.insertNewPr(20, 2,2000 , 1, 14, 8, 1, 1, 0));
-stampa(prova);
+//stampa(prova);
 //console.log(isNaN(5))
 /*prova.model.getModel().findAll()
 console.log(prova.model.getModel().findAll({

@@ -61,6 +61,9 @@ var Centro_vaccinale = /** @class */ (function () {
             timestamps: false
         });
     }
+    Centro_vaccinale.prototype.getProxyModel = function () {
+        return this;
+    };
     // Metodo per inserire un nuovo centro centro vaccinale
     Centro_vaccinale.prototype.insertNewCV = function (lati, longi, nome, maxf1, maxf2) {
         return __awaiter(this, void 0, void 0, function () {

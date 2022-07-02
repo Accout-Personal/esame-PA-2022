@@ -36,43 +36,56 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-var centro_vaccinale_1 = require("../model/centro_vaccinale");
+exports.PresentCV = void 0;
 var _a = require('sequelize'), Sequelize = _a.Sequelize, Model = _a.Model, DataTypes = _a.DataTypes;
-var sequelize_1 = require("../config/sequelize");
-var dotenv = require("dotenv");
+var proxyCV_1 = require("../model/Proxymodel/proxyCV");
+var haversine = require("haversine");
 /*
 * Utilizziamo il pattern builder per implementare questa classe, in quanto abbiamo che il contenuto restituito all'utente può variare a seconda delle richieste
 */
 var PresentCV = /** @class */ (function () {
     function PresentCV() {
-        this.model = new centro_vaccinale_1.Centro_vaccinale(sequelize_1.DBConnection.getInstance().getConnection());
+        this.proxyInterfaceCV = new proxyCV_1.proxyCV();
     }
     //istanza di 
     //In questo metodo viene utilizzata soltanto la funzione di filtraggio relativa alla distanza
     PresentCV.prototype.producePartA = function () {
-        throw new Error("Method not implemented.");
-    };
-    //in questa funzione viene eseguita sia la funzione di filtraggio per la distanza che per la disponibilità
-    PresentCV.prototype.producePartB = function () {
-        throw new Error("Method not implemented.");
-    };
-    PresentCV.prototype.mioGetAll = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var res;
+            var start, result, complete, ok;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.model.getModel().findAll()];
+                    case 0:
+                        start = {
+                            latitude: 30.849635,
+                            longitude: -83.24559
+                        };
+                        return [4 /*yield*/, this.proxyInterfaceCV.getProxyModel().getModel().findAll({
+                                attributes: ['id', 'lati', 'longi']
+                            })];
                     case 1:
-                        res = _a.sent();
+                        result = _a.sent();
+                        complete = [];
+                        result.map(function (val) {
+                            var end = {
+                                latitude: val.dataValues.lati,
+                                longitude: val.dataValues.longi
+                            };
+                            val.dataValues.distanza = haversine(start, end, { unit: 'meter' });
+                            complete.push(val.dataValues);
+                        });
+                        console.log(complete);
+                        ok = complete.filter(function (value) { return value.distanza >= 9273708.961528707; });
+                        console.log(' risultato finale \n');
+                        console.log(ok);
                         return [2 /*return*/];
                 }
             });
         });
     };
+    //in questa funzione viene eseguita sia la funzione di filtraggio per la distanza che per la disponibilità
+    PresentCV.prototype.producePartB = function () {
+        throw new Error("Method not implemented.");
+    };
     return PresentCV;
 }());
-dotenv.config();
-console.log(process.env);
-//var prova = new PresentCV();
-//console.log(prova.mioGetAll())
-console.log(sequelize_1.DBConnection.getInstance().getConnection());
+exports.PresentCV = PresentCV;

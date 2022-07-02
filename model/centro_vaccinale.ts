@@ -29,6 +29,10 @@ export class Centro_vaccinale implements proxyInterfaceCV{
             timestamps: false
           } );
     }
+
+  getProxyModel(): Centro_vaccinale {
+    return this;
+  }
      
 // Metodo per inserire un nuovo centro centro vaccinale
       public async insertNewCV(lati: number, longi: number, nome: string, maxf1: number, maxf2: number): Promise<Object>{
