@@ -1,13 +1,22 @@
 import { Prenotazione } from "../prenotazione";
 import { proxyinterfacePR } from "../ProxyInterface/proxyinterfacePren";
 import { Sequelize, Model, DataTypes } from 'sequelize';
+import { Vaccini } from "../vaccino";
+import { Users } from "../users";
+import { Centro_vaccinale } from "../centro_vaccinale";
 
 export class proxyPr implements proxyinterfacePR {
 
     private model:Prenotazione;
+    private modelV:Vaccini;
+    private modelU:Users;
+    private modelCV:Centro_vaccinale;
 
     constructor(connessione:Sequelize){
-        this.model = new Prenotazione(connessione)
+        this.model = new Prenotazione(connessione);
+        this.modelV = new Vaccini(connessione);
+        this.modelU = new Users(connessione);
+        this.modelCV = new Centro_vaccinale(connessione);
     }
 
     async insertNewPr(giorno:number, mese:number,anno:number , fascia: number, slot: number, centro_vaccino: number, vaccino: number, user: number, stato: number): Promise<Object> {  
@@ -17,7 +26,7 @@ export class proxyPr implements proxyinterfacePR {
             this.TypeCheckFascia(fascia) &&
             this.TypeCheckSlot(slot) &&
             this.TypeCheckCV(centro_vaccino) &&
-            this.TypeCheckVaccino(vaccino) &&
+            await this.TypeCheckVaccino(vaccino) &&
             this.TypeCheckUser(user) &&
             this.TypeCheckStato(stato)
         ) {
@@ -48,8 +57,14 @@ export class proxyPr implements proxyinterfacePR {
         return true;
     }
 
-    TypeCheckVaccino(vaccino: number): Boolean{
+    async TypeCheckVaccino(vaccino: number): Promise<Boolean>{
         if(typeof vaccino !== 'number' || isNaN(vaccino)) throw new Error('Questo vaccino non è valido');
+        let test = await this.modelV.getModel().findAll({
+            where: {
+              id: vaccino
+            }
+          });
+        if(Object.keys(test).length == 0) throw new Error('Questo vaccino non esiste');
         return true;
     }
 

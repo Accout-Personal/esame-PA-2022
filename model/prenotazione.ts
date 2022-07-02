@@ -61,11 +61,16 @@ export class Prenotazione implements proxyinterfacePR{
     // metodo per inserire una prenotazione
     async insertNewPr(giorno:number, mese:number,anno:number , fascia: number, slot: number, centro_vaccino: number, vaccino: number, user: number, stato: number):Promise<Object> {
       try{
-        let data = giorno.toString()+'/'+mese.toString()+'/'+anno.toString()
-        await this.prenotazione.create({data: data, fascia: fascia, slot: slot, centro_vaccino: centro_vaccino, vaccino: vaccino, user: user, stato: stato});
+        let data = new Date(anno.toString()+'-'+mese.toString()+'-'+giorno.toString())
+        //await this.prenotazione.create({data: data, fascia: fascia, slot: slot, centro_vac: centro_vaccino, vaccino: vaccino, user: user, stato: stato});
         return true;
     } catch{
         return false;
     }
+    }
+
+    // Metodo per ottenere il modello
+    public getModel():any{
+      return this.prenotazione;
     }
 }
