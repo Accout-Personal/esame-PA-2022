@@ -90,22 +90,21 @@ var Prenotazione = /** @class */ (function () {
     // metodo per inserire una prenotazione
     Prenotazione.prototype.insertNewPr = function (giorno, mese, anno, fascia, slot, centro_vaccino, vaccino, user, stato) {
         return __awaiter(this, void 0, void 0, function () {
-            var data2, data4, data;
-            return __generator(this, function (_a) {
-                try {
-                    console.log(anno + ' questo è l anno');
-                    data2 = anno.toString() + '-' + mese.toString() + '-' + giorno.toString();
-                    data4 = new Date(data2);
-                    console.log(data2);
-                    data = new Date('2024-07-21');
-                    console.log(data4);
-                    //await this.prenotazione.create({data: data, fascia: fascia, slot: slot, centro_vac: centro_vaccino, vaccino: vaccino, user: user, stato: stato});
-                    return [2 /*return*/, true];
+            var data, _a;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        _b.trys.push([0, 2, , 3]);
+                        data = new Date(anno.toString() + '-' + mese.toString() + '-' + giorno.toString());
+                        return [4 /*yield*/, this.prenotazione.create({ data: data, fascia: fascia, slot: slot, centro_vac: centro_vaccino, vaccino: vaccino, user: user, stato: stato })];
+                    case 1:
+                        _b.sent();
+                        return [2 /*return*/, true];
+                    case 2:
+                        _a = _b.sent();
+                        return [2 /*return*/, false];
+                    case 3: return [2 /*return*/];
                 }
-                catch (error) {
-                    console.error(error);
-                }
-                return [2 /*return*/];
             });
         });
     };

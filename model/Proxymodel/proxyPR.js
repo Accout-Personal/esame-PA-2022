@@ -118,6 +118,7 @@ var proxyPr = /** @class */ (function () {
                             })];
                     case 1:
                         test = _a.sent();
+                        console.log(Object.keys(test).length);
                         if (Object.keys(test).length == 0)
                             throw new Error('Questo vaccino non esiste');
                         return [2 /*return*/, true];
