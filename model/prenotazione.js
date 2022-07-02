@@ -41,6 +41,7 @@ var _a = require('sequelize'), Sequelize = _a.Sequelize, Model = _a.Model, DataT
 var centro_vaccinale_1 = require("./centro_vaccinale");
 var users_1 = require("./users");
 var vaccino_1 = require("./vaccino");
+var luxon_1 = require("luxon");
 /**
  *  Classe model che rappresenta la tabella 'prenotazione' nel database
  */
@@ -88,15 +89,15 @@ var Prenotazione = /** @class */ (function () {
         });
     }
     // metodo per inserire una prenotazione
-    Prenotazione.prototype.insertNewPr = function (giorno, mese, anno, fascia, slot, centro_vaccino, vaccino, user, stato) {
+    Prenotazione.prototype.insertNewPr = function (data, fascia, slot, centro_vaccino, vaccino, user, stato) {
         return __awaiter(this, void 0, void 0, function () {
-            var data, _a;
+            var dataIns, _a;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
                         _b.trys.push([0, 2, , 3]);
-                        data = new Date(anno.toString() + '-' + mese.toString() + '-' + giorno.toString());
-                        return [4 /*yield*/, this.prenotazione.create({ data: data, fascia: fascia, slot: slot, centro_vac: centro_vaccino, vaccino: vaccino, user: user, stato: stato })];
+                        dataIns = luxon_1.DateTime.fromISO(data);
+                        return [4 /*yield*/, this.prenotazione.create({ data: dataIns.toISODate(), fascia: fascia, slot: slot, centro_vac: centro_vaccino, vaccino: vaccino, user: user, stato: stato })];
                     case 1:
                         _b.sent();
                         return [2 /*return*/, true];

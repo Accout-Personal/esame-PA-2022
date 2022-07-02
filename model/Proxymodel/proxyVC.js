@@ -38,9 +38,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 exports.__esModule = true;
 exports.proxyVC = void 0;
 var vaccino_1 = require("../vaccino");
+var sequelize_1 = require("../../config/sequelize");
 var proxyVC = /** @class */ (function () {
-    function proxyVC(connessione) {
-        this.model = new vaccino_1.Vaccini(connessione);
+    function proxyVC() {
+        this.model = new vaccino_1.Vaccini(sequelize_1.DBConnection.getInstance().getConnection());
     }
     proxyVC.prototype.insertNewVacc = function (nome, validita) {
         return __awaiter(this, void 0, void 0, function () {

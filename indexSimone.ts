@@ -23,7 +23,7 @@ const connection = DBConnection.getInstance().getConnection();
 
 async function stampa(prova:proxyPr){
     
-    let result = await prova.insertNewPr(20, 2,2000 , 1, 14, 8, 100, 1, 0);
+    let result = await prova.insertNewPr('2020-02-02', 1, 14, 8, 1, 1, 0);
     switch(typeof result){
     case 'boolean': {
         console.log('è booleano');
@@ -44,8 +44,7 @@ async function stampa(prova:proxyPr){
 
 
 
-var prova = new proxyPr(connection);
-var pippo = new Prenotazione(connection);
+var prova = new proxyPr();
 //console.log(pippo.insertNewPr(20, 2,2000 , 1, 14, 8, 1, 1, 0));
 stampa(prova);
 //console.log(isNaN(5))

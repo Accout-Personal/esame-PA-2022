@@ -40,7 +40,6 @@ var sequelize_1 = require("./config/sequelize");
 var users_1 = require("./model/users");
 var dotenv = require("dotenv");
 var proxyPR_1 = require("./model/Proxymodel/proxyPR");
-var prenotazione_1 = require("./model/prenotazione");
 function querySemplice(connection) {
     return __awaiter(this, void 0, void 0, function () {
         var users;
@@ -66,7 +65,7 @@ function stampa(prova) {
         var result;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, prova.insertNewPr(20, 2, 2000, 1, 14, 8, 100, 1, 0)];
+                case 0: return [4 /*yield*/, prova.insertNewPr('2020-02-02', 1, 14, 8, 1, 1, 0)];
                 case 1:
                     result = _a.sent();
                     switch (typeof result) {
@@ -87,8 +86,7 @@ function stampa(prova) {
         });
     });
 }
-var prova = new proxyPR_1.proxyPr(connection);
-var pippo = new prenotazione_1.Prenotazione(connection);
+var prova = new proxyPR_1.proxyPr();
 //console.log(pippo.insertNewPr(20, 2,2000 , 1, 14, 8, 1, 1, 0));
 stampa(prova);
 //console.log(isNaN(5))

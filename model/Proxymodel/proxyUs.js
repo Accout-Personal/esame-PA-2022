@@ -38,10 +38,29 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 exports.__esModule = true;
 exports.proxyUs = void 0;
 var users_1 = require("../users");
+var crypto = require("node:crypto");
+var sequelize_1 = require("../../config/sequelize");
 var proxyUs = /** @class */ (function () {
-    function proxyUs(connessione) {
-        this.model = new users_1.Users(connessione);
+    function proxyUs() {
+        this.model = new users_1.Users(sequelize_1.DBConnection.getInstance().getConnection());
     }
+    proxyUs.prototype.getUser = function (username) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!this.TypeCheckUsername(username)) return [3 /*break*/, 2];
+                        return [4 /*yield*/, this.model.getModel().findAll({
+                                where: {
+                                    username: username
+                                }
+                            })];
+                    case 1: return [2 /*return*/, _a.sent()];
+                    case 2: return [2 /*return*/];
+                }
+            });
+        });
+    };
     proxyUs.prototype.insertNewUsers = function (cf, username, password, tipo) {
         return __awaiter(this, void 0, void 0, function () {
             var error_1;
@@ -53,7 +72,7 @@ var proxyUs = /** @class */ (function () {
                             this.TypeCheckUsername(username) &&
                             this.TypeCheckPassword(password) &&
                             this.TypeCheckTipo(tipo))) return [3 /*break*/, 2];
-                        return [4 /*yield*/, this.model.insertNewUsers(cf, username, password, tipo)];
+                        return [4 /*yield*/, this.model.insertNewUsers(cf, username, crypto.createHash('sha256').update(password).digest('hex'), tipo)];
                     case 1: return [2 /*return*/, _a.sent()];
                     case 2: return [3 /*break*/, 4];
                     case 3:

@@ -3,6 +3,7 @@ import { Centro_vaccinale } from "./centro_vaccinale";
 import { proxyinterfacePR } from "./ProxyInterface/proxyinterfacePren";
 import { Users } from "./users";
 import { Vaccini } from "./vaccino";
+import { DateTime } from "luxon";
 /**
  *  Classe model che rappresenta la tabella 'prenotazione' nel database 
  */
@@ -59,10 +60,10 @@ export class Prenotazione implements proxyinterfacePR{
     }
 
     // metodo per inserire una prenotazione
-    async insertNewPr(giorno:number, mese:number,anno:number , fascia: number, slot: number, centro_vaccino: number, vaccino: number, user: number, stato: number):Promise<Object> {
+    async insertNewPr(data:string, fascia: number, slot: number, centro_vaccino: number, vaccino: number, user: number, stato: number):Promise<Object> {
       try{
-        let data = new Date(anno.toString()+'-'+mese.toString()+'-'+giorno.toString())
-        await this.prenotazione.create({data: data, fascia: fascia, slot: slot, centro_vac: centro_vaccino, vaccino: vaccino, user: user, stato: stato});
+        let dataIns = DateTime.fromISO(data)
+        await this.prenotazione.create({data: dataIns.toISODate(), fascia: fascia, slot: slot, centro_vac: centro_vaccino, vaccino: vaccino, user: user, stato: stato});
         return true;
     } catch{
         return false;

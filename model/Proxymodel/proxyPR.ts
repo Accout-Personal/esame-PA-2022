@@ -5,6 +5,7 @@ import { Vaccini } from "../vaccino";
 import { Users } from "../users";
 import { Centro_vaccinale } from "../centro_vaccinale";
 import {DBConnection} from "../../config/sequelize"
+import { DateTime } from "luxon";
 
 export class proxyPr implements proxyinterfacePR {
 
@@ -20,45 +21,50 @@ export class proxyPr implements proxyinterfacePR {
         this.modelCV = new Centro_vaccinale(DBConnection.getInstance().getConnection());
     }
 
-    async insertNewPr(giorno:number, mese:number,anno:number , fascia: number, slot: number, centro_vaccino: number, vaccino: number, user: number, stato: number): Promise<Object> {  
+    async insertNewPr(data:string, fascia: number, slot: number, centro_vaccino: number, vaccino: number, user: number, stato: number): Promise<Object> {  
         try {
         if(
-            this.TypeCheckData(giorno,mese,anno) &&
+            this.TypeCheckData(data) &&
             this.TypeCheckFascia(fascia) &&
             this.TypeCheckSlot(slot) &&
-            this.TypeCheckCV(centro_vaccino) &&
+            await this.TypeCheckCV(centro_vaccino) &&
             await this.TypeCheckVaccino(vaccino) &&
-            this.TypeCheckUser(user) &&
+            await this.TypeCheckUser(user) &&
             this.TypeCheckStato(stato)
         ) {
-                return await this.model.insertNewPr(giorno, mese, anno, fascia, slot, centro_vaccino, vaccino, user, stato);  
+                return await this.model.insertNewPr(data, fascia, slot, centro_vaccino, vaccino, user, stato);  
             }     
         } catch(error) {return error;}
     }
 
-    TypeCheckData(giorno:number, mese:number, anno:number): Boolean{
-        if((typeof giorno !== 'number' || isNaN(giorno))) throw new Error('Questa giorno non è valido');
-        if((typeof mese !== 'number' || isNaN(mese))) throw new Error('Questa mese non è valido');
-        if((typeof anno !== 'number' || isNaN(anno))) throw new Error('Questa anno non è valido');
+    private TypeCheckData(data:string): Boolean{
+        let dataIns = DateTime.fromISO(data)
+        if((typeof data !== 'string' || !dataIns.isValid)) throw new Error('Questa data non è valida');
         return true;
     }
 
-    TypeCheckFascia(fascia: number): Boolean{
+    private TypeCheckFascia(fascia: number): Boolean{
         if(typeof fascia !== 'number' || isNaN(fascia)) throw new Error('Questa fascia non è valida');
         return true;
     }
 
-    TypeCheckSlot(slot: number): Boolean{
+    private TypeCheckSlot(slot: number): Boolean{
         if(typeof slot !== 'number' || isNaN(slot)) throw new Error('Questa slot non è valido');
         return true;
     }
 
-    TypeCheckCV(Cv: number): Boolean{
+    private async TypeCheckCV(Cv: number): Promise<Boolean>{
         if(typeof Cv !== 'number' || isNaN(Cv)) throw new Error('Questo centro vaccino non è valido');
+        let test = await this.modelCV.getModel().findAll({
+            where: {
+              id: Cv
+            }
+          });
+        if(Object.keys(test).length == 0) throw new Error('Questo centro vaccino non esiste');
         return true;
     }
 
-    async TypeCheckVaccino(vaccino: number): Promise<Boolean>{
+    private async TypeCheckVaccino(vaccino: number): Promise<Boolean>{
         if(typeof vaccino !== 'number' || isNaN(vaccino)) throw new Error('Questo vaccino non è valido');
         let test = await this.modelV.getModel().findAll({
             where: {
@@ -69,12 +75,18 @@ export class proxyPr implements proxyinterfacePR {
         return true;
     }
 
-    TypeCheckUser(user: number): Boolean{
+    private async TypeCheckUser(user: number): Promise<Boolean>{
         if(typeof user !== 'number' || isNaN(user)) throw new Error('Questo utente non è valido');
+        let test = await this.modelU.getModel().findAll({
+            where: {
+              id: user
+            }
+          });
+        if(Object.keys(test).length == 0) throw new Error('Questo utente non esiste');
         return true;
     }
 
-    TypeCheckStato(stato: number): Boolean{
+    private TypeCheckStato(stato: number): Boolean{
         if(typeof stato !== 'number' || isNaN(stato)) throw new Error('Questo stato non è valido');
         return true;
     }
