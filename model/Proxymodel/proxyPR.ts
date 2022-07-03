@@ -7,6 +7,7 @@ import { Centro_vaccinale } from "../centro_vaccinale";
 import { DBConnection } from "../../config/sequelize"
 import { DateTime } from "luxon";
 import { UUID } from "sequelize";
+
 export class proxyPr implements proxyinterfacePR {
 
     private model: Prenotazione;
@@ -68,29 +69,30 @@ export class proxyPr implements proxyinterfacePR {
 
     private async checkVaxValidity(data: string, vaccino: number, user: number) {
         let DataPre = DateTime.fromISO(data);
-        let DataVaxExpire;
         let LastVax = await this.model.getModel().findAll({
             where: {
                 user: user,
                 vaccino: vaccino,
-                stato: 1
+                stato: [0, 1],
+
             },
-            order: [['data', 'DESC']],
-            query: { raw: true }
+            order: [['data', 'DESC']]
         });
         //mai vaccinato
-        if (LastVax.count == 0) {
+        if (JSON.parse(JSON.stringify(LastVax)).length == 0) {
+            console.log("questo user non ha mai vaccinato.")
             return;
         }
-        let LastVaxTime = DateTime.fromISO(LastVax.data);
+        let LastVaxTime = DateTime.fromISO(LastVax[0].data);
         let Vaccino = await this.modelV.getModel().findOne({ where: { id: vaccino }, query: { raw: true } });
-        //vaccino e' ancora effettivo.
-        if (LastVaxTime.plus({ day: Vaccino.validita }) < DataPre) throw Error("il vaccino ancora e' effettivo");
+
+        //il vaccino e' ancora effettivo.
+        if (DataPre < LastVaxTime.plus({ day: Vaccino.validita })) throw Error("il vaccino ancora e' effettivo");
 
     }
 
     private async checkSlot(data: string, centro: number, slot: number) {
-        
+
         let count = await this.model.getModel().count({
             where: {
                 data: data,
@@ -98,7 +100,7 @@ export class proxyPr implements proxyinterfacePR {
                 slot: slot
             }
         });
-        console.log("count result: "+count);
+        console.log("count result: " + count);
         if (count > 0) { throw Error("slot e' gia occupato.") };
 
     }
@@ -183,15 +185,15 @@ export class proxyPr implements proxyinterfacePR {
         return true;
     }
 
-    async takeNumberOfPrenotation(fascia:Boolean): Promise<Array<any>>{
-        if(fascia){
+    async takeNumberOfPrenotation(fascia: Boolean): Promise<Array<any>> {
+        if (fascia) {
             let result = await this.model.getModel().findAndCountAll({
-                attributes: ['centro_vac', 'data','fascia' ],
-                group: ['centro_vac', 'data','fascia' ]
+                attributes: ['centro_vac', 'data', 'fascia'],
+                group: ['centro_vac', 'data', 'fascia']
             })
             return result.count
         }
-        else{
+        else {
             let result = await this.model.getModel().findAndCountAll({
                 attributes: ['centro_vac', 'data'],
                 group: ['centro_vac', 'data']
