@@ -82,7 +82,7 @@ var Prenotazione = /** @class */ (function () {
                     key: 'id'
                 }
             },
-            stato: { type: DataTypes.BIGINT(20) },
+            stato: { type: DataTypes.BIGINT(20), defaultValue: 0 },
             uuid: { type: Sequelize.UUID, defaultValue: Sequelize.UUIDV4 }
         }, {
             tableName: 'prenotazione',
@@ -90,7 +90,7 @@ var Prenotazione = /** @class */ (function () {
         });
     }
     // metodo per inserire una prenotazione
-    Prenotazione.prototype.insertNewPr = function (data, fascia, slot, centro_vaccino, vaccino, user, stato) {
+    Prenotazione.prototype.insertNewPr = function (data, fascia, slot, centro_vaccino, vaccino, user) {
         return __awaiter(this, void 0, void 0, function () {
             var dataIns, _a;
             return __generator(this, function (_b) {
@@ -98,10 +98,10 @@ var Prenotazione = /** @class */ (function () {
                     case 0:
                         _b.trys.push([0, 2, , 3]);
                         dataIns = luxon_1.DateTime.fromISO(data);
-                        return [4 /*yield*/, this.prenotazione.create({ data: dataIns.toISODate(), fascia: fascia, slot: slot, centro_vac: centro_vaccino, vaccino: vaccino, user: user, stato: stato })];
+                        return [4 /*yield*/, this.prenotazione.create({ data: dataIns.toISODate(), fascia: fascia, slot: slot, centro_vac: centro_vaccino, vaccino: vaccino, user: user })];
                     case 1:
                         _b.sent();
-                        return [2 /*return*/, true];
+                        return [2 /*return*/, this.prenotazione];
                     case 2:
                         _a = _b.sent();
                         return [2 /*return*/, false];

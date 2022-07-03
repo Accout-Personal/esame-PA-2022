@@ -50,7 +50,7 @@ var proxyUs = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         if (!this.TypeCheckUsername(username)) return [3 /*break*/, 2];
-                        return [4 /*yield*/, this.model.getModel().findAll({
+                        return [4 /*yield*/, this.model.getModel().findOne({
                                 where: {
                                     username: username
                                 }
