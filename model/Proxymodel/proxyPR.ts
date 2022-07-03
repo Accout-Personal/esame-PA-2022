@@ -29,7 +29,8 @@ export class proxyPr implements proxyinterfacePR {
             await this.TypeCheckVaccino(vaccino);
             await this.TypeCheckUser(user);
             this.TypeCheckStato(stato);
-            
+            await this.CheckSlot(data,centro_vaccino,slot);
+
             return await this.model.insertNewPr(data, fascia, slot, centro_vaccino, vaccino, user, stato);
     }
 
@@ -50,7 +51,17 @@ export class proxyPr implements proxyinterfacePR {
             
     }
 
-    private CheckSlot
+    private async CheckSlot(data:string,centro:number,slot:number){
+        let result = await this.model.getModel().count({
+            where:{
+                data:data,
+                centro_vac:centro,
+                slot:slot
+            }
+        });
+        if(result>0){throw Error("slot e' gia occupato.")};
+
+    }
 
     private TypeCheckData(data:string): Boolean{
         let dataIns = DateTime.fromISO(data)

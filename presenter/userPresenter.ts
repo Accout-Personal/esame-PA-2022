@@ -32,4 +32,12 @@ export class userPresenter {
         });
     };
 
+    public static Prenota(req,res){
+        try{
+
+        }catch(err){
+            
+        }
+    }
+
 }
