@@ -8,6 +8,6 @@ export function errorHandler(err, req, res, next) {
     if (res.headersSent) {
         return next(err)
     }
-    res.status(403).send({"error": err.message});
+    res.status(403).send({"errore": err.message});
 }
 
