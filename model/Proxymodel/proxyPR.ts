@@ -6,7 +6,7 @@ import { Users } from "../users";
 import { Centro_vaccinale } from "../centro_vaccinale";
 import {DBConnection} from "../../config/sequelize"
 import { DateTime } from "luxon";
-
+import { UUID } from "sequelize";
 export class proxyPr implements proxyinterfacePR {
 
     private model:Prenotazione;
@@ -22,20 +22,35 @@ export class proxyPr implements proxyinterfacePR {
     }
 
     async insertNewPr(data:string, fascia: number, slot: number, centro_vaccino: number, vaccino: number, user: number, stato: number): Promise<Object> {  
-        try {
-        if(
-            this.TypeCheckData(data) &&
-            this.TypeCheckFascia(fascia) &&
-            this.TypeCheckSlot(slot) &&
-            await this.TypeCheckCV(centro_vaccino) &&
-            await this.TypeCheckVaccino(vaccino) &&
-            await this.TypeCheckUser(user) &&
-            this.TypeCheckStato(stato)
-        ) {
-                return await this.model.insertNewPr(data, fascia, slot, centro_vaccino, vaccino, user, stato);  
-            }     
-        } catch(error) {return error;}
+            this.TypeCheckData(data);
+            this.TypeCheckFascia(fascia);
+            this.TypeCheckSlot(slot);
+            await this.TypeCheckCV(centro_vaccino);
+            await this.TypeCheckVaccino(vaccino);
+            await this.TypeCheckUser(user);
+            this.TypeCheckStato(stato);
+            
+            return await this.model.insertNewPr(data, fascia, slot, centro_vaccino, vaccino, user, stato);
     }
+
+    async getListaPr(userid?:number,centro?:number,data?:string){
+        
+        if(typeof userid === "undefined" && typeof centro === "undefined"){
+            throw Error("non hai inserito nessun paramentro");
+        }
+        
+        if(typeof userid === "undefined"){
+            this.TypeCheckData(data);
+            return await this.model.getPreCentro(centro,data);
+        }
+
+        this.TypeCheckUser(userid);
+        return await this.model.getPreUser(userid);
+
+            
+    }
+
+    private CheckSlot
 
     private TypeCheckData(data:string): Boolean{
         let dataIns = DateTime.fromISO(data)
@@ -45,11 +60,13 @@ export class proxyPr implements proxyinterfacePR {
 
     private TypeCheckFascia(fascia: number): Boolean{
         if(typeof fascia !== 'number' || isNaN(fascia)) throw new Error('Questa fascia non è valida');
+        if(fascia > 2) throw new Error('Questa fascia non è valida');
         return true;
     }
 
     private TypeCheckSlot(slot: number): Boolean{
         if(typeof slot !== 'number' || isNaN(slot)) throw new Error('Questa slot non è valido');
+        if(slot > 37) throw new Error('Questa fascia non è valida');
         return true;
     }
 

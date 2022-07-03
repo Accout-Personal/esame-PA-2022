@@ -22,7 +22,6 @@ export class userPresenter {
                              req.body.username,
                              req.body.password,
                              0).then((value) => {
-            console.log(value[0]);
             if (value) {
                 res.send({message:"successo."});
             }
