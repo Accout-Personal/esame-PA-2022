@@ -39,7 +39,9 @@ exports.__esModule = true;
 var sequelize_1 = require("./config/sequelize");
 var users_1 = require("./model/users");
 var dotenv = require("dotenv");
+var proxyCV_1 = require("./model/Proxymodel/proxyCV");
 var proxyPR_1 = require("./model/Proxymodel/proxyPR");
+var buildCV_1 = require("./presenter/builder/buildCV");
 function querySemplice(connection) {
     return __awaiter(this, void 0, void 0, function () {
         var users;
@@ -94,7 +96,7 @@ function stampaAgain() {
                 case 0:
                     prova = new proxyPR_1.proxyPr();
                     _b = (_a = console).log;
-                    return [4 /*yield*/, prova.takeNumberOfPrenotation()];
+                    return [4 /*yield*/, prova.takeNumberOfPrenotation(true)];
                 case 1:
                     _b.apply(_a, [_c.sent()]);
                     return [2 /*return*/];
@@ -102,8 +104,11 @@ function stampaAgain() {
         });
     });
 }
-//prova.producePartA(30.849635,-83.24559,8196783.546569308)
-stampaAgain();
+//stampaAgain()
+var prova = new proxyCV_1.proxyCV();
+var pluto = new buildCV_1.buildCV(prova);
+pluto.producePartB(30.849635, -83.24559, 8996783.546569308, '2022-07-01');
+//pluto.producePartA(30.849635,-83.24559,8196783.546569308)
 //console.log(pippo.insertNewPr(20, 2,2000 , 1, 14, 8, 1, 1, 0));
 //stampa(prova);
 //console.log(isNaN(5))

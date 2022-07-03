@@ -4,6 +4,6 @@
 
 export interface builderInterfaceCV {
     producePartA(latitude:number, longitude: number,distanza:number, order?: Boolean): void;
-    producePartB(latitude:number, longitude: number,distanza:number, order?: Boolean): Promise<void>;
+    producePartB(latitude:number, longitude: number,distanza:number,data:string, order?: Boolean): Promise<void>;
     getResult(): Array<any>
 }
