@@ -102,7 +102,7 @@ export class proxyPr implements proxyinterfacePR {
     }
 
     private async checkAvailability(dataAppuntamento: string, centro: number, fasciaOraria: number) {
-        let list = await this.takeNumberOfPrenotation()
+        let list = await this.takeNumberOfPrenotation(true)
         let centro_vac = this.modelCV.getModel().findOne({
             where: {
                 id: centro
@@ -181,8 +181,8 @@ export class proxyPr implements proxyinterfacePR {
         return true;
     }
 
-    async takeNumberOfPrenotation(check:Boolean): Promise<Array<any>>{
-        if(check){
+    async takeNumberOfPrenotation(fascia:Boolean): Promise<Array<any>>{
+        if(fascia){
             let result = await this.model.getModel().findAndCountAll({
                 attributes: ['centro_vac', 'data','fascia' ],
                 group: ['centro_vac', 'data','fascia' ]
