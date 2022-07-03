@@ -52,43 +52,44 @@ var proxyPr = /** @class */ (function () {
     }
     proxyPr.prototype.insertNewPr = function (data, fascia, slot, centro_vaccino, vaccino, user, stato) {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, _b, _c, error_1;
-            return __generator(this, function (_d) {
-                switch (_d.label) {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
                     case 0:
-                        _d.trys.push([0, 9, , 10]);
-                        _c = this.TypeCheckData(data) &&
-                            this.TypeCheckFascia(fascia) &&
-                            this.TypeCheckSlot(slot);
-                        if (!_c) return [3 /*break*/, 2];
+                        this.TypeCheckData(data);
+                        this.TypeCheckFascia(fascia);
+                        this.TypeCheckSlot(slot);
                         return [4 /*yield*/, this.TypeCheckCV(centro_vaccino)];
                     case 1:
-                        _c = (_d.sent());
-                        _d.label = 2;
-                    case 2:
-                        _b = _c;
-                        if (!_b) return [3 /*break*/, 4];
+                        _a.sent();
                         return [4 /*yield*/, this.TypeCheckVaccino(vaccino)];
-                    case 3:
-                        _b = (_d.sent());
-                        _d.label = 4;
-                    case 4:
-                        _a = _b;
-                        if (!_a) return [3 /*break*/, 6];
+                    case 2:
+                        _a.sent();
                         return [4 /*yield*/, this.TypeCheckUser(user)];
-                    case 5:
-                        _a = (_d.sent());
-                        _d.label = 6;
-                    case 6:
-                        if (!(_a &&
-                            this.TypeCheckStato(stato))) return [3 /*break*/, 8];
+                    case 3:
+                        _a.sent();
+                        this.TypeCheckStato(stato);
                         return [4 /*yield*/, this.model.insertNewPr(data, fascia, slot, centro_vaccino, vaccino, user, stato)];
-                    case 7: return [2 /*return*/, _d.sent()];
-                    case 8: return [3 /*break*/, 10];
-                    case 9:
-                        error_1 = _d.sent();
-                        return [2 /*return*/, error_1];
-                    case 10: return [2 /*return*/];
+                    case 4: return [2 /*return*/, _a.sent()];
+                }
+            });
+        });
+    };
+    proxyPr.prototype.getListaPr = function (userid, centro, data) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (typeof userid === "undefined" && typeof centro === "undefined") {
+                            throw Error("non hai inserito nessun paramentro");
+                        }
+                        if (!(typeof userid === "undefined")) return [3 /*break*/, 2];
+                        this.TypeCheckData(data);
+                        return [4 /*yield*/, this.model.getPreCentro(centro, data)];
+                    case 1: return [2 /*return*/, _a.sent()];
+                    case 2:
+                        this.TypeCheckUser(userid);
+                        return [4 /*yield*/, this.model.getPreUser(userid)];
+                    case 3: return [2 /*return*/, _a.sent()];
                 }
             });
         });
@@ -102,11 +103,15 @@ var proxyPr = /** @class */ (function () {
     proxyPr.prototype.TypeCheckFascia = function (fascia) {
         if (typeof fascia !== 'number' || isNaN(fascia))
             throw new Error('Questa fascia non è valida');
+        if (fascia > 2)
+            throw new Error('Questa fascia non è valida');
         return true;
     };
     proxyPr.prototype.TypeCheckSlot = function (slot) {
         if (typeof slot !== 'number' || isNaN(slot))
             throw new Error('Questa slot non è valido');
+        if (slot > 37)
+            throw new Error('Questa fascia non è valida');
         return true;
     };
     proxyPr.prototype.TypeCheckCV = function (Cv) {
@@ -191,8 +196,7 @@ var proxyPr = /** @class */ (function () {
                         })];
                     case 1:
                         result = _a.sent();
-                        console.log(result);
-                        return [2 /*return*/];
+                        return [2 /*return*/, result.count];
                 }
             });
         });

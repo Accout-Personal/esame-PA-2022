@@ -43,11 +43,15 @@ async function stampa(prova:proxyPr){
     
 }
 
+async function stampaAgain(){
+    var prova = new proxyPr();
+    console.log(await prova.takeNumberOfPrenotation())
+}
 
 
-var prova = new proxyPr();
+
 //prova.producePartA(30.849635,-83.24559,8196783.546569308)
-prova.takeNumberOfPrenotation()
+stampaAgain()
 //console.log(pippo.insertNewPr(20, 2,2000 , 1, 14, 8, 1, 1, 0));
 //stampa(prova);
 //console.log(isNaN(5))

@@ -82,7 +82,8 @@ var Prenotazione = /** @class */ (function () {
                     key: 'id'
                 }
             },
-            stato: { type: DataTypes.BIGINT(20) }
+            stato: { type: DataTypes.BIGINT(20) },
+            uuid: { type: Sequelize.UUID, defaultValue: Sequelize.UUIDV4 }
         }, {
             tableName: 'prenotazione',
             timestamps: false
@@ -105,6 +106,35 @@ var Prenotazione = /** @class */ (function () {
                         _a = _b.sent();
                         return [2 /*return*/, false];
                     case 3: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    Prenotazione.prototype.getPreUser = function (userid) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.prenotazione.findAll({
+                            where: {
+                                user: userid
+                            }
+                        })];
+                    case 1: return [2 /*return*/, _a.sent()];
+                }
+            });
+        });
+    };
+    Prenotazione.prototype.getPreCentro = function (centro, data) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.prenotazione.findAll({
+                            where: {
+                                centro_vac: centro,
+                                data: data
+                            }
+                        })];
+                    case 1: return [2 /*return*/, _a.sent()];
                 }
             });
         });

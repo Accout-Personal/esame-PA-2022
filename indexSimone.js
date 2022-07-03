@@ -86,9 +86,24 @@ function stampa(prova) {
         });
     });
 }
-var prova = new proxyPR_1.proxyPr();
+function stampaAgain() {
+    return __awaiter(this, void 0, void 0, function () {
+        var prova, _a, _b;
+        return __generator(this, function (_c) {
+            switch (_c.label) {
+                case 0:
+                    prova = new proxyPR_1.proxyPr();
+                    _b = (_a = console).log;
+                    return [4 /*yield*/, prova.takeNumberOfPrenotation()];
+                case 1:
+                    _b.apply(_a, [_c.sent()]);
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
 //prova.producePartA(30.849635,-83.24559,8196783.546569308)
-prova.takeNumberOfPrenotation();
+stampaAgain();
 //console.log(pippo.insertNewPr(20, 2,2000 , 1, 14, 8, 1, 1, 0));
 //stampa(prova);
 //console.log(isNaN(5))
