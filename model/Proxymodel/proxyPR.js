@@ -191,12 +191,33 @@ var proxyPr = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, this.model.getModel().findAndCountAll({
-                            attributes: ['centro_vac', 'data',],
-                            group: ['centro_vac', 'data',]
+                            attributes: ['centro_vac', 'data', 'fascia'],
+                            group: ['centro_vac', 'data', 'fascia']
                         })];
                     case 1:
                         result = _a.sent();
                         return [2 /*return*/, result.count];
+                }
+            });
+        });
+    };
+    proxyPr.prototype.takeSumF1F2 = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var complete, result;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        complete = [];
+                        return [4 /*yield*/, this.modelCV.getModel().findAll({
+                                attributes: ['id', 'maxf1', 'maxf2']
+                            })];
+                    case 1:
+                        result = _a.sent();
+                        result.map(function (val) {
+                            val.dataValues.somma = val.dataValues.maxf1 + val.dataValues.maxf1;
+                            complete.push(val.dataValues);
+                        });
+                        return [2 /*return*/, complete];
                 }
             });
         });

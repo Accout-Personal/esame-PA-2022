@@ -110,9 +110,21 @@ export class proxyPr implements proxyinterfacePR {
 
     async takeNumberOfPrenotation(): Promise<Array<any>>{
         let result = await this.model.getModel().findAndCountAll({
-            attributes: ['centro_vac', 'data', ],
-            group: ['centro_vac', 'data', ]
+            attributes: ['centro_vac', 'data','fascia' ],
+            group: ['centro_vac', 'data','fascia' ]
         })
         return result.count
+    }
+
+    async takeSumF1F2() {
+        let complete = [];
+        let result = await this.modelCV.getModel().findAll({
+            attributes: ['id','maxf1','maxf2']
+        })
+        result.map(val => {
+            val.dataValues.somma = val.dataValues.maxf1+val.dataValues.maxf1
+            complete.push(val.dataValues)
+        });
+        return complete;
     }
 }
