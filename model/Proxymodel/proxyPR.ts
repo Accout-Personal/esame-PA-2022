@@ -90,14 +90,16 @@ export class proxyPr implements proxyinterfacePR {
     }
 
     private async checkSlot(data: string, centro: number, slot: number) {
-        let result = await this.model.getModel().count({
+        
+        let count = await this.model.getModel().count({
             where: {
                 data: data,
                 centro_vac: centro,
                 slot: slot
             }
         });
-        if (result > 0) { throw Error("slot e' gia occupato.") };
+        console.log("count result: "+count);
+        if (count > 0) { throw Error("slot e' gia occupato.") };
 
     }
 

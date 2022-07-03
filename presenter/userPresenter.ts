@@ -37,6 +37,7 @@ export class userPresenter {
             const Proxy = new proxyPr();
             const body = req.body;
             Proxy.insertNewPr(body.data, body.slot, body.centro_vac, body.vaccino, req.user.user.id).then(value => {
+                console.log("prenotazione successo");
                 console.log(value);
                 res.status(200).send({"message":"prenotazione successo","uuid":value["uuid"]});
             });

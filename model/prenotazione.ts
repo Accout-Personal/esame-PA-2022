@@ -28,7 +28,7 @@ export class Prenotazione implements proxyinterfacePR {
         autoIncrement: true,
         primaryKey: true
       },
-      data: { type: DataTypes.DATE },
+      data: { type: DataTypes.DATEONLY },
       fascia: { type: DataTypes.INTEGER },
       slot: { type: DataTypes.INTEGER },
       centro_vac: {
@@ -66,8 +66,8 @@ export class Prenotazione implements proxyinterfacePR {
       let dataIns = DateTime.fromISO(data)
       await this.prenotazione.create({ data: dataIns.toISODate(), fascia: fascia, slot: slot, centro_vac: centro_vaccino, vaccino: vaccino, user: user });
       return this.prenotazione;
-    } catch {
-      return false;
+    } catch(error) {
+      console.log(error);
     }
   }
 
