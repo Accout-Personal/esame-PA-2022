@@ -1,6 +1,7 @@
 import { proxyUs } from "../model/Proxymodel/proxyUs";
 import * as crypto from 'node:crypto';
 import * as jwt from 'jsonwebtoken';
+import { proxyPr } from "../model/Proxymodel/proxyPR";
 
 export class userPresenter {
 
@@ -34,7 +35,9 @@ export class userPresenter {
 
     public static Prenota(req,res){
         try{
-
+            const Proxy = new proxyPr();
+            
+            Proxy.insertNewPr();
         }catch(err){
             return 
         }
