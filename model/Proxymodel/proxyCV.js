@@ -46,7 +46,7 @@ var proxyCV = /** @class */ (function () {
     }
     proxyCV.prototype.insertNewCV = function (lati, longi, nome, maxf1, maxf2) {
         return __awaiter(this, void 0, void 0, function () {
-            var error_1;
+            var result, error_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -57,10 +57,23 @@ var proxyCV = /** @class */ (function () {
                             this.TypeCheckMaxf1(maxf1) &&
                             this.TypeCheckMaxf2(maxf2))) return [3 /*break*/, 2];
                         return [4 /*yield*/, this.model.insertNewCV(lati, longi, nome, maxf1, maxf2)];
-                    case 1: return [2 /*return*/, _a.sent()];
+                    case 1:
+                        result = _a.sent();
+                        if (result && !(result instanceof Error)) {
+                            return [2 /*return*/, true];
+                        }
+                        else {
+                            if (result instanceof Error)
+                                return [2 /*return*/, new Error(result.message)];
+                            else
+                                return [2 /*return*/, new Error("errore inserimento nel database")];
+                        }
+                        ;
+                        _a.label = 2;
                     case 2: return [3 /*break*/, 4];
                     case 3:
                         error_1 = _a.sent();
+                        error_1.message("validazione fallita");
                         return [2 /*return*/, error_1];
                     case 4: return [2 /*return*/];
                 }

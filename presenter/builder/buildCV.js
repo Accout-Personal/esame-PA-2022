@@ -36,56 +36,104 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.PresentCV = void 0;
-var _a = require('sequelize'), Sequelize = _a.Sequelize, Model = _a.Model, DataTypes = _a.DataTypes;
-var proxyCV_1 = require("../model/Proxymodel/proxyCV");
+exports.buildCV = void 0;
 var haversine = require("haversine");
-/*
-* Utilizziamo il pattern builder per implementare questa classe, in quanto abbiamo che il contenuto restituito all'utente può variare a seconda delle richieste
-*/
-var PresentCV = /** @class */ (function () {
-    function PresentCV() {
-        this.proxyInterfaceCV = new proxyCV_1.proxyCV();
+var proxyPR_1 = require("../../model/Proxymodel/proxyPR");
+var buildCV = /** @class */ (function () {
+    function buildCV(proxy) {
+        this.result = [];
+        this.proxy = proxy;
     }
-    //istanza di 
     //In questo metodo viene utilizzata soltanto la funzione di filtraggio relativa alla distanza
-    PresentCV.prototype.producePartA = function () {
+    buildCV.prototype.producePartA = function (latitude, longitude, distanza, order) {
+        if (order === void 0) { order = true; }
         return __awaiter(this, void 0, void 0, function () {
-            var start, result, complete, ok;
+            var start, all;
+            var _this = this;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         start = {
-                            latitude: 30.849635,
-                            longitude: -83.24559
+                            latitude: latitude,
+                            longitude: longitude
                         };
-                        return [4 /*yield*/, this.proxyInterfaceCV.getProxyModel().getModel().findAll({
+                        return [4 /*yield*/, this.proxy.getProxyModel().getModel().findAll({
                                 attributes: ['id', 'lati', 'longi']
                             })];
                     case 1:
-                        result = _a.sent();
-                        complete = [];
-                        result.map(function (val) {
+                        all = _a.sent();
+                        all.map(function (val) {
                             var end = {
                                 latitude: val.dataValues.lati,
                                 longitude: val.dataValues.longi
                             };
                             val.dataValues.distanza = haversine(start, end, { unit: 'meter' });
-                            complete.push(val.dataValues);
+                            if (val.dataValues.distanza <= distanza)
+                                _this.result.push(val.dataValues);
                         });
-                        console.log(complete);
-                        ok = complete.filter(function (value) { return value.distanza >= 9273708.961528707; });
-                        console.log(' risultato finale \n');
-                        console.log(ok);
+                        if (order)
+                            this.result.sort(function (a, b) {
+                                return a.distanza - b.distanza;
+                            });
+                        else {
+                            this.result.sort(function (a, b) {
+                                return b.distanza - a.distanza;
+                            });
+                        }
+                        console.log(this.result);
                         return [2 /*return*/];
                 }
             });
         });
     };
     //in questa funzione viene eseguita sia la funzione di filtraggio per la distanza che per la disponibilità
-    PresentCV.prototype.producePartB = function () {
-        throw new Error("Method not implemented.");
+    buildCV.prototype.producePartB = function (latitude, longitude, distanza, order) {
+        if (order === void 0) { order = true; }
+        return __awaiter(this, void 0, void 0, function () {
+            var start, all;
+            var _this = this;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        this.proxyPre = new proxyPR_1.proxyPr();
+                        start = {
+                            latitude: latitude,
+                            longitude: longitude
+                        };
+                        return [4 /*yield*/, this.proxy.getProxyModel().getModel().findAll({
+                                attributes: ['id', 'lati', 'longi', 'maxf1', 'maxf2']
+                            })];
+                    case 1:
+                        all = _a.sent();
+                        all.map(function (val) {
+                            var end = {
+                                latitude: val.dataValues.lati,
+                                longitude: val.dataValues.longi
+                            };
+                            val.dataValues.distanza = haversine(start, end, { unit: 'meter' });
+                            if (val.dataValues.distanza <= distanza)
+                                _this.result.push(val.dataValues);
+                        });
+                        if (order)
+                            this.result.sort(function (a, b) {
+                                return a.distanza - b.distanza;
+                            });
+                        else {
+                            this.result.sort(function (a, b) {
+                                return b.distanza - a.distanza;
+                            });
+                        }
+                        console.log(this.result);
+                        return [2 /*return*/];
+                }
+            });
+        });
     };
-    return PresentCV;
+    buildCV.prototype.getResult = function () {
+        var finish = this.result;
+        this.result = [];
+        return finish;
+    };
+    return buildCV;
 }());
-exports.PresentCV = PresentCV;
+exports.buildCV = buildCV;

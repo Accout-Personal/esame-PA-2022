@@ -90,4 +90,12 @@ export class proxyPr implements proxyinterfacePR {
         if(typeof stato !== 'number' || isNaN(stato)) throw new Error('Questo stato non è valido');
         return true;
     }
+
+    async takeNumberOfPrenotation(){
+        let result = await this.model.getModel().findAndCountAll({
+            attributes: ['centro_vac', 'data', ],
+            group: ['centro_vac', 'data', ]
+        })
+        console.log(result)
+    }
 }

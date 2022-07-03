@@ -67,18 +67,18 @@ var Centro_vaccinale = /** @class */ (function () {
     // Metodo per inserire un nuovo centro centro vaccinale
     Centro_vaccinale.prototype.insertNewCV = function (lati, longi, nome, maxf1, maxf2) {
         return __awaiter(this, void 0, void 0, function () {
-            var _a;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
+            var error_1;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
                     case 0:
-                        _b.trys.push([0, 2, , 3]);
+                        _a.trys.push([0, 2, , 3]);
                         return [4 /*yield*/, this.centro_vaccinale.create({ lati: lati, longi: longi, nome: nome, maxf1: maxf1, maxf2: maxf2 })];
                     case 1:
-                        _b.sent();
+                        _a.sent();
                         return [2 /*return*/, true];
                     case 2:
-                        _a = _b.sent();
-                        return [2 /*return*/, false];
+                        error_1 = _a.sent();
+                        return [2 /*return*/, error_1];
                     case 3: return [2 /*return*/];
                 }
             });
@@ -91,7 +91,7 @@ var Centro_vaccinale = /** @class */ (function () {
     // Metodo per ottenere tutti i centri vaccinali
     Centro_vaccinale.prototype.getAll = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var result, error_1;
+            var result, error_2;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -101,8 +101,8 @@ var Centro_vaccinale = /** @class */ (function () {
                         result = _a.sent();
                         return [2 /*return*/, result];
                     case 2:
-                        error_1 = _a.sent();
-                        return [2 /*return*/, error_1];
+                        error_2 = _a.sent();
+                        return [2 /*return*/, error_2];
                     case 3: return [2 /*return*/];
                 }
             });
