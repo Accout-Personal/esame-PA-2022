@@ -39,8 +39,8 @@ export class Centro_vaccinale implements proxyInterfaceCV{
         try{
             await this.centro_vaccinale.create({lati: lati, longi: longi, nome: nome, maxf1: maxf1, maxf2: maxf2 });
             return true;
-        } catch{
-            return false;}
+        } catch(error){
+            return error}
       }
 
 // Metodo per ottenere il modello

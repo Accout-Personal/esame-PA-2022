@@ -17,8 +17,20 @@ export class userPresenter {
     };
 
     public static register(req, res) {
-
+        const proxy = new proxyUs();
+        proxy.insertNewUsers(req.body.cf,
+                             req.body.username,
+                             req.body.password,
+                             0).then((value) => {
+            console.log(value[0]);
+            if (value) {
+                res.send({message:"successo."});
+            }
+            else{
+                res.send({message:"fallito."});
+            }
+                
+        });
     };
-
 
 }

@@ -21,9 +21,18 @@ export class proxyCV implements proxyInterfaceCV{
             this.TypeCheckMaxf1(maxf1) &&
             this.TypeCheckMaxf2(maxf2)
             ) {
-                return await this.model.insertNewCV(lati, longi, nome, maxf1, maxf2);  
+                let result = await this.model.insertNewCV(lati, longi, nome, maxf1, maxf2)
+                if(result && !(result instanceof Error)){
+                    return true;
+                }else{
+                    if(result instanceof Error)
+                        return new Error(result.message);
+                    else
+                        return new Error("errore inserimento nel database");
+                };  
+                 
             }     
-        } catch(error) {return error;}
+        } catch(error) {error.message("validazione fallita");return error;}
     }
 
     TypeCheckLati(lati: number): Boolean{
