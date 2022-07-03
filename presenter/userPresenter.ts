@@ -36,7 +36,7 @@ export class userPresenter {
         try{
 
         }catch(err){
-            
+            return 
         }
     }
 
