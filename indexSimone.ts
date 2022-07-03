@@ -22,7 +22,7 @@ const connection = DBConnection.getInstance().getConnection();
     console.log(JSON.stringify(value));
 });*/
 
-async function stampa(prova:proxyPr){
+/*async function stampa(prova:proxyPr){
     
     let result = await prova.insertNewPr('2020-02-02', 1, 14, 8, 1, 1, 0);
     switch(typeof result){
@@ -41,7 +41,7 @@ async function stampa(prova:proxyPr){
     console.log('mi dispiace, hai generato questa eccezione');
     //catch(error){console.log('mi dispiace, hai generato questa eccezione: ',error)}
     
-}
+}*/
 
 async function stampaAgain(){
     let prova = new proxyPr();
