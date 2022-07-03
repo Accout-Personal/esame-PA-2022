@@ -21,14 +21,14 @@ export class proxyPr implements proxyinterfacePR {
         this.modelCV = new Centro_vaccinale(DBConnection.getInstance().getConnection());
     }
 
-    async insertNewPr(data: string, slot: number, centro_vaccino: number, vaccino: number, user: number, stato: number): Promise<Object> {
+    async insertNewPr(data: string, slot: number, centro_vaccino: number, vaccino: number, user: number): Promise<Object> {
         //controllo il tipo di dato sia valido
         this.TypeCheckData(data);
         this.TypeCheckSlot(slot);
         await this.TypeCheckCV(centro_vaccino);
         await this.TypeCheckVaccino(vaccino);
         await this.TypeCheckUser(user);
-        this.TypeCheckStato(stato);
+        //this.TypeCheckStato(stato);
 
         //fascia 1 da 1-16, fascia 2 da 17-27;
         var fascia: number;
@@ -38,12 +38,15 @@ export class proxyPr implements proxyinterfacePR {
             fascia = 1;
         }
 
-        await this.checkAvailability(data, centro_vaccino, fascia);
-        await this.checkSlot(data, centro_vaccino, slot);
+        console.log("checking validity")
+        await this.checkAvailability(data, centro_vaccino, fascia).then(() => { console.log("validity checking success..") });
+        console.log("checking slot")
+        await this.checkSlot(data, centro_vaccino, slot).then(() => { console.log("slot checking success..") });
 
-        await this.checkVaxValidity(data, vaccino, user);
+        console.log("checking vax validity")
+        await this.checkVaxValidity(data, vaccino, user).then(() => { console.log("vax validity checking success..") });
 
-        return await this.model.insertNewPr(data, fascia, slot, centro_vaccino, vaccino, user, stato);
+        return await this.model.insertNewPr(data, fascia, slot, centro_vaccino, vaccino, user);
     }
 
     async getListaPr(userid?: number, centro?: number, data?: string) {
@@ -70,7 +73,7 @@ export class proxyPr implements proxyinterfacePR {
             where: {
                 user: user,
                 vaccino: vaccino,
-                status: 1
+                stato: 1
             },
             order: [['data', 'DESC']],
             query: { raw: true }
@@ -82,7 +85,7 @@ export class proxyPr implements proxyinterfacePR {
         let LastVaxTime = DateTime.fromISO(LastVax.data);
         let Vaccino = await this.modelV.getModel().findOne({ where: { id: vaccino }, query: { raw: true } });
         //vaccino e' ancora effettivo.
-        if (LastVaxTime.plus({ day: Vaccino.validita }).isBefore(DataPre)) throw Error("il vaccino ancora e' effettivo");
+        if (LastVaxTime.plus({ day: Vaccino.validita }) < DataPre) throw Error("il vaccino ancora e' effettivo");
 
     }
 
@@ -111,16 +114,24 @@ export class proxyPr implements proxyinterfacePR {
             data === dataAppuntamento && centro_vac === centro && fascia === fasciaOraria
         });
 
-        if (res.count >= centro_vac["maxf" + fasciaOraria]) {
-            throw Error("la fascia oraria e' piena");
+        //se e' undefined implica che la data e la fascia selezionata non e' prenotata da nessuno
+        if (typeof res != "undefined") {
+            if (res.count >= centro_vac["maxf" + fasciaOraria]) {
+                throw Error("la fascia oraria e' piena");
+            }
+        } else {
+            if (centro_vac["maxf" + fasciaOraria] < 1) {
+                throw Error("la fascia oraria e' piena");
+            }
         }
+
     }
 
     private TypeCheckData(data: string): Boolean {
-        let dataIns = DateTime.fromISO(data)
+        let dataIns = DateTime.fromISO(data);
         let dataNow = DateTime.now();
         if ((typeof data !== 'string' || !dataIns.isValid)) throw new Error('Questa data non è valida');
-        if ((dataIns.isBefore(dataNow))) throw new Error("Puoi prenotare solo in un dato futuro.");
+        if ((dataIns < dataNow)) throw new Error("Puoi prenotare solo in un dato futuro.");
         return true;
     }
 
@@ -153,12 +164,14 @@ export class proxyPr implements proxyinterfacePR {
     }
 
     private async TypeCheckUser(user: number): Promise<Boolean> {
+        console.log(user);
         if (typeof user !== 'number' || isNaN(user)) throw new Error('Questo utente non è valido');
         let test = await this.modelU.getModel().findAll({
             where: {
                 id: user
             }
         });
+        console.log(test);
         if (Object.keys(test).length == 0) throw new Error('Questo utente non esiste');
         return true;
     }

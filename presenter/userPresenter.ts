@@ -8,39 +8,41 @@ export class userPresenter {
     public static login(req, res) {
         const proxy = new proxyUs();
         proxy.getUser(req.body.username).then((value) => {
-            console.log(value[0]);
-            if (value[0] !== undefined && value[0].password === crypto.createHash('sha256').update(req.body.password).digest('hex')) {
-                res.send({ token: jwt.sign({ user: { "username": value[0].username, "tipo": value[0].tipo } }, process.env.JWT_SECRET_KEY, { expiresIn: process.env.TOKEN_EXPIRE_TIME}) });
+            console.log(value);
+            if (value !== undefined && value.password === crypto.createHash('sha256').update(req.body.password).digest('hex')) {
+                res.send({ token: jwt.sign({ user: { "username": value.username, "tipo": value.tipo, "id": value.id } }, process.env.JWT_SECRET_KEY, { expiresIn: process.env.TOKEN_EXPIRE_TIME }) });
             }
             else
-                res.status(401).send({message:"credenziale invalido"});
+                res.status(401).send({ message: "credenziale invalido" });
         });
     };
 
     public static register(req, res) {
         const proxy = new proxyUs();
         proxy.insertNewUsers(req.body.cf,
-                             req.body.username,
-                             req.body.password,
-                             0).then((value) => {
-            if (value) {
-                res.send({message:"successo."});
-            }
-            else{
-                res.send({message:"fallito."});
-            }
-                
-        });
+            req.body.username,
+            req.body.password,
+            0).then((value) => {
+                if (value) {
+                    res.send({ message: "successo." });
+                }
+                else {
+                    res.send({ message: "fallito." });
+                }
+
+            });
     };
 
-    public static Prenota(req,res){
-        try{
+    public static Prenota(req, res) {
             const Proxy = new proxyPr();
-            
-            Proxy.insertNewPr();
-        }catch(err){
-            return 
-        }
+            const body = req.body;
+            Proxy.insertNewPr(body.data, body.slot, body.centro_vac, body.vaccino, req.user.user.id).then(value => {
+                console.log(value);
+                res.status(200).send({"message":"prenotazione successo","uuid":value["uuid"]});
+            });
+        //} catch (err) {
+        //    res.status(401).send({ "message": err.message });
+        //}
     }
 
 }

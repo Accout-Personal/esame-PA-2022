@@ -13,7 +13,7 @@ export class proxyUs implements proxyInterfaceUsers {
 
     async getUser(username:string){
         if(this.TypeCheckUsername(username)) 
-            return await this.model.getModel().findAll({
+            return await this.model.getModel().findOne({
                 where: {
                   username: username
                 }
