@@ -39,6 +39,7 @@ exports.__esModule = true;
 exports.buildCV = void 0;
 var haversine = require("haversine");
 var proxyPR_1 = require("../../model/Proxymodel/proxyPR");
+var luxon_1 = require("luxon");
 var buildCV = /** @class */ (function () {
     function buildCV(proxy) {
         this.result = [];
@@ -87,15 +88,26 @@ var buildCV = /** @class */ (function () {
         });
     };
     //in questa funzione viene eseguita sia la funzione di filtraggio per la distanza che per la disponibilità
-    buildCV.prototype.producePartB = function (latitude, longitude, distanza, order) {
+    buildCV.prototype.producePartB = function (latitude, longitude, distanza, data, order) {
         if (order === void 0) { order = true; }
         return __awaiter(this, void 0, void 0, function () {
-            var start, all;
+            var prenotazioni, query, start, all, check;
             var _this = this;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         this.proxyPre = new proxyPR_1.proxyPr();
+                        if (!luxon_1.DateTime.fromISO(data).isValid) return [3 /*break*/, 2];
+                        return [4 /*yield*/, this.proxyPre.takeNumberOfPrenotation(false)];
+                    case 1:
+                        query = _a.sent();
+                        console.log(query);
+                        prenotazioni = query.filter(function (val) { if (val.data == data)
+                            return true; });
+                        return [3 /*break*/, 3];
+                    case 2: throw new Error("Hai inserito una data non corretta");
+                    case 3:
+                        console.log(prenotazioni);
                         start = {
                             latitude: latitude,
                             longitude: longitude
@@ -103,16 +115,28 @@ var buildCV = /** @class */ (function () {
                         return [4 /*yield*/, this.proxy.getProxyModel().getModel().findAll({
                                 attributes: ['id', 'lati', 'longi', 'maxf1', 'maxf2']
                             })];
-                    case 1:
+                    case 4:
                         all = _a.sent();
+                        check = true;
                         all.map(function (val) {
                             var end = {
                                 latitude: val.dataValues.lati,
                                 longitude: val.dataValues.longi
                             };
                             val.dataValues.distanza = haversine(start, end, { unit: 'meter' });
-                            if (val.dataValues.distanza <= distanza)
+                            if (val.dataValues.distanza <= distanza) {
+                                prenotazioni.map(function (pre) {
+                                    if (val.dataValues.id == pre.centro_vac && check) {
+                                        val.dataValues.residuo = (val.dataValues.maxf1 + val.dataValues.maxf2) - pre.count;
+                                        check = false;
+                                    }
+                                    if (check)
+                                        val.dataValues.residuo = val.dataValues.maxf1 + val.dataValues.maxf2;
+                                });
+                                if (!check)
+                                    check = true;
                                 _this.result.push(val.dataValues);
+                            }
                         });
                         if (order)
                             this.result.sort(function (a, b) {

@@ -108,12 +108,21 @@ export class proxyPr implements proxyinterfacePR {
         return true;
     }
 
-    async takeNumberOfPrenotation(): Promise<Array<any>>{
-        let result = await this.model.getModel().findAndCountAll({
-            attributes: ['centro_vac', 'data','fascia' ],
-            group: ['centro_vac', 'data','fascia' ]
-        })
-        return result.count
+    async takeNumberOfPrenotation(check:Boolean): Promise<Array<any>>{
+        if(check){
+            let result = await this.model.getModel().findAndCountAll({
+                attributes: ['centro_vac', 'data','fascia' ],
+                group: ['centro_vac', 'data','fascia' ]
+            })
+            return result.count
+        }
+        else{
+            let result = await this.model.getModel().findAndCountAll({
+                attributes: ['centro_vac', 'data'],
+                group: ['centro_vac', 'data']
+            })
+            return result.count
+        }
     }
 
     async takeSumF1F2() {

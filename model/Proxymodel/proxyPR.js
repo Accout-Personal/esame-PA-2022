@@ -185,16 +185,25 @@ var proxyPr = /** @class */ (function () {
             throw new Error('Questo stato non è valido');
         return true;
     };
-    proxyPr.prototype.takeNumberOfPrenotation = function () {
+    proxyPr.prototype.takeNumberOfPrenotation = function (check) {
         return __awaiter(this, void 0, void 0, function () {
-            var result;
+            var result, result;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.model.getModel().findAndCountAll({
-                            attributes: ['centro_vac', 'data', 'fascia'],
-                            group: ['centro_vac', 'data', 'fascia']
-                        })];
+                    case 0:
+                        if (!check) return [3 /*break*/, 2];
+                        return [4 /*yield*/, this.model.getModel().findAndCountAll({
+                                attributes: ['centro_vac', 'data', 'fascia'],
+                                group: ['centro_vac', 'data', 'fascia']
+                            })];
                     case 1:
+                        result = _a.sent();
+                        return [2 /*return*/, result.count];
+                    case 2: return [4 /*yield*/, this.model.getModel().findAndCountAll({
+                            attributes: ['centro_vac', 'data'],
+                            group: ['centro_vac', 'data']
+                        })];
+                    case 3:
                         result = _a.sent();
                         return [2 /*return*/, result.count];
                 }
