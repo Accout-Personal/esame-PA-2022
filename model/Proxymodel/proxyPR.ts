@@ -91,11 +91,11 @@ export class proxyPr implements proxyinterfacePR {
         return true;
     }
 
-    async takeNumberOfPrenotation(){
+    async takeNumberOfPrenotation(): Promise<Array<any>>{
         let result = await this.model.getModel().findAndCountAll({
             attributes: ['centro_vac', 'data', ],
             group: ['centro_vac', 'data', ]
         })
-        console.log(result)
+        return result.count
     }
 }
