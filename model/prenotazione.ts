@@ -52,7 +52,8 @@ export class Prenotazione implements proxyinterfacePR{
                 key: 'id'
               }
             },
-            stato:{type:DataTypes.BIGINT(20)}
+            stato:{type:DataTypes.BIGINT(20)},
+            uuid:{type:Sequelize.UUID,defaultValue:Sequelize.UUIDV4}
           }, {
             tableName: 'prenotazione',
             timestamps: false
@@ -68,6 +69,23 @@ export class Prenotazione implements proxyinterfacePR{
     } catch{
         return false;
     }
+    }
+
+    async getPreUser(userid:number){
+      return await this.prenotazione.findAll({
+        where:{
+          user:userid
+        }
+      });
+    }
+
+    async getPreCentro(centro:number,data:string){
+      return await this.prenotazione.findAll({
+        where:{
+          centro_vac:centro,
+          data:data
+        }
+      });
     }
 
     // Metodo per ottenere il modello
