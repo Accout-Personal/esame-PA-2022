@@ -8,7 +8,7 @@ export class buildCV implements builderInterfaceCV {
 
     private result = [];
     private proxy;
-    private proxyPre;
+    private proxyPre = new proxyPr();
 
     constructor(proxy:proxyInterfaceCV){
         this.proxy = proxy;
@@ -47,7 +47,6 @@ export class buildCV implements builderInterfaceCV {
     //in questa funzione viene eseguita sia la funzione di filtraggio per la distanza che per la disponibilità
     async producePartB(latitude:number, longitude: number,distanza:number, data:string, order: Boolean = true): Promise<void> {
 
-        this.proxyPre = new proxyPr()
         let prenotazioni;
         if(DateTime.fromISO(data).isValid){
             let query = await this.proxyPre.takeNumberOfPrenotation(false);
@@ -93,7 +92,14 @@ export class buildCV implements builderInterfaceCV {
         console.log(this.result)
     }
 
+    // Metodo per ottenere gli slot temporali disponibili
+    async getSlotFree(): Promise<void> {
+        let cv = await this.proxy.getProxyModel().getSpecificCV(3);
+        console.log(cv[0].dataValues)
+        console.log(await this.proxyPre.getSlotFull(3,['2022-06-30','2022-07-01'],1))
+    }
 
+    //metodo per ottenere il risultato finale
     getResult(): Array<any>{
         let finish = this.result;
         this.result = [];

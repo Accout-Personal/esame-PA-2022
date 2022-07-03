@@ -148,7 +148,7 @@ var proxyPr = /** @class */ (function () {
     };
     proxyPr.prototype.checkSlot = function (data, centro, slot) {
         return __awaiter(this, void 0, void 0, function () {
-            var result;
+            var count;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, this.model.getModel().count({
@@ -159,8 +159,9 @@ var proxyPr = /** @class */ (function () {
                             }
                         })];
                     case 1:
-                        result = _a.sent();
-                        if (result > 0) {
+                        count = _a.sent();
+                        console.log("count result: " + count);
+                        if (count > 0) {
                             throw Error("slot e' gia occupato.");
                         }
                         ;
@@ -334,6 +335,36 @@ var proxyPr = /** @class */ (function () {
                             complete.push(val.dataValues);
                         });
                         return [2 /*return*/, complete];
+                }
+            });
+        });
+    };
+    proxyPr.prototype.getSlotFull = function (id, data, fascia) {
+        return __awaiter(this, void 0, void 0, function () {
+            var query, query;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!(typeof fascia === 'undefined')) return [3 /*break*/, 2];
+                        return [4 /*yield*/, this.model.getModel().findAll({
+                                where: {
+                                    centro_vac: id,
+                                    data: data
+                                }
+                            })];
+                    case 1:
+                        query = _a.sent();
+                        return [2 /*return*/, query];
+                    case 2: return [4 /*yield*/, this.model.getModel().findAll({
+                            where: {
+                                centro_vac: id,
+                                data: data,
+                                fascia: fascia
+                            }
+                        })];
+                    case 3:
+                        query = _a.sent();
+                        return [2 /*return*/, query];
                 }
             });
         });

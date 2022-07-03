@@ -1,12 +1,13 @@
 import { Prenotazione } from "../prenotazione";
 import { proxyinterfacePR } from "../ProxyInterface/proxyinterfacePren";
-import { Sequelize, Model, DataTypes } from 'sequelize';
+import { Sequelize, Model, DataTypes, Op } from 'sequelize';
 import { Vaccini } from "../vaccino";
 import { Users } from "../users";
 import { Centro_vaccinale } from "../centro_vaccinale";
 import { DBConnection } from "../../config/sequelize"
 import { DateTime } from "luxon";
 import { UUID } from "sequelize";
+
 export class proxyPr implements proxyinterfacePR {
 
     private model: Prenotazione;
@@ -210,5 +211,28 @@ export class proxyPr implements proxyinterfacePR {
             complete.push(val.dataValues)
         });
         return complete;
+    }
+
+    async getSlotFull(id:number,data: Array<string>, fascia?: number): Promise<void> {
+        if(typeof fascia === 'undefined')
+        {
+        let query = await this.model.getModel().findAll({
+            where: {
+                    centro_vac: id,
+                    data: data 
+              }
+        });
+        return query;
+        }
+        else {
+            let query = await this.model.getModel().findAll({
+                where: {
+                        centro_vac: id,
+                        data: data,
+                        fascia: fascia
+                  }
+            });
+            return query;
+        }
     }
 }

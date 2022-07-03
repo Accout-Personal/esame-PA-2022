@@ -49,12 +49,23 @@ export class Centro_vaccinale implements proxyInterfaceCV{
       }
 
 // Metodo per ottenere tutti i centri vaccinali
-      async getAll():Promise<any>{
+    /*  async getAll():Promise<any>{
         try {
           let result = await this.centro_vaccinale.findAll()
           return result;
         } catch (error) {
           return error;
         }
+      }*/
+
+//Metodo per ottenere determinati centri vaccinali 
+      async getSpecificCV(id:number): Promise<Object>{
+        let query = this.centro_vaccinale.findAll({
+          attributes: ['id','maxf1','maxf2'],
+          where: {
+            id: id
+          }
+        });
+        return query;
       }
 }
