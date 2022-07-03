@@ -31,7 +31,7 @@ export const verificaEAutorizza = (req,res,next) =>{
 
     } catch (err) {
         var Errore:Error;
-        if(err.message == 'TokenExpiredError') {
+        if(err instanceof jwt.TokenExpiredError) {
             Errore = new Error('Il token e\' scaduto');
          }
          else{
