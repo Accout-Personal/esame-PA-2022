@@ -51,7 +51,6 @@ var buildCV = /** @class */ (function () {
         if (order === void 0) { order = true; }
         return __awaiter(this, void 0, void 0, function () {
             var start, all;
-            var _this = this;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -64,14 +63,22 @@ var buildCV = /** @class */ (function () {
                             })];
                     case 1:
                         all = _a.sent();
-                        all.map(function (val) {
+                        all = all.map(function (val) {
                             var end = {
                                 latitude: val.dataValues.lati,
                                 longitude: val.dataValues.longi
                             };
                             val.dataValues.distanza = haversine(start, end, { unit: 'meter' });
-                            if (val.dataValues.distanza <= distanza)
-                                _this.result.push(val.dataValues);
+                            return val.dataValues;
+                            /*if(val.dataValues.distanza <= distanza)
+                            this.result.push(val.dataValues)*/
+                        });
+                        //console.log(all)
+                        this.result = all.filter(function (value) {
+                            if (value.distanza <= distanza)
+                                return true;
+                            else
+                                return false;
                         });
                         if (order)
                             this.result.sort(function (a, b) {
@@ -93,7 +100,6 @@ var buildCV = /** @class */ (function () {
         if (order === void 0) { order = true; }
         return __awaiter(this, void 0, void 0, function () {
             var prenotazioni, query, start, all, check;
-            var _this = this;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -101,13 +107,12 @@ var buildCV = /** @class */ (function () {
                         return [4 /*yield*/, this.proxyPre.takeNumberOfPrenotation(false)];
                     case 1:
                         query = _a.sent();
-                        console.log(query);
+                        //console.log(query)
                         prenotazioni = query.filter(function (val) { if (val.data == data)
                             return true; });
                         return [3 /*break*/, 3];
                     case 2: throw new Error("Hai inserito una data non corretta");
                     case 3:
-                        console.log(prenotazioni);
                         start = {
                             latitude: latitude,
                             longitude: longitude
@@ -118,25 +123,41 @@ var buildCV = /** @class */ (function () {
                     case 4:
                         all = _a.sent();
                         check = true;
-                        all.map(function (val) {
+                        all = all.map(function (val) {
                             var end = {
                                 latitude: val.dataValues.lati,
                                 longitude: val.dataValues.longi
                             };
                             val.dataValues.distanza = haversine(start, end, { unit: 'meter' });
-                            if (val.dataValues.distanza <= distanza) {
+                            return val.dataValues;
+                            /*if(val.dataValues.distanza <= distanza){
+                            prenotazioni.map(pre => {
+                                if(val.dataValues.id == pre.centro_vac && check){
+                                    val.dataValues.residuo = (val.dataValues.maxf1+val.dataValues.maxf2) - pre.count;
+                                    check = false ;
+                                }
+                                if(check)val.dataValues.residuo = val.dataValues.maxf1+val.dataValues.maxf2
+                            });
+                            if(!check)check = true;
+                            this.result.push(val.dataValues)
+                            }*/
+                        });
+                        this.result = all.filter(function (val) {
+                            if (val.distanza <= distanza) {
                                 prenotazioni.map(function (pre) {
-                                    if (val.dataValues.id == pre.centro_vac && check) {
-                                        val.dataValues.residuo = (val.dataValues.maxf1 + val.dataValues.maxf2) - pre.count;
+                                    if (val.id == pre.centro_vac && check) {
+                                        val.residuo = (val.maxf1 + val.maxf2) - pre.count;
                                         check = false;
                                     }
                                     if (check)
-                                        val.dataValues.residuo = val.dataValues.maxf1 + val.dataValues.maxf2;
+                                        val.residuo = val.maxf1 + val.maxf2;
                                 });
                                 if (!check)
                                     check = true;
-                                _this.result.push(val.dataValues);
+                                return true;
                             }
+                            else
+                                return false;
                         });
                         if (order)
                             this.result.sort(function (a, b) {
@@ -154,20 +175,44 @@ var buildCV = /** @class */ (function () {
         });
     };
     // Metodo per ottenere gli slot temporali disponibili
-    buildCV.prototype.getSlotFree = function () {
+    buildCV.prototype.getSlotFree = function (centroCV, date, fascia) {
         return __awaiter(this, void 0, void 0, function () {
-            var cv, _a, _b;
-            return __generator(this, function (_c) {
-                switch (_c.label) {
-                    case 0: return [4 /*yield*/, this.proxy.getProxyModel().getSpecificCV(3)];
+            var cv, prenotazioni, range, free, _i, date_1, d, i;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (fascia <= 0 || isNaN(fascia) || fascia >= 3 || !isFinite(fascia))
+                            throw new Error('la fascia inserita non è valida');
+                        if (date.length > 5)
+                            throw new Error('Hai inserito troppe date');
+                        if (typeof centroCV !== 'number' || isNaN(centroCV))
+                            throw new Error('Il centro vaccinale inserito non è corretto');
+                        return [4 /*yield*/, this.proxy.getProxyModel().getSpecificCV(centroCV)];
                     case 1:
-                        cv = _c.sent();
-                        console.log(cv.count);
-                        console.log(cv[0].dataValues);
-                        _b = (_a = console).log;
-                        return [4 /*yield*/, this.proxyPre.getSlotFull(3, ['2022-06-30', '2022-07-01'], 1)];
+                        cv = _a.sent();
+                        return [4 /*yield*/, this.proxyPre.getSlotFull(centroCV, date, fascia)];
                     case 2:
-                        _b.apply(_a, [_c.sent()]);
+                        prenotazioni = _a.sent();
+                        prenotazioni = prenotazioni.map(function (value) { return value.dataValues; });
+                        console.log(prenotazioni);
+                        range = 0;
+                        if (typeof fascia === 'number' && fascia == 1)
+                            range = cv[0].dataValues.maxf1;
+                        if (typeof fascia === 'number' && fascia == 2)
+                            range = cv[0].dataValues.maxf2;
+                        if (typeof fascia === 'undefined')
+                            range = cv[0].dataValues.maxf1 + cv[0].dataValues.maxf2;
+                        free = [];
+                        for (_i = 0, date_1 = date; _i < date_1.length; _i++) {
+                            d = date_1[_i];
+                            for (i = 1; i <= range; i++) {
+                                free.push({
+                                    data: d,
+                                    slot: i
+                                });
+                            }
+                        }
+                        console.log(free);
                         return [2 /*return*/];
                 }
             });

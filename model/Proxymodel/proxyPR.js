@@ -114,7 +114,7 @@ var proxyPr = /** @class */ (function () {
     };
     proxyPr.prototype.checkVaxValidity = function (data, vaccino, user) {
         return __awaiter(this, void 0, void 0, function () {
-            var DataPre, DataVaxExpire, LastVax, LastVaxTime, Vaccino;
+            var DataPre, LastVax, LastVaxTime, Vaccino;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -123,23 +123,23 @@ var proxyPr = /** @class */ (function () {
                                 where: {
                                     user: user,
                                     vaccino: vaccino,
-                                    stato: 1
+                                    stato: [0, 1]
                                 },
-                                order: [['data', 'DESC']],
-                                query: { raw: true }
+                                order: [['data', 'DESC']]
                             })];
                     case 1:
                         LastVax = _a.sent();
                         //mai vaccinato
-                        if (LastVax.count == 0) {
+                        if (JSON.parse(JSON.stringify(LastVax)).length == 0) {
+                            console.log("questo user non ha mai vaccinato.");
                             return [2 /*return*/];
                         }
-                        LastVaxTime = luxon_1.DateTime.fromISO(LastVax.data);
+                        LastVaxTime = luxon_1.DateTime.fromISO(LastVax[0].data);
                         return [4 /*yield*/, this.modelV.getModel().findOne({ where: { id: vaccino }, query: { raw: true } })];
                     case 2:
                         Vaccino = _a.sent();
-                        //vaccino e' ancora effettivo.
-                        if (LastVaxTime.plus({ day: Vaccino.validita }) < DataPre)
+                        //il vaccino e' ancora effettivo.
+                        if (DataPre < LastVaxTime.plus({ day: Vaccino.validita }))
                             throw Error("il vaccino ancora e' effettivo");
                         return [2 /*return*/];
                 }
@@ -347,6 +347,7 @@ var proxyPr = /** @class */ (function () {
                     case 0:
                         if (!(typeof fascia === 'undefined')) return [3 /*break*/, 2];
                         return [4 /*yield*/, this.model.getModel().findAll({
+                                attributes: ['data', 'slot'],
                                 where: {
                                     centro_vac: id,
                                     data: data
@@ -356,6 +357,7 @@ var proxyPr = /** @class */ (function () {
                         query = _a.sent();
                         return [2 /*return*/, query];
                     case 2: return [4 /*yield*/, this.model.getModel().findAll({
+                            attributes: ['data', 'slot'],
                             where: {
                                 centro_vac: id,
                                 data: data,

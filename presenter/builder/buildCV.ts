@@ -3,6 +3,7 @@ import { builderInterfaceCV } from "./builderInterface/builderInterfaceCV";
 import * as haversine from 'haversine'
 import { proxyPr } from "../../model/Proxymodel/proxyPR";
 import { DateTime } from "luxon";
+import { Prenotazione } from "../../model/prenotazione";
 
 export class buildCV implements builderInterfaceCV {
 
@@ -26,15 +27,21 @@ export class buildCV implements builderInterfaceCV {
             attributes: ['id', 'lati', 'longi']
           });
         
-        all.map( val => {
+        all = all.map( val => {
             let end = {
                 latitude: val.dataValues.lati,
                 longitude: val.dataValues.longi
             }
             val.dataValues.distanza = haversine(start, end, {unit: 'meter'})
-            if(val.dataValues.distanza <= distanza)
-            this.result.push(val.dataValues)
+            return val.dataValues;
+            /*if(val.dataValues.distanza <= distanza)
+            this.result.push(val.dataValues)*/
         });
+        //console.log(all)
+        this.result = all.filter(value => {
+            if(value.distanza <= distanza) return true;
+            else return false;
+        })
         if(order)this.result.sort( (a, b) => {
             return a.distanza - b.distanza
         })
@@ -50,12 +57,12 @@ export class buildCV implements builderInterfaceCV {
         let prenotazioni;
         if(DateTime.fromISO(data).isValid){
             let query = await this.proxyPre.takeNumberOfPrenotation(false);
-            console.log(query)
+            //console.log(query)
             prenotazioni= query.filter((val) => {if(val.data == data) return true})
         }
         else throw new Error("Hai inserito una data non corretta");
         
-        console.log(prenotazioni)
+        //console.log(prenotazioni)
         let start = {
             latitude: latitude,
             longitude: longitude
@@ -65,13 +72,14 @@ export class buildCV implements builderInterfaceCV {
             attributes: ['id', 'lati', 'longi','maxf1','maxf2']
           });
           let check = true;
-        all.map( val => {
+        all = all.map( val => {
             let end = {
                 latitude: val.dataValues.lati,
                 longitude: val.dataValues.longi
             }
-            val.dataValues.distanza = haversine(start, end, {unit: 'meter'})
-            if(val.dataValues.distanza <= distanza){
+            val.dataValues.distanza = haversine(start, end, {unit: 'meter'});
+            return val.dataValues;
+            /*if(val.dataValues.distanza <= distanza){
             prenotazioni.map(pre => {
                 if(val.dataValues.id == pre.centro_vac && check){
                     val.dataValues.residuo = (val.dataValues.maxf1+val.dataValues.maxf2) - pre.count;
@@ -81,8 +89,26 @@ export class buildCV implements builderInterfaceCV {
             });
             if(!check)check = true;
             this.result.push(val.dataValues)
-            }
+            }*/
         });
+        this.result = all.filter(val => {
+            if(val.distanza <= distanza){
+                prenotazioni.map(pre => {
+                    if(val.id == pre.centro_vac && check){
+                        val.residuo = (val.maxf1+val.maxf2) - pre.count;
+                        check = false ;
+                    }
+                    if(check)val.residuo = val.maxf1+val.maxf2
+                });
+                if(!check)check = true;
+                return true;
+            }
+            else return false;
+        });
+        this.result = this.result.filter(value => {
+            if(value.residuo == 0)return false;
+            else return true;
+        })
         if(order)this.result.sort( (a, b) => {
             return a.distanza - b.distanza
         })
@@ -93,10 +119,29 @@ export class buildCV implements builderInterfaceCV {
     }
 
     // Metodo per ottenere gli slot temporali disponibili
-    async getSlotFree(): Promise<void> {
-        let cv = await this.proxy.getProxyModel().getSpecificCV(3);
-        console.log(cv[0].dataValues)
-        console.log(await this.proxyPre.getSlotFull(3,['2022-06-30','2022-07-01'],1))
+    async getSlotFree(centroCV:number,date:Array<string>,fascia?: number): Promise<void> {
+        if(fascia <= 0 || isNaN(fascia) || fascia >= 3 || !isFinite(fascia)) throw new Error('la fascia inserita non è valida');
+        if(date.length > 5) throw new Error('Hai inserito troppe date');
+        if(typeof centroCV !== 'number' || isNaN(centroCV)) throw new Error('Il centro vaccinale inserito non è corretto');
+        let cv = await this.proxy.getProxyModel().getSpecificCV(centroCV);
+        let prenotazioni = await this.proxyPre.getSlotFull(centroCV,date,fascia)
+        prenotazioni  = prenotazioni.map(value => {return value.dataValues} )
+        console.log(prenotazioni)
+        let range = 0;
+        if(typeof fascia === 'number' && fascia == 1) range = cv[0].dataValues.maxf1;
+        if(typeof fascia === 'number' && fascia == 2) range = cv[0].dataValues.maxf2;
+        if(typeof fascia === 'undefined') range = cv[0].dataValues.maxf1+cv[0].dataValues.maxf2;
+        let free = [];
+        for(let d of date){
+            for(let i = 1; i<= range ;i++){
+                free.push({
+                    data: d,
+                    slot: i
+                });
+            } 
+        }
+        
+        console.log(free)
     }
 
     //metodo per ottenere il risultato finale
