@@ -89,22 +89,26 @@ var Centro_vaccinale = /** @class */ (function () {
         return this.centro_vaccinale;
     };
     // Metodo per ottenere tutti i centri vaccinali
-    Centro_vaccinale.prototype.getAll = function () {
+    /*  async getAll():Promise<any>{
+        try {
+          let result = await this.centro_vaccinale.findAll()
+          return result;
+        } catch (error) {
+          return error;
+        }
+      }*/
+    //Metodo per ottenere determinati centri vaccinali 
+    Centro_vaccinale.prototype.getSpecificCV = function (id) {
         return __awaiter(this, void 0, void 0, function () {
-            var result, error_2;
+            var query;
             return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        _a.trys.push([0, 2, , 3]);
-                        return [4 /*yield*/, this.centro_vaccinale.findAll()];
-                    case 1:
-                        result = _a.sent();
-                        return [2 /*return*/, result];
-                    case 2:
-                        error_2 = _a.sent();
-                        return [2 /*return*/, error_2];
-                    case 3: return [2 /*return*/];
-                }
+                query = this.centro_vaccinale.findAll({
+                    attributes: ['id', 'maxf1', 'maxf2'],
+                    where: {
+                        id: id
+                    }
+                });
+                return [2 /*return*/, query];
             });
         });
     };

@@ -58,7 +58,7 @@ var Prenotazione = /** @class */ (function () {
                 autoIncrement: true,
                 primaryKey: true
             },
-            data: { type: DataTypes.DATE },
+            data: { type: DataTypes.DATEONLY },
             fascia: { type: DataTypes.INTEGER },
             slot: { type: DataTypes.INTEGER },
             centro_vac: {
@@ -92,19 +92,20 @@ var Prenotazione = /** @class */ (function () {
     // metodo per inserire una prenotazione
     Prenotazione.prototype.insertNewPr = function (data, fascia, slot, centro_vaccino, vaccino, user) {
         return __awaiter(this, void 0, void 0, function () {
-            var dataIns, _a;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
+            var dataIns, error_1;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
                     case 0:
-                        _b.trys.push([0, 2, , 3]);
+                        _a.trys.push([0, 2, , 3]);
                         dataIns = luxon_1.DateTime.fromISO(data);
                         return [4 /*yield*/, this.prenotazione.create({ data: dataIns.toISODate(), fascia: fascia, slot: slot, centro_vac: centro_vaccino, vaccino: vaccino, user: user })];
                     case 1:
-                        _b.sent();
+                        _a.sent();
                         return [2 /*return*/, this.prenotazione];
                     case 2:
-                        _a = _b.sent();
-                        return [2 /*return*/, false];
+                        error_1 = _a.sent();
+                        console.log(error_1);
+                        return [3 /*break*/, 3];
                     case 3: return [2 /*return*/];
                 }
             });

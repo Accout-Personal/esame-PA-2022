@@ -43,6 +43,7 @@ var luxon_1 = require("luxon");
 var buildCV = /** @class */ (function () {
     function buildCV(proxy) {
         this.result = [];
+        this.proxyPre = new proxyPR_1.proxyPr();
         this.proxy = proxy;
     }
     //In questo metodo viene utilizzata soltanto la funzione di filtraggio relativa alla distanza
@@ -96,7 +97,6 @@ var buildCV = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        this.proxyPre = new proxyPR_1.proxyPr();
                         if (!luxon_1.DateTime.fromISO(data).isValid) return [3 /*break*/, 2];
                         return [4 /*yield*/, this.proxyPre.takeNumberOfPrenotation(false)];
                     case 1:
@@ -153,6 +153,27 @@ var buildCV = /** @class */ (function () {
             });
         });
     };
+    // Metodo per ottenere gli slot temporali disponibili
+    buildCV.prototype.getSlotFree = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var cv, _a, _b;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
+                    case 0: return [4 /*yield*/, this.proxy.getProxyModel().getSpecificCV(3)];
+                    case 1:
+                        cv = _c.sent();
+                        console.log(cv.count);
+                        console.log(cv[0].dataValues);
+                        _b = (_a = console).log;
+                        return [4 /*yield*/, this.proxyPre.getSlotFull(3, ['2022-06-30', '2022-07-01'], 1)];
+                    case 2:
+                        _b.apply(_a, [_c.sent()]);
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    //metodo per ottenere il risultato finale
     buildCV.prototype.getResult = function () {
         var finish = this.result;
         this.result = [];
