@@ -33,15 +33,25 @@ export class userPresenter {
             });
     };
 
-    public static Prenota(req, res) {
+    public static prenota(req, res) {
             const Proxy = new proxyPr();
             const body = req.body;
             Proxy.insertNewPr(body.data, body.slot, body.centro_vac, body.vaccino, req.user.user.id).then(value => {
                 res.status(200).send({"message":"prenotazione successo","uuid":value["uuid"]});
             });
-        //} catch (err) {
-        //    res.status(401).send({ "message": err.message });
-        //}
+        //TODO:QRcode,PDF...
+    }
+
+    public static modificaPre(req,res){
+        const Proxy = new proxyPr();
+        const body = req.body;
+        Proxy.insertNewPr(body.data, body.slot, body.centro_vac, body.vaccino, req.user.user.id).then(value => {
+            res.status(200).send({"message":"prenotazione successo","uuid":value["uuid"]});
+        });
+    }
+
+    public static cancellaPre(req,res){
+        const Proxy = new proxyPr();
     }
 
 }

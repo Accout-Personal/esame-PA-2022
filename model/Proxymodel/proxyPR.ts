@@ -22,7 +22,7 @@ export class proxyPr implements proxyinterfacePR {
         this.modelCV = new Centro_vaccinale(DBConnection.getInstance().getConnection());
     }
 
-    async insertNewPr(data: string, slot: number, centro_vaccino: number, vaccino: number, user: number): Promise<Object> {
+    public async insertNewPr(data: string, slot: number, centro_vaccino: number, vaccino: number, user: number): Promise<Object> {
         //controllo il tipo di dato sia valido
         this.TypeCheckData(data);
         this.TypeCheckSlot(slot);
@@ -50,7 +50,7 @@ export class proxyPr implements proxyinterfacePR {
         return await this.model.insertNewPr(data, fascia, slot, centro_vaccino, vaccino, user);
     }
 
-    async getListaPr(userid?: number, centro?: number, data?: string) {
+    public async getListaPr(userid?: number, centro?: number, data?: string) {
 
         if (typeof userid === "undefined" && typeof centro === "undefined") {
             throw Error("non hai inserito nessun paramentro");
@@ -64,6 +64,24 @@ export class proxyPr implements proxyinterfacePR {
         this.TypeCheckUser(userid);
         return await this.model.getPreUser(userid);
 
+
+    }
+
+    public async cancellaPre(id:number,user:number){
+        this.checkPreID(id,user);
+        
+    }
+
+    private async checkPreID(id:number,user:number){
+        if (typeof id !== 'number' || isNaN(id)) throw new Error('Id non è valido');
+
+        //un utente non puo' cancellare le prenotazione degli altri.
+        let result = this.model.getModel().count({where:{
+            id:id,
+            user:user
+        }});
+
+        if(result < 1) throw Error("informazione non e' valido");
 
     }
 
@@ -184,6 +202,7 @@ export class proxyPr implements proxyinterfacePR {
         if (typeof stato !== 'number' || isNaN(stato)) throw new Error('Questo stato non è valido');
         return true;
     }
+
 
     async takeNumberOfPrenotation(fascia: Boolean): Promise<Array<any>> {
         if (fascia) {
