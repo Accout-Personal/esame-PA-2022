@@ -101,9 +101,9 @@ function stampaAgain() {
 //stampaAgain()
 var prova = new proxyCV_1.proxyCV();
 var pluto = new buildCV_1.buildCV(prova);
-//pluto.producePartB(30.849635,-83.24559,8996783.546569308,'2022-07-01') prova haversine
+//pluto.producePartB(30.849635,-83.24559,8996783.546569308,'2022-07-01') //prova haversine
 //pluto.producePartA(30.849635,-83.24559,8196783.546569308)
-pluto.getSlotFree();
+pluto.getSlotFree(3, ['2022-07-01', '2022-06-30'], 1);
 //console.log(pippo.insertNewPr(20, 2,2000 , 1, 14, 8, 1, 1, 0));
 //stampa(prova);
 //console.log(isNaN(5))

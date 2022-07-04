@@ -289,10 +289,12 @@ export class proxyPr implements proxyinterfacePR {
         return complete;
     }
 
-    async getSlotFull(id: number, data: Array<string>, fascia?: number): Promise<void> {
-        if (typeof fascia === 'undefined') {
-            let query = await this.model.getModel().findAll({
-                where: {
+    async getSlotFull(id:number,data: Array<string>, fascia?: number): Promise<any> {
+        if(typeof fascia === 'undefined')
+        {
+        let query = await this.model.getModel().findAll({
+            attributes: ['data','slot'],
+            where: {
                     centro_vac: id,
                     data: data
                 }
@@ -301,6 +303,7 @@ export class proxyPr implements proxyinterfacePR {
         }
         else {
             let query = await this.model.getModel().findAll({
+                attributes: ['data','slot'],
                 where: {
                     centro_vac: id,
                     data: data,
