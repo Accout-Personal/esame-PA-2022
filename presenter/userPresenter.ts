@@ -34,24 +34,40 @@ export class userPresenter {
     };
 
     public static prenota(req, res) {
-            const Proxy = new proxyPr();
-            const body = req.body;
-            Proxy.insertNewPr(body.data, body.slot, body.centro_vac, body.vaccino, req.user.user.id).then(value => {
-                res.status(200).send({"message":"prenotazione successo","uuid":value["uuid"]});
-            });
-        //TODO:QRcode,PDF...
-    }
-
-    public static modificaPre(req,res){
         const Proxy = new proxyPr();
         const body = req.body;
         Proxy.insertNewPr(body.data, body.slot, body.centro_vac, body.vaccino, req.user.user.id).then(value => {
-            res.status(200).send({"message":"prenotazione successo","uuid":value["uuid"]});
+            res.status(200).send({ "message": "prenotazione successo", "uuid": value["uuid"] });
+        }).catch(error => {
+            res.status(401).send({ "errore": error.message });
         });
+        //TODO:QRcode,PDF...
+
     }
 
-    public static cancellaPre(req,res){
+    public static modificaPre(req, res) {
         const Proxy = new proxyPr();
+        const body = req.body;
+        //Proxy.modifica(body.data, body.slot, body.centro_vac, body.vaccino, req.user.user.id).then(value => {
+        //    res.status(200).send({ "message": "modificato con successo"});
+        //}).then(value => {
+        //    res.status(200).send({ "message": "prenotazione successo", "uuid": value["uuid"] });
+        //});
+        //TODO:QRcode,PDF...
+
+
+
+    }
+
+    public static cancellaPre(req, res) {
+        const Proxy = new proxyPr();
+        const body = req.body;
+        Proxy.cancellaPre(body.id, req.user.user.id).then(value => {
+            res.status(200).send({ "message": "cancellato con successo" });
+        }).then(value => {
+            res.status(200).send({ "message": "prenotazione successo", "uuid": value["uuid"] });
+        });
+
     }
 
 }

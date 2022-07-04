@@ -7,6 +7,7 @@ import { Centro_vaccinale } from "../centro_vaccinale";
 import { DBConnection } from "../../config/sequelize"
 import { DateTime } from "luxon";
 import { UUID } from "sequelize";
+import { stringSanitizer } from "../../util/stringsanitizer";
 
 export class proxyPr implements proxyinterfacePR {
 
@@ -23,8 +24,9 @@ export class proxyPr implements proxyinterfacePR {
     }
 
     public async insertNewPr(data: string, slot: number, centro_vaccino: number, vaccino: number, user: number): Promise<Object> {
+        let sanitizeddata = stringSanitizer(data);
         //controllo il tipo di dato sia valido
-        this.TypeCheckData(data);
+        this.TypeCheckData(sanitizeddata);
         this.TypeCheckSlot(slot);
         await this.TypeCheckCV(centro_vaccino);
         await this.TypeCheckVaccino(vaccino);
@@ -40,14 +42,14 @@ export class proxyPr implements proxyinterfacePR {
         }
 
         console.log("checking validity")
-        await this.checkAvailability(data, centro_vaccino, fascia).then(() => { console.log("validity checking success..") });
+        await this.checkAvailability(sanitizeddata, centro_vaccino, fascia).then(() => { console.log("validity checking success..") });
         console.log("checking slot")
-        await this.checkSlot(data, centro_vaccino, slot).then(() => { console.log("slot checking success..") });
+        await this.checkSlot(sanitizeddata, centro_vaccino, slot).then(() => { console.log("slot checking success..") });
 
         console.log("checking vax validity")
-        await this.checkVaxValidity(data, vaccino, user).then(() => { console.log("vax validity checking success..") });
+        await this.checkVaxValidity(sanitizeddata, vaccino, user).then(() => { console.log("vax validity checking success..") });
 
-        return await this.model.insertNewPr(data, fascia, slot, centro_vaccino, vaccino, user);
+        return await this.model.insertNewPr(sanitizeddata, fascia, slot, centro_vaccino, vaccino, user);
     }
 
     public async getListaPr(userid?: number, centro?: number, data?: string) {
@@ -63,29 +65,75 @@ export class proxyPr implements proxyinterfacePR {
 
         this.TypeCheckUser(userid);
         return await this.model.getPreUser(userid);
-
-
     }
 
-    public async cancellaPre(id:number,user:number){
-        this.checkPreID(id,user);
-        
+    public async cancellaPre(id: number, user: number) {
+        await this.checkPreID(id, user);
+        console.log("cheking success");
+        return await this.model.delete(id);
     }
 
-    private async checkPreID(id:number,user:number){
+    public async modifica(updateBody: { id: number, user: number, data?: string, slot?: number, centro_vaccino?: number, vaccino?: number }) {
+
+
+        await this.TypeCheckUser(updateBody.user);
+        await this.checkPreID(updateBody.id, updateBody.user);
+
+        let oldPr = this.model.getModel().findOne({ where: { id: updateBody.id } });
+
+        var safeBody: any = {};
+        if (typeof updateBody.data !== "undefined") {
+            let sanitizedData = stringSanitizer(updateBody.data);
+            this.TypeCheckData(sanitizedData);
+            safeBody.data = sanitizedData;
+        }
+
+        if (typeof updateBody.slot !== "undefined") {
+            this.TypeCheckSlot(updateBody.slot);
+            safeBody.slot = updateBody.slot;
+        }
+
+        if (typeof updateBody.centro_vaccino !== "undefined") {
+            this.TypeCheckCV(updateBody.centro_vaccino);
+            safeBody.centro_vaccino = updateBody.centro_vaccino;
+        }
+
+        if (typeof updateBody.vaccino !== "undefined")
+            this.TypeCheckVaccino(updateBody.vaccino);
+        safeBody.vaccino = updateBody.vaccino;
+
+        let data = safeBody.data ? safeBody.data : oldPr.data;
+        let centro = safeBody.centro ? safeBody.centro : oldPr.centro_vac;
+        let fascia = safeBody.fascia ? safeBody.fascia : oldPr.fascia;
+
+        //devo controllare la disponibilita' solo se cambio la fascia o data.
+        if (oldPr.data != safeBody.data || oldPr.fascia != safeBody.fascia) {
+            //this.checkAvailability(safeBody.data ? safeBody.data : oldPr.data, safeBody.centro ? safeBody.centro : oldPr.centro_vac, safeBody.fascia ? safeBody.fascia : oldPr.fascia);
+            await this.checkAvailability(data, centro, fascia);
+        }
+
+        await this.checkSlot(data,centro,safeBody.slot?safeBody.slot:oldPr.slot);
+
+        return await this.model.modifica(updateBody.id,safeBody);
+    }
+
+    private async checkPreID(id: number, user: number) {
         if (typeof id !== 'number' || isNaN(id)) throw new Error('Id non è valido');
 
         //un utente non puo' cancellare le prenotazione degli altri.
-        let result = this.model.getModel().count({where:{
-            id:id,
-            user:user
-        }});
+        let result = this.model.getModel().count({
+            where: {
+                id: id,
+                user: user
+            }
+        });
 
-        if(result < 1) throw Error("informazione non e' valido");
+        if (result < 1) throw Error("informazione non e' valido");
 
     }
 
     private async checkVaxValidity(data: string, vaccino: number, user: number) {
+
         let DataPre = DateTime.fromISO(data);
         let LastVax = await this.model.getModel().findAll({
             where: {
@@ -110,7 +158,6 @@ export class proxyPr implements proxyinterfacePR {
     }
 
     private async checkSlot(data: string, centro: number, slot: number) {
-
         let count = await this.model.getModel().count({
             where: {
                 data: data,
@@ -118,12 +165,27 @@ export class proxyPr implements proxyinterfacePR {
                 slot: slot
             }
         });
-        console.log("count result: " + count);
         if (count > 0) { throw Error("slot e' gia occupato.") };
 
     }
 
     private async checkAvailability(dataAppuntamento: string, centro: number, fasciaOraria: number) {
+
+        let res = await this.getPRCentroFascia(dataAppuntamento, centro, fasciaOraria);
+        //se e' undefined implica che la data e la fascia selezionata non e' prenotata da nessuno
+        if (typeof res.count != "undefined") {
+            if (res.count >= res.centro["maxf" + fasciaOraria]) {
+                throw Error("la fascia oraria e' piena");
+            }
+        } else {
+            if (res.centro["maxf" + fasciaOraria] < 1) {
+                throw Error("la fascia oraria e' piena");
+            }
+        }
+
+    }
+
+    private async getPRCentroFascia(dataAppuntamento: string, centro: number, fasciaOraria: number) {
         let list = await this.takeNumberOfPrenotation(true)
         let centro_vac = this.modelCV.getModel().findOne({
             where: {
@@ -136,23 +198,17 @@ export class proxyPr implements proxyinterfacePR {
             data === dataAppuntamento && centro_vac === centro && fascia === fasciaOraria
         });
 
-        //se e' undefined implica che la data e la fascia selezionata non e' prenotata da nessuno
-        if (typeof res != "undefined") {
-            if (res.count >= centro_vac["maxf" + fasciaOraria]) {
-                throw Error("la fascia oraria e' piena");
-            }
-        } else {
-            if (centro_vac["maxf" + fasciaOraria] < 1) {
-                throw Error("la fascia oraria e' piena");
-            }
-        }
-
+        if (typeof res === 'undefined')
+            return { count: undefined, centro: centro_vac };
+        else
+            return { count: res.length, centro: centro_vac };
     }
 
     private TypeCheckData(data: string): Boolean {
-        let dataIns = DateTime.fromISO(data);
+        let sanitizeddata = stringSanitizer(data);
+        let dataIns = DateTime.fromISO(sanitizeddata);
         let dataNow = DateTime.now();
-        if ((typeof data !== 'string' || !dataIns.isValid)) throw new Error('Questa data non è valida');
+        if ((typeof sanitizeddata !== 'string' || !dataIns.isValid)) throw new Error('Questa data non è valida');
         if ((dataIns < dataNow)) throw new Error("Puoi prenotare solo in un dato futuro.");
         return true;
     }
@@ -233,24 +289,23 @@ export class proxyPr implements proxyinterfacePR {
         return complete;
     }
 
-    async getSlotFull(id:number,data: Array<string>, fascia?: number): Promise<void> {
-        if(typeof fascia === 'undefined')
-        {
-        let query = await this.model.getModel().findAll({
-            where: {
+    async getSlotFull(id: number, data: Array<string>, fascia?: number): Promise<void> {
+        if (typeof fascia === 'undefined') {
+            let query = await this.model.getModel().findAll({
+                where: {
                     centro_vac: id,
-                    data: data 
-              }
-        });
-        return query;
+                    data: data
+                }
+            });
+            return query;
         }
         else {
             let query = await this.model.getModel().findAll({
                 where: {
-                        centro_vac: id,
-                        data: data,
-                        fascia: fascia
-                  }
+                    centro_vac: id,
+                    data: data,
+                    fascia: fascia
+                }
             });
             return query;
         }

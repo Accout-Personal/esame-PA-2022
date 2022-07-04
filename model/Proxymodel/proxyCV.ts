@@ -2,6 +2,7 @@ import { and, Sequelize } from "../../node_modules/sequelize/types/index";
 import { Centro_vaccinale } from "../centro_vaccinale";
 import { proxyInterfaceCV } from "../ProxyInterface/proxyinterfaceCV";
 import {DBConnection} from "../../config/sequelize";
+import { stringSanitizer } from "../../util/stringsanitizer";
 // Nel proxy andiamo a implementare tutti i controlli e le sanificazioni sui dati di input per evitare problemi e crash del sistema
 
 export class proxyCV implements proxyInterfaceCV{
@@ -12,16 +13,17 @@ export class proxyCV implements proxyInterfaceCV{
         this.model = new Centro_vaccinale(DBConnection.getInstance().getConnection())
     }
 
-    async insertNewCV(lati: number, longi: number, nome: string, maxf1: number, maxf2: number): Promise<Object> {  
+    async insertNewCV(lati: number, longi: number, nome: string, maxf1: number, maxf2: number): Promise<Object> {
+        let sanitizednome = stringSanitizer(nome);  
         try {
         if(
             this.TypeCheckLati(lati) &&
             this.TypeCheckLati(longi) &&
-            this.TypeCheckNome(nome) &&
+            this.TypeCheckNome(sanitizednome) &&
             this.TypeCheckMaxf1(maxf1) &&
             this.TypeCheckMaxf2(maxf2)
             ) {
-                let result = await this.model.insertNewCV(lati, longi, nome, maxf1, maxf2)
+                let result = await this.model.insertNewCV(lati, longi, sanitizednome, maxf1, maxf2)
                 if(result && !(result instanceof Error)){
                     return true;
                 }else{

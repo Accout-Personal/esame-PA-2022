@@ -61,21 +61,33 @@ export class Prenotazione implements proxyinterfacePR {
   }
 
   // metodo per inserire una prenotazione
-  async insertNewPr(data: string, fascia: number, slot: number, centro_vaccino: number, vaccino: number, user: number): Promise<Object> {
-    try {
-      return await this.prenotazione.create({ data: DateTime.fromISO(data).toISODate(), fascia: fascia, slot: slot, centro_vac: centro_vaccino, vaccino: vaccino, user: user });;
-    } catch (error) {
-      console.log(error);
-    }
+  public async insertNewPr(data: string, fascia: number, slot: number, centro_vaccino: number, vaccino: number, user: number): Promise<Object> {
+    return await this.prenotazione.create(
+      {
+        data: DateTime.fromISO(data).toISODate(),
+        fascia: fascia,
+        slot: slot,
+        centro_vac: centro_vaccino,
+        vaccino: vaccino,
+        user: user
+      });
+  }
+
+  public async modifica(id: number, updatebody: any) {
+    return await this.prenotazione.update({
+      updatebody,
+      where: {
+        id: id
+      }
+    });
   }
 
   // metodo per inserire una prenotazione
-  public async delete(id:number): Promise<Object> {
-    try {
-      return await this.prenotazione.destroy({where:{id:id}});
-    } catch (error) {
-      console.log(error);
-    }
+  public async delete(id: number): Promise<Object> {
+    return await this.prenotazione.destroy(
+      {
+        where: { id: id }
+      });
   }
 
   async getPreUser(userid: number) {
