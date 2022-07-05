@@ -81,7 +81,7 @@ export class proxyPr implements proxyinterfacePR {
         await this.checkPreID(updateBody.id, updateBody.user);
 
         let oldPr = await this.model.getModel().findOne({ where: { id: updateBody.id } });
-        if(typeof oldPr === "undefined" || oldPr === null){
+        if (typeof oldPr === "undefined" || oldPr === null) {
             throw Error("Questo appunto e' inesistente");
         }
         var safeBody: any = {};
@@ -94,7 +94,7 @@ export class proxyPr implements proxyinterfacePR {
         if (typeof updateBody.slot !== "undefined") {
             this.TypeCheckSlot(updateBody.slot);
             safeBody.slot = updateBody.slot;
-            safeBody.fascia = safeBody.slot>16?2:1;
+            safeBody.fascia = safeBody.slot > 16 ? 2 : 1;
         }
 
         if (typeof updateBody.centro_vac !== "undefined") {
@@ -103,7 +103,7 @@ export class proxyPr implements proxyinterfacePR {
         }
 
         if (typeof updateBody.vaccino !== "undefined")
-            this.TypeCheckVaccino(updateBody.vaccino);
+            await this.TypeCheckVaccino(updateBody.vaccino);
         safeBody.vaccino = updateBody.vaccino;
         console.log("basic control finished");
 
@@ -112,7 +112,7 @@ export class proxyPr implements proxyinterfacePR {
         let data = safeBody.data ? safeBody.data : oldPr.data;
         let centro = safeBody.centro_vac ? safeBody.centro_vac : oldPr.centro_vac;
         let fascia = safeBody.fascia ? safeBody.fascia : oldPr.fascia;
-        console.log("data: "+ data + " centro: "+ centro + " fascia: "+ fascia);
+        console.log("data: " + data + " centro: " + centro + " fascia: " + fascia);
         console.log(oldPr);
         //devo controllare la disponibilita' solo se cambio la fascia o data.
         if (oldPr.data != safeBody.data || oldPr.fascia != safeBody.fascia) {
@@ -121,9 +121,14 @@ export class proxyPr implements proxyinterfacePR {
             await this.checkAvailability(data, centro, fascia);
         }
         console.log("check slot");
-        await this.checkSlot(data,centro,safeBody.slot?safeBody.slot:oldPr.slot);
+        await this.checkSlot(data, centro, safeBody.slot ? safeBody.slot : oldPr.slot);
+        //controllo vaccino
+        console.log("check vaccino");
+        console.log("user " + updateBody.user);
+        await this.checkVaxValidity(data, safeBody.vaccino, updateBody.user, updateBody.id);
+
         console.log("aggiornamento delle informazioni");
-        return await this.model.modifica(updateBody.id,safeBody);
+        return await this.model.modifica(updateBody.id, safeBody);
     }
 
     private async checkPreID(id: number, user: number) {
@@ -141,18 +146,25 @@ export class proxyPr implements proxyinterfacePR {
 
     }
 
-    private async checkVaxValidity(data: string, vaccino: number, user: number) {
+    private async checkVaxValidity(data: string, vaccino: number, user: number, excludeid?: number) {
 
         let DataPre = DateTime.fromISO(data);
-        let LastVax = await this.model.getModel().findAll({
-            where: {
-                user: user,
-                vaccino: vaccino,
-                stato: [0, 1],
-
-            },
+        let queryBody = {
+            user: user,
+            vaccino: vaccino,
+            stato: [0, 1]
+        };
+        var LastVax = await this.model.getModel().findAll({
+            where: queryBody,
             order: [['data', 'DESC']]
         });
+
+        if (typeof excludeid !== 'undefined') {
+            LastVax = LastVax.filter((element)=>{
+                return element.id != excludeid;
+            })
+        }
+        
         //mai vaccinato
         if (JSON.parse(JSON.stringify(LastVax)).length == 0) {
             console.log("questo user non ha mai vaccinato.")
@@ -298,12 +310,11 @@ export class proxyPr implements proxyinterfacePR {
         return complete;
     }
 
-    async getSlotFull(id:number,data: Array<string>, fascia?: number): Promise<any> {
-        if(typeof fascia === 'undefined')
-        {
-        let query = await this.model.getModel().findAll({
-            attributes: ['data','slot'],
-            where: {
+    async getSlotFull(id: number, data: Array<string>, fascia?: number): Promise<any> {
+        if (typeof fascia === 'undefined') {
+            let query = await this.model.getModel().findAll({
+                attributes: ['data', 'slot'],
+                where: {
                     centro_vac: id,
                     data: data
                 }
@@ -312,7 +323,7 @@ export class proxyPr implements proxyinterfacePR {
         }
         else {
             let query = await this.model.getModel().findAll({
-                attributes: ['data','slot'],
+                attributes: ['data', 'slot'],
                 where: {
                     centro_vac: id,
                     data: data,
