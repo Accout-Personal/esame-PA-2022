@@ -74,12 +74,14 @@ export class Prenotazione implements proxyinterfacePR {
   }
 
   public async modifica(id: number, updatebody: any) {
-    return await this.prenotazione.update({
+    return await this.prenotazione.update(
       updatebody,
-      where: {
-        id: id
+      {
+        where: {
+          id: id
+        }
       }
-    });
+    );
   }
 
   // metodo per inserire una prenotazione

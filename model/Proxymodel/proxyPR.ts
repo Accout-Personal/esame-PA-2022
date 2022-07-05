@@ -49,6 +49,7 @@ export class proxyPr implements proxyinterfacePR {
         console.log("checking vax validity")
         await this.checkVaxValidity(sanitizeddata, vaccino, user).then(() => { console.log("vax validity checking success..") });
 
+
         return await this.model.insertNewPr(sanitizeddata, fascia, slot, centro_vaccino, vaccino, user);
     }
 
@@ -73,14 +74,16 @@ export class proxyPr implements proxyinterfacePR {
         return await this.model.delete(id);
     }
 
-    public async modifica(updateBody: { id: number, user: number, data?: string, slot?: number, centro_vaccino?: number, vaccino?: number }) {
+    public async modifica(updateBody: { id: number, user: number, data?: string, slot?: number, centro_vac?: number, vaccino?: number }) {
 
 
         await this.TypeCheckUser(updateBody.user);
         await this.checkPreID(updateBody.id, updateBody.user);
 
-        let oldPr = this.model.getModel().findOne({ where: { id: updateBody.id } });
-
+        let oldPr = await this.model.getModel().findOne({ where: { id: updateBody.id } });
+        if(typeof oldPr === "undefined" || oldPr === null){
+            throw Error("Questo appunto e' inesistente");
+        }
         var safeBody: any = {};
         if (typeof updateBody.data !== "undefined") {
             let sanitizedData = stringSanitizer(updateBody.data);
@@ -91,29 +94,35 @@ export class proxyPr implements proxyinterfacePR {
         if (typeof updateBody.slot !== "undefined") {
             this.TypeCheckSlot(updateBody.slot);
             safeBody.slot = updateBody.slot;
+            safeBody.fascia = safeBody.slot>16?2:1;
         }
 
-        if (typeof updateBody.centro_vaccino !== "undefined") {
-            this.TypeCheckCV(updateBody.centro_vaccino);
-            safeBody.centro_vaccino = updateBody.centro_vaccino;
+        if (typeof updateBody.centro_vac !== "undefined") {
+            this.TypeCheckCV(updateBody.centro_vac);
+            safeBody.centro_vac = updateBody.centro_vac;
         }
 
         if (typeof updateBody.vaccino !== "undefined")
             this.TypeCheckVaccino(updateBody.vaccino);
         safeBody.vaccino = updateBody.vaccino;
+        console.log("basic control finished");
+
+        console.log(safeBody);
 
         let data = safeBody.data ? safeBody.data : oldPr.data;
-        let centro = safeBody.centro ? safeBody.centro : oldPr.centro_vac;
+        let centro = safeBody.centro_vac ? safeBody.centro_vac : oldPr.centro_vac;
         let fascia = safeBody.fascia ? safeBody.fascia : oldPr.fascia;
-
+        console.log("data: "+ data + " centro: "+ centro + " fascia: "+ fascia);
+        console.log(oldPr);
         //devo controllare la disponibilita' solo se cambio la fascia o data.
         if (oldPr.data != safeBody.data || oldPr.fascia != safeBody.fascia) {
             //this.checkAvailability(safeBody.data ? safeBody.data : oldPr.data, safeBody.centro ? safeBody.centro : oldPr.centro_vac, safeBody.fascia ? safeBody.fascia : oldPr.fascia);
+            console.log("controllo disponibilita'");
             await this.checkAvailability(data, centro, fascia);
         }
-
+        console.log("check slot");
         await this.checkSlot(data,centro,safeBody.slot?safeBody.slot:oldPr.slot);
-
+        console.log("aggiornamento delle informazioni");
         return await this.model.modifica(updateBody.id,safeBody);
     }
 
@@ -215,7 +224,7 @@ export class proxyPr implements proxyinterfacePR {
 
     private TypeCheckSlot(slot: number): Boolean {
         if (typeof slot !== 'number' || isNaN(slot)) throw new Error('Questa slot non è valido');
-        if (slot > 37 || slot < 1) throw new Error('Questa fascia non è valida');
+        if (slot > 36 || slot < 1) throw new Error('Questa fascia non è valida');
         return true;
     }
 

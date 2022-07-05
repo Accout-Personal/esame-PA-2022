@@ -37,6 +37,10 @@ export class proxyCV implements proxyInterfaceCV{
         } catch(error) {error.message("validazione fallita");return error;}
     }
 
+    public async getCentro(id:number){
+        return await this.model.findOne(id);
+    }
+
     TypeCheckLati(lati: number): Boolean{
         if(typeof lati !== 'number' || isNaN(lati)) throw new Error('Questo valore di latitudine non è un numero');
         return true;

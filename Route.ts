@@ -29,9 +29,7 @@ UserRoute.get('/getSlotCentro',(req,res,next)=>{
 UserRoute.post('/prenota',userPresenter.prenota);
 UserRoute.post('/cancella',userPresenter.cancellaPre);
 
-UserRoute.post('/modifica',(req,res,next)=>{
-    res.send('rotta modifica prenotazione');
-});
+UserRoute.post('/modifica',userPresenter.modificaPre);
 UserRoute.get('/myListPrenota',(req,res,next)=>{
     res.send('rotta my lista prenota');
 });
