@@ -6,30 +6,59 @@ import { proxyVC } from "../model/Proxymodel/proxyVC";
 
 export class adminPresenter {
 
-   public static creaCentroVax(req,res) {
-    
-    const centrVax = new proxyCV();
-    centrVax.insertNewCV(req.body.lati,req.body.longi,req.body.nome,req.body.maxf1,req.body.maxf2).then(value=>{
-        if(value instanceof Error){
-            res.status(401).send(value.message);
-        }
-        else{
-            res.send({message:"inserimento andatato con successo."});
-        }
-    });
-   }
+    public static async creaCentroVax(req, res) {
 
-   public static creaVaccino(req,res){
-        const Vaccini = new proxyVC();
-        Vaccini.insertNewVacc(req.body.name,req.body.validita).then(value=>{
-            if(value instanceof Error){
+        const centrVax = new proxyCV();
+        centrVax.insertNewCV(req.body.lati, req.body.longi, req.body.nome, req.body.maxf1, req.body.maxf2).then(value => {
+            if (value instanceof Error) {
                 res.status(401).send(value.message);
             }
-            else{
-                res.send({message:"inserimento andatato con successo."});
+            else {
+                res.send({ message: "inserimento andatato con successo." });
             }
         });
-   }
-   
+    }
+
+    public static async creaVaccino(req, res) {
+        const Vaccini = new proxyVC();
+        Vaccini.insertNewVacc(req.body.name, req.body.validita).then(value => {
+            if (value instanceof Error) {
+                res.status(401).send(value.message);
+            }
+            else {
+                res.send({ message: "inserimento andatato con successo." });
+            }
+        });
+    }
+
+    public static async riceveQRCode(req, res) {
+        let img: Buffer = req.file.buffer;
+        //Importing jimp module
+        var Jimp = require("jimp");
+        // Importing qrcode-reader module
+        var qrCode = require('qrcode-reader');
+
+        // Read the image and create a buffer
+        // Parse the image using Jimp.read() method
+        Jimp.read(img, function (err, image) {
+            if (err) {
+                console.error(err);
+            }
+            // Creating an instance of qrcode-reader module
+            let qrcode = new qrCode();
+            qrcode.callback = function (err, value) {
+                if (err) {
+                    console.error(err);
+                }
+                // Printing the decrypted value
+                console.log(value.result);
+            };
+            // Decoding the QR code
+            qrcode.decode(image.bitmap);
+        });
+        return res.send("decode completed");
+
+    }
+
 
 }
