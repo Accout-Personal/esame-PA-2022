@@ -39,6 +39,10 @@ export class Users implements proxyInterfaceUsers{
         return await this.user.findAll();
     }
 
+    public async getUser(id:number){
+      return await this.user.findOne({where:{id:id}});
+    }
+
     // Metodo per ottenere il modello
     public getModel():any{
       return this.user;

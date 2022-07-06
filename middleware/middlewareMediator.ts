@@ -9,12 +9,12 @@ import {unless} from 'express-unless';
 export function initMiddleware(){
     
     app.use(auth.ControllaToken.unless({
-            path:{url:'/login'}
+            path:[{url:'/qrcode/qrcodeEncode'},{url:'/qrcode/qrcodeDecode'},{url:'/login'}]
         }
     ));
 
     app.use(auth.verificaEAutorizza.unless({
-            path:{url:'/login'}
+            path:[{url:'/qrcode/qrcodeEncode'},{url:'/qrcode/qrcodeDecode'},{url:'/login'}]
         }
     ));
     
