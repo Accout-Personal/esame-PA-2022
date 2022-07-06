@@ -2,10 +2,6 @@ import * as express from 'express';
 import { initMiddleware, initErrorHandler } from './middleware/MiddlewareMediator';
 import { userPresenter } from './presenter/userPresenter';
 import * as bodyParser from 'body-parser';
-
-import * as QRCode from 'qrcode';
-import { PassThrough } from 'stream';
-import * as imageDataURI from "image-data-uri";
 import { adminPresenter } from './presenter/adminPresenter';
 
 export const app = express()
@@ -28,18 +24,9 @@ app.use('/admin', AdminRoute);
 initErrorHandler();
 
 
-
+//scopo di test
 app.get('/qrcode/qrcodeEncode', async (req, res, next) => {
-    const qrStream = new PassThrough();
-    const result = await QRCode.toFileStream(qrStream, "hello world QR Code",
-        {
-            type: 'png',
-            width: 200,
-            errorCorrectionLevel: 'H'
-        }
-    );
-    res.setHeader('Content-type', 'image/png');
-    qrStream.pipe(res);
+    
 });
 
 

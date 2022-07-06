@@ -32,30 +32,38 @@ export class adminPresenter {
     }
 
     public static async riceveQRCode(req, res) {
-        let img: Buffer = req.file.buffer;
-        //Importing jimp module
-        var Jimp = require("jimp");
-        // Importing qrcode-reader module
-        var qrCode = require('qrcode-reader');
+        if (typeof req.file !== 'undefined') {
+            let img: Buffer = req.file.buffer;
+            //Importing jimp module
+            var Jimp = require("jimp");
+            // Importing qrcode-reader module
+            var qrCode = require('qrcode-reader');
 
-        // Read the image and create a buffer
-        // Parse the image using Jimp.read() method
-        Jimp.read(img, function (err, image) {
-            if (err) {
-                console.error(err);
-            }
-            // Creating an instance of qrcode-reader module
-            let qrcode = new qrCode();
-            qrcode.callback = function (err, value) {
+            // Read the image and create a buffer
+            // Parse the image using Jimp.read() method
+            Jimp.read(img, function (err, image) {
                 if (err) {
                     console.error(err);
                 }
-                // Printing the decrypted value
-                console.log(value.result);
-            };
-            // Decoding the QR code
-            qrcode.decode(image.bitmap);
-        });
+                // Creating an instance of qrcode-reader module
+                let qrcode = new qrCode();
+                qrcode.callback = function (err, value) {
+                    if (err) {
+                        console.error(err);
+                    }
+                    // Printing the decrypted value
+                    console.log(value.result);
+                };
+                // Decoding the QR code
+                qrcode.decode(image.bitmap);
+            });
+        }
+        else{
+            //Legge dalla stringa
+            let uuid = req.body.uuid;
+            
+        }
+
         return res.send("decode completed");
 
     }
