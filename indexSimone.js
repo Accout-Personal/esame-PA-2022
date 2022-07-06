@@ -84,26 +84,25 @@ var connection = sequelize_1.DBConnection.getInstance().getConnection();
 }*/
 function stampaAgain() {
     return __awaiter(this, void 0, void 0, function () {
-        var prova, _a, _b;
-        return __generator(this, function (_c) {
-            switch (_c.label) {
+        var prova;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
                 case 0:
                     prova = new proxyPR_1.proxyPr();
-                    _b = (_a = console).log;
-                    return [4 /*yield*/, prova.takeNumberOfPrenotation(true)];
+                    return [4 /*yield*/, prova.getStatisticPositive()];
                 case 1:
-                    _b.apply(_a, [_c.sent()]);
+                    _a.sent();
                     return [2 /*return*/];
             }
         });
     });
 }
-//stampaAgain()
+stampaAgain();
 var prova = new proxyCV_1.proxyCV();
 var pluto = new buildCV_1.buildCV(prova);
 //pluto.producePartB(30.849635,-83.24559,8996783.546569308,'2022-07-01') //prova haversine
 //pluto.producePartA(30.849635,-83.24559,8196783.546569308)
-pluto.getSlotFree(3, ['2022-07-01', '2022-06-30'], 1);
+//pluto.getSlotFree(3,['2022-07-01','2022-06-30'],1)
 //console.log(pippo.insertNewPr(20, 2,2000 , 1, 14, 8, 1, 1, 0));
 //stampa(prova);
 //console.log(isNaN(5))

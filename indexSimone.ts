@@ -45,19 +45,19 @@ const connection = DBConnection.getInstance().getConnection();
 
 async function stampaAgain(){
     let prova = new proxyPr();
-    console.log(await prova.takeNumberOfPrenotation(true))
+    await prova.getStatisticPositive()
 }
 
 
 
 
-//stampaAgain()
+stampaAgain()
 let prova = new proxyCV();
 let pluto = new buildCV(prova)
 //pluto.producePartB(30.849635,-83.24559,8996783.546569308,'2022-07-01') //prova haversine
 //pluto.producePartA(30.849635,-83.24559,8196783.546569308)
 
-pluto.getSlotFree(3,['2022-07-01','2022-06-30'],1)
+//pluto.getSlotFree(3,['2022-07-01','2022-06-30'],1)
 
 //console.log(pippo.insertNewPr(20, 2,2000 , 1, 14, 8, 1, 1, 0));
 //stampa(prova);

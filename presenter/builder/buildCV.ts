@@ -39,8 +39,8 @@ export class buildCV implements builderInterfaceCV {
         });
         //console.log(all)
         this.result = all.filter(value => {
-            if(value.distanza <= distanza) return true;
-            else return false;
+            return value.distanza <= distanza;
+            
         })
         if(order)this.result.sort( (a, b) => {
             return a.distanza - b.distanza
@@ -106,8 +106,7 @@ export class buildCV implements builderInterfaceCV {
             else return false;
         });
         this.result = this.result.filter(value => {
-            if(value.residuo == 0)return false;
-            else return true;
+            return value.residuo > 0;
         })
         if(order)this.result.sort( (a, b) => {
             return a.distanza - b.distanza

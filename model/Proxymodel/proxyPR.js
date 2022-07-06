@@ -499,6 +499,48 @@ var proxyPr = /** @class */ (function () {
             });
         });
     };
+    // Metodo per ottenere le statistiche sui centri vaccinali e sulle prenotazioni che hanno avuto esito positivo
+    proxyPr.prototype.getStatisticPositive = function (order) {
+        if (order === void 0) { order = true; }
+        return __awaiter(this, void 0, void 0, function () {
+            var positiveResult, allResult, statistic;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.model.getModel().findAndCountAll({
+                            attributes: ['centro_vac', 'stato'],
+                            where: { stato: 1 },
+                            group: ['centro_vac', 'stato']
+                        })];
+                    case 1:
+                        positiveResult = _a.sent();
+                        return [4 /*yield*/, this.model.getModel().findAndCountAll({
+                                attributes: ['centro_vac'],
+                                group: ['centro_vac']
+                            })];
+                    case 2:
+                        allResult = _a.sent();
+                        statistic = positiveResult.count.map(function (value) {
+                            allResult.count.map(function (val) {
+                                if (value.centro_vac == val.centro_vac) {
+                                    value.media = (value.count / val.count).toFixed(2);
+                                }
+                            });
+                            return value;
+                        });
+                        if (order)
+                            statistic.sort(function (a, b) {
+                                return a.media - b.media;
+                            });
+                        else
+                            statistic.sort(function (a, b) {
+                                return b.media - a.media;
+                            });
+                        console.log(statistic);
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
     return proxyPr;
 }());
 exports.proxyPr = proxyPr;
