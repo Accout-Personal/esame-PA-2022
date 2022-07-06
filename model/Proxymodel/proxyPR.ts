@@ -335,7 +335,7 @@ export class proxyPr implements proxyinterfacePR {
     }
 
     // Metodo per ottenere le statistiche sui centri vaccinali e sulle prenotazioni che hanno avuto esito positivo
-    async getStatisticPositive(order:Boolean = true): Promise<void>{
+    async getStatisticPositive(order:Boolean = true): Promise<Array<Object>>{
         let positiveResult = await this.model.getModel().findAndCountAll({
             attributes: ['centro_vac', 'stato'],
             where: {stato: 1},
@@ -359,6 +359,6 @@ export class proxyPr implements proxyinterfacePR {
         else  statistic.sort((a, b) => {
                 return b.media - a.media;
             });
-            console.log(statistic)
+            return statistic;
     }    
 }
