@@ -43,6 +43,7 @@ var users_1 = require("../users");
 var centro_vaccinale_1 = require("../centro_vaccinale");
 var sequelize_1 = require("../../config/sequelize");
 var luxon_1 = require("luxon");
+var stringsanitizer_1 = require("../../util/stringsanitizer");
 var proxyPr = /** @class */ (function () {
     function proxyPr() {
         this.model = new prenotazione_1.Prenotazione(sequelize_1.DBConnection.getInstance().getConnection());
@@ -52,12 +53,13 @@ var proxyPr = /** @class */ (function () {
     }
     proxyPr.prototype.insertNewPr = function (data, slot, centro_vaccino, vaccino, user) {
         return __awaiter(this, void 0, void 0, function () {
-            var fascia;
+            var sanitizeddata, fascia;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
+                        sanitizeddata = (0, stringsanitizer_1.stringSanitizer)(data);
                         //controllo il tipo di dato sia valido
-                        this.TypeCheckData(data);
+                        this.TypeCheckData(sanitizeddata);
                         this.TypeCheckSlot(slot);
                         return [4 /*yield*/, this.TypeCheckCV(centro_vaccino)];
                     case 1:
@@ -75,18 +77,18 @@ var proxyPr = /** @class */ (function () {
                             fascia = 1;
                         }
                         console.log("checking validity");
-                        return [4 /*yield*/, this.checkAvailability(data, centro_vaccino, fascia).then(function () { console.log("validity checking success.."); })];
+                        return [4 /*yield*/, this.checkAvailability(sanitizeddata, centro_vaccino, fascia).then(function () { console.log("validity checking success.."); })];
                     case 4:
                         _a.sent();
                         console.log("checking slot");
-                        return [4 /*yield*/, this.checkSlot(data, centro_vaccino, slot).then(function () { console.log("slot checking success.."); })];
+                        return [4 /*yield*/, this.checkSlot(sanitizeddata, centro_vaccino, slot).then(function () { console.log("slot checking success.."); })];
                     case 5:
                         _a.sent();
                         console.log("checking vax validity");
-                        return [4 /*yield*/, this.checkVaxValidity(data, vaccino, user).then(function () { console.log("vax validity checking success.."); })];
+                        return [4 /*yield*/, this.checkVaxValidity(sanitizeddata, vaccino, user).then(function () { console.log("vax validity checking success.."); })];
                     case 6:
                         _a.sent();
-                        return [4 /*yield*/, this.model.insertNewPr(data, fascia, slot, centro_vaccino, vaccino, user)];
+                        return [4 /*yield*/, this.model.insertNewPr(sanitizeddata, fascia, slot, centro_vaccino, vaccino, user)];
                     case 7: return [2 /*return*/, _a.sent()];
                 }
             });
@@ -115,8 +117,85 @@ var proxyPr = /** @class */ (function () {
     proxyPr.prototype.cancellaPre = function (id, user) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                this.checkPreID(id, user);
-                return [2 /*return*/];
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.checkPreID(id, user)];
+                    case 1:
+                        _a.sent();
+                        console.log("cheking success");
+                        return [4 /*yield*/, this.model["delete"](id)];
+                    case 2: return [2 /*return*/, _a.sent()];
+                }
+            });
+        });
+    };
+    proxyPr.prototype.modifica = function (updateBody) {
+        return __awaiter(this, void 0, void 0, function () {
+            var oldPr, safeBody, sanitizedData, data, centro, fascia;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.TypeCheckUser(updateBody.user)];
+                    case 1:
+                        _a.sent();
+                        return [4 /*yield*/, this.checkPreID(updateBody.id, updateBody.user)];
+                    case 2:
+                        _a.sent();
+                        return [4 /*yield*/, this.model.getModel().findOne({ where: { id: updateBody.id } })];
+                    case 3:
+                        oldPr = _a.sent();
+                        if (typeof oldPr === "undefined" || oldPr === null) {
+                            throw Error("Questo appunto e' inesistente");
+                        }
+                        safeBody = {};
+                        if (typeof updateBody.data !== "undefined") {
+                            sanitizedData = (0, stringsanitizer_1.stringSanitizer)(updateBody.data);
+                            this.TypeCheckData(sanitizedData);
+                            safeBody.data = sanitizedData;
+                        }
+                        if (typeof updateBody.slot !== "undefined") {
+                            this.TypeCheckSlot(updateBody.slot);
+                            safeBody.slot = updateBody.slot;
+                            safeBody.fascia = safeBody.slot > 16 ? 2 : 1;
+                        }
+                        if (typeof updateBody.centro_vac !== "undefined") {
+                            this.TypeCheckCV(updateBody.centro_vac);
+                            safeBody.centro_vac = updateBody.centro_vac;
+                        }
+                        if (!(typeof updateBody.vaccino !== "undefined")) return [3 /*break*/, 5];
+                        return [4 /*yield*/, this.TypeCheckVaccino(updateBody.vaccino)];
+                    case 4:
+                        _a.sent();
+                        _a.label = 5;
+                    case 5:
+                        safeBody.vaccino = updateBody.vaccino;
+                        console.log("basic control finished");
+                        console.log(safeBody);
+                        data = safeBody.data ? safeBody.data : oldPr.data;
+                        centro = safeBody.centro_vac ? safeBody.centro_vac : oldPr.centro_vac;
+                        fascia = safeBody.fascia ? safeBody.fascia : oldPr.fascia;
+                        console.log("data: " + data + " centro: " + centro + " fascia: " + fascia);
+                        console.log(oldPr);
+                        if (!(oldPr.data != safeBody.data || oldPr.fascia != safeBody.fascia)) return [3 /*break*/, 7];
+                        //this.checkAvailability(safeBody.data ? safeBody.data : oldPr.data, safeBody.centro ? safeBody.centro : oldPr.centro_vac, safeBody.fascia ? safeBody.fascia : oldPr.fascia);
+                        console.log("controllo disponibilita'");
+                        return [4 /*yield*/, this.checkAvailability(data, centro, fascia)];
+                    case 6:
+                        _a.sent();
+                        _a.label = 7;
+                    case 7:
+                        console.log("check slot");
+                        return [4 /*yield*/, this.checkSlot(data, centro, safeBody.slot ? safeBody.slot : oldPr.slot)];
+                    case 8:
+                        _a.sent();
+                        //controllo vaccino
+                        console.log("check vaccino");
+                        console.log("user " + updateBody.user);
+                        return [4 /*yield*/, this.checkVaxValidity(data, safeBody.vaccino, updateBody.user, updateBody.id)];
+                    case 9:
+                        _a.sent();
+                        console.log("aggiornamento delle informazioni");
+                        return [4 /*yield*/, this.model.modifica(updateBody.id, safeBody)];
+                    case 10: return [2 /*return*/, _a.sent()];
+                }
             });
         });
     };
@@ -126,33 +205,41 @@ var proxyPr = /** @class */ (function () {
             return __generator(this, function (_a) {
                 if (typeof id !== 'number' || isNaN(id))
                     throw new Error('Id non è valido');
-                result = this.model.getModel().count({ where: {
+                result = this.model.getModel().count({
+                    where: {
                         id: id,
                         user: user
-                    } });
+                    }
+                });
                 if (result < 1)
                     throw Error("informazione non e' valido");
                 return [2 /*return*/];
             });
         });
     };
-    proxyPr.prototype.checkVaxValidity = function (data, vaccino, user) {
+    proxyPr.prototype.checkVaxValidity = function (data, vaccino, user, excludeid) {
         return __awaiter(this, void 0, void 0, function () {
-            var DataPre, LastVax, LastVaxTime, Vaccino;
+            var DataPre, queryBody, LastVax, LastVaxTime, Vaccino;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         DataPre = luxon_1.DateTime.fromISO(data);
+                        queryBody = {
+                            user: user,
+                            vaccino: vaccino,
+                            stato: [0, 1]
+                        };
                         return [4 /*yield*/, this.model.getModel().findAll({
-                                where: {
-                                    user: user,
-                                    vaccino: vaccino,
-                                    stato: [0, 1]
-                                },
+                                where: queryBody,
                                 order: [['data', 'DESC']]
                             })];
                     case 1:
                         LastVax = _a.sent();
+                        if (typeof excludeid !== 'undefined') {
+                            LastVax = LastVax.filter(function (element) {
+                                return element.id != excludeid;
+                            });
+                        }
                         //mai vaccinato
                         if (JSON.parse(JSON.stringify(LastVax)).length == 0) {
                             console.log("questo user non ha mai vaccinato.");
@@ -184,7 +271,6 @@ var proxyPr = /** @class */ (function () {
                         })];
                     case 1:
                         count = _a.sent();
-                        console.log("count result: " + count);
                         if (count > 0) {
                             throw Error("slot e' gia occupato.");
                         }
@@ -195,6 +281,30 @@ var proxyPr = /** @class */ (function () {
         });
     };
     proxyPr.prototype.checkAvailability = function (dataAppuntamento, centro, fasciaOraria) {
+        return __awaiter(this, void 0, void 0, function () {
+            var res;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.getPRCentroFascia(dataAppuntamento, centro, fasciaOraria)];
+                    case 1:
+                        res = _a.sent();
+                        //se e' undefined implica che la data e la fascia selezionata non e' prenotata da nessuno
+                        if (typeof res.count != "undefined") {
+                            if (res.count >= res.centro["maxf" + fasciaOraria]) {
+                                throw Error("la fascia oraria e' piena");
+                            }
+                        }
+                        else {
+                            if (res.centro["maxf" + fasciaOraria] < 1) {
+                                throw Error("la fascia oraria e' piena");
+                            }
+                        }
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    proxyPr.prototype.getPRCentroFascia = function (dataAppuntamento, centro, fasciaOraria) {
         return __awaiter(this, void 0, void 0, function () {
             var list, centro_vac, res;
             return __generator(this, function (_a) {
@@ -212,26 +322,20 @@ var proxyPr = /** @class */ (function () {
                             var data = _a.data, centro_vac = _a.centro_vac, fascia = _a.fascia;
                             data === dataAppuntamento && centro_vac === centro && fascia === fasciaOraria;
                         });
-                        //se e' undefined implica che la data e la fascia selezionata non e' prenotata da nessuno
-                        if (typeof res != "undefined") {
-                            if (res.count >= centro_vac["maxf" + fasciaOraria]) {
-                                throw Error("la fascia oraria e' piena");
-                            }
-                        }
-                        else {
-                            if (centro_vac["maxf" + fasciaOraria] < 1) {
-                                throw Error("la fascia oraria e' piena");
-                            }
-                        }
+                        if (typeof res === 'undefined')
+                            return [2 /*return*/, { count: undefined, centro: centro_vac }];
+                        else
+                            return [2 /*return*/, { count: res.length, centro: centro_vac }];
                         return [2 /*return*/];
                 }
             });
         });
     };
     proxyPr.prototype.TypeCheckData = function (data) {
-        var dataIns = luxon_1.DateTime.fromISO(data);
+        var sanitizeddata = (0, stringsanitizer_1.stringSanitizer)(data);
+        var dataIns = luxon_1.DateTime.fromISO(sanitizeddata);
         var dataNow = luxon_1.DateTime.now();
-        if ((typeof data !== 'string' || !dataIns.isValid))
+        if ((typeof sanitizeddata !== 'string' || !dataIns.isValid))
             throw new Error('Questa data non è valida');
         if ((dataIns < dataNow))
             throw new Error("Puoi prenotare solo in un dato futuro.");
@@ -240,7 +344,7 @@ var proxyPr = /** @class */ (function () {
     proxyPr.prototype.TypeCheckSlot = function (slot) {
         if (typeof slot !== 'number' || isNaN(slot))
             throw new Error('Questa slot non è valido');
-        if (slot > 37 || slot < 1)
+        if (slot > 36 || slot < 1)
             throw new Error('Questa fascia non è valida');
         return true;
     };

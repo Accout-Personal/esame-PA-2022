@@ -39,6 +39,7 @@ exports.__esModule = true;
 exports.proxyCV = void 0;
 var centro_vaccinale_1 = require("../centro_vaccinale");
 var sequelize_1 = require("../../config/sequelize");
+var stringsanitizer_1 = require("../../util/stringsanitizer");
 // Nel proxy andiamo a implementare tutti i controlli e le sanificazioni sui dati di input per evitare problemi e crash del sistema
 var proxyCV = /** @class */ (function () {
     function proxyCV() {
@@ -46,18 +47,21 @@ var proxyCV = /** @class */ (function () {
     }
     proxyCV.prototype.insertNewCV = function (lati, longi, nome, maxf1, maxf2) {
         return __awaiter(this, void 0, void 0, function () {
-            var result, error_1;
+            var sanitizednome, result, error_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        _a.trys.push([0, 3, , 4]);
+                        sanitizednome = (0, stringsanitizer_1.stringSanitizer)(nome);
+                        _a.label = 1;
+                    case 1:
+                        _a.trys.push([1, 4, , 5]);
                         if (!(this.TypeCheckLati(lati) &&
                             this.TypeCheckLati(longi) &&
-                            this.TypeCheckNome(nome) &&
+                            this.TypeCheckNome(sanitizednome) &&
                             this.TypeCheckMaxf1(maxf1) &&
-                            this.TypeCheckMaxf2(maxf2))) return [3 /*break*/, 2];
-                        return [4 /*yield*/, this.model.insertNewCV(lati, longi, nome, maxf1, maxf2)];
-                    case 1:
+                            this.TypeCheckMaxf2(maxf2))) return [3 /*break*/, 3];
+                        return [4 /*yield*/, this.model.insertNewCV(lati, longi, sanitizednome, maxf1, maxf2)];
+                    case 2:
                         result = _a.sent();
                         if (result && !(result instanceof Error)) {
                             return [2 /*return*/, true];
@@ -69,13 +73,23 @@ var proxyCV = /** @class */ (function () {
                                 return [2 /*return*/, new Error("errore inserimento nel database")];
                         }
                         ;
-                        _a.label = 2;
-                    case 2: return [3 /*break*/, 4];
-                    case 3:
+                        _a.label = 3;
+                    case 3: return [3 /*break*/, 5];
+                    case 4:
                         error_1 = _a.sent();
                         error_1.message("validazione fallita");
                         return [2 /*return*/, error_1];
-                    case 4: return [2 /*return*/];
+                    case 5: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    proxyCV.prototype.getCentro = function (id) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.model.findOne(id)];
+                    case 1: return [2 /*return*/, _a.sent()];
                 }
             });
         });

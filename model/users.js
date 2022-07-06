@@ -90,6 +90,16 @@ var Users = /** @class */ (function () {
             });
         });
     };
+    Users.prototype.getUser = function (id) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.user.findOne({ where: { id: id } })];
+                    case 1: return [2 /*return*/, _a.sent()];
+                }
+            });
+        });
+    };
     // Metodo per ottenere il modello
     Users.prototype.getModel = function () {
         return this.user;

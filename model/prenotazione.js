@@ -92,18 +92,31 @@ var Prenotazione = /** @class */ (function () {
     // metodo per inserire una prenotazione
     Prenotazione.prototype.insertNewPr = function (data, fascia, slot, centro_vaccino, vaccino, user) {
         return __awaiter(this, void 0, void 0, function () {
-            var error_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        _a.trys.push([0, 2, , 3]);
-                        return [4 /*yield*/, this.prenotazione.create({ data: luxon_1.DateTime.fromISO(data).toISODate(), fascia: fascia, slot: slot, centro_vac: centro_vaccino, vaccino: vaccino, user: user })];
+                    case 0: return [4 /*yield*/, this.prenotazione.create({
+                            data: luxon_1.DateTime.fromISO(data).toISODate(),
+                            fascia: fascia,
+                            slot: slot,
+                            centro_vac: centro_vaccino,
+                            vaccino: vaccino,
+                            user: user
+                        })];
                     case 1: return [2 /*return*/, _a.sent()];
-                    case 2:
-                        error_1 = _a.sent();
-                        console.log(error_1);
-                        return [3 /*break*/, 3];
-                    case 3: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    Prenotazione.prototype.modifica = function (id, updatebody) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.prenotazione.update(updatebody, {
+                            where: {
+                                id: id
+                            }
+                        })];
+                    case 1: return [2 /*return*/, _a.sent()];
                 }
             });
         });
@@ -111,18 +124,12 @@ var Prenotazione = /** @class */ (function () {
     // metodo per inserire una prenotazione
     Prenotazione.prototype["delete"] = function (id) {
         return __awaiter(this, void 0, void 0, function () {
-            var error_2;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        _a.trys.push([0, 2, , 3]);
-                        return [4 /*yield*/, this.prenotazione.destroy({ where: { id: id } })];
+                    case 0: return [4 /*yield*/, this.prenotazione.destroy({
+                            where: { id: id }
+                        })];
                     case 1: return [2 /*return*/, _a.sent()];
-                    case 2:
-                        error_2 = _a.sent();
-                        console.log(error_2);
-                        return [3 /*break*/, 3];
-                    case 3: return [2 /*return*/];
                 }
             });
         });

@@ -120,21 +120,20 @@ export class buildCV implements builderInterfaceCV {
 
     // Metodo per ottenere gli slot temporali disponibili
     async getSlotFree(centroCV:number,date:Array<string>,fascia?: number): Promise<void> {
-        let freeSlotF1 = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15];
-        let freeSlotF2 = [16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35];
-        let freeSlot = freeSlotF1.concat(freeSlotF2);
+        //let freeSlotF1 = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15];
+        //let freeSlotF2 = [16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35];
+        //let freeSlot = freeSlotF1.concat(freeSlotF2);
         if(fascia <= 0 || isNaN(fascia) || fascia >= 3 || !isFinite(fascia)) throw new Error('la fascia inserita non è valida');
         if(date.length > 5) throw new Error('Hai inserito troppe date');
         if(typeof centroCV !== 'number' || isNaN(centroCV)) throw new Error('Il centro vaccinale inserito non è corretto');
         let cv = await this.proxy.getProxyModel().getSpecificCV(centroCV);
         let prenotazioni = await this.proxyPre.getSlotFull(centroCV,date,fascia)
         prenotazioni = prenotazioni.map(value => {return value.dataValues} )
-        console.log(prenotazioni)
+        //console.log(prenotazioni)
         if(typeof fascia === 'number' && fascia == 1){
             for(let d of date){
-                console.log(d);
+                let freeSlotF1 = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15];
                 prenotazioni.map(value => {
-                    console.log(d == value.data)
                     if(d == value.data){
                         freeSlotF1 = freeSlotF1.filter(val => {
                             if(val == value.slot)return false;
@@ -147,11 +146,40 @@ export class buildCV implements builderInterfaceCV {
                     slotLiberi: freeSlotF1
                 });
             }
-            
-            /*this.result = freeSlot.filter(value => {
-                if(freeSlotF1.includes(value))return false;
-                else return true;
-            })*/
+        };
+        if(typeof fascia === 'number' && fascia == 2){
+            for(let d of date){
+                let freeSlotF2 = [16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35];
+                prenotazioni.map(value => {
+                    if(d == value.data){
+                        freeSlotF2 = freeSlotF2.filter(val => {
+                            if(val == value.slot)return false;
+                            else return true;
+                        });
+                    };
+                });
+                this.result.push({
+                    date: d,
+                    slotLiberi: freeSlotF2
+                });
+            }
+        };
+        if(typeof fascia === 'undefined'){
+            for(let d of date){
+                let freeSlot = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35];
+                prenotazioni.map(value => {
+                    if(d == value.data){
+                        freeSlot = freeSlot.filter(val => {
+                            if(val == value.slot)return false;
+                            else return true;
+                        });
+                    };
+                });
+                this.result.push({
+                    date: d,
+                    slotLiberi: freeSlot
+                });
+            }
         };
         /*if(typeof fascia === 'number' && fascia == 2) range = cv[0].dataValues.maxf2;
         if(typeof fascia === 'undefined') range = cv[0].dataValues.maxf1+cv[0].dataValues.maxf2;

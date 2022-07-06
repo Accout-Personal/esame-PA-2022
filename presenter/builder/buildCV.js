@@ -183,13 +183,13 @@ var buildCV = /** @class */ (function () {
     // Metodo per ottenere gli slot temporali disponibili
     buildCV.prototype.getSlotFree = function (centroCV, date, fascia) {
         return __awaiter(this, void 0, void 0, function () {
-            var freeSlotF1, freeSlotF2, freeSlot, cv, prenotazioni, _loop_1, this_1, _i, date_1, d;
+            var cv, prenotazioni, _loop_1, this_1, _i, date_1, d;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        freeSlotF1 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
-                        freeSlotF2 = [16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35];
-                        freeSlot = freeSlotF1.concat(freeSlotF2);
+                        //let freeSlotF1 = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15];
+                        //let freeSlotF2 = [16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35];
+                        //let freeSlot = freeSlotF1.concat(freeSlotF2);
                         if (fascia <= 0 || isNaN(fascia) || fascia >= 3 || !isFinite(fascia))
                             throw new Error('la fascia inserita non è valida');
                         if (date.length > 5)
@@ -203,12 +203,14 @@ var buildCV = /** @class */ (function () {
                     case 2:
                         prenotazioni = _a.sent();
                         prenotazioni = prenotazioni.map(function (value) { return value.dataValues; });
-                        console.log(prenotazioni);
+                        //console.log(prenotazioni)
                         if (typeof fascia === 'number' && fascia == 1) {
                             _loop_1 = function (d) {
-                                console.log(d);
+                                var freeSlotF1 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+                                console.log('sono qui');
+                                console.log(freeSlotF1);
                                 prenotazioni.map(function (value) {
-                                    console.log(d == value.data);
+                                    //console.log(d == value.data)
                                     if (d == value.data) {
                                         freeSlotF1 = freeSlotF1.filter(function (val) {
                                             if (val == value.slot)
