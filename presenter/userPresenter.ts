@@ -2,10 +2,7 @@ import { proxyUs } from "../model/Proxymodel/proxyUs";
 import * as crypto from 'node:crypto';
 import * as jwt from 'jsonwebtoken';
 import { proxyPr } from "../model/Proxymodel/proxyPR";
-import { slotToTime } from "../util/slotTotime";
-import { proxyCV } from "../model/Proxymodel/proxyCV";
-import { PassThrough } from 'stream';
-import * as QRCode from 'qrcode';
+import { directorRes } from "./builder/directorRes";
 
 export class userPresenter {
 
@@ -42,51 +39,15 @@ export class userPresenter {
         const body = req.body;
         try {
             let value = await Proxy.insertNewPr(body.data, body.slot, body.centro_vac, body.vaccino, req.user.user.id);
-            let Prenotazione: any = value;
-            //costruisce l'informazione da restituire
-            //di default json
-            if (typeof body.tipo === 'undefined' || body.tipo.toLowerCase() == "json") {
-                let returnBody: any = {};
-                
-                new proxyUs().getUserByID(Prenotazione.user).then(user => {
-                    returnBody.cf = user.cf;
-                });
-                await new proxyCV().getCentro(Prenotazione.centro_vac).then(res => {
-                    console.log(res);
-                    returnBody.presso = res.nome;
-                });
-                returnBody.codicePrenotazione = Prenotazione.uuid;
-                returnBody.data = Prenotazione.data;
-                returnBody.ora = slotToTime(Prenotazione.slot);
-                console.log(returnBody);
-                res.status(200).send({ "message": "prenotato con successo", "info": returnBody });
-                return;
-            }
-
-            if (body.tipo.toLowerCase() == "qrcode") {
-                const qrStream = new PassThrough();
-
-                const result = await QRCode.toFileStream(qrStream, Prenotazione.uuid,
-                    {
-                        type: 'png',
-                        width: 500,
-                        errorCorrectionLevel: 'H'
-                    }
-                );
-                if(!(typeof body.pdf !== "undefined") && body.pdf.toLowerCase() == "si"){
-                    console.log("ritornare un pdf")
-                    return;
-                }
-                res.setHeader('Content-type', 'image/png');
-                qrStream.pipe(res);
-            }
+            await directorRes.respose(res, value, body.tipo).catch(err=>{
+                console.log(err);
+                res.status(400).send({ "errore": err.message });
+            });
 
         } catch (error) {
             console.log(error);
             res.status(400).send({ "errore": error.message });
         };
-        //TODO:QRcode,PDF...
-
     }
 
     public static async modificaPre(req, res) {
