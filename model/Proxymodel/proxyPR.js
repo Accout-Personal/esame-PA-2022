@@ -112,6 +112,30 @@ var proxyPr = /** @class */ (function () {
             });
         });
     };
+    proxyPr.prototype.cancellaPre = function (id, user) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                this.checkPreID(id, user);
+                return [2 /*return*/];
+            });
+        });
+    };
+    proxyPr.prototype.checkPreID = function (id, user) {
+        return __awaiter(this, void 0, void 0, function () {
+            var result;
+            return __generator(this, function (_a) {
+                if (typeof id !== 'number' || isNaN(id))
+                    throw new Error('Id non è valido');
+                result = this.model.getModel().count({ where: {
+                        id: id,
+                        user: user
+                    } });
+                if (result < 1)
+                    throw Error("informazione non e' valido");
+                return [2 /*return*/];
+            });
+        });
+    };
     proxyPr.prototype.checkVaxValidity = function (data, vaccino, user) {
         return __awaiter(this, void 0, void 0, function () {
             var DataPre, LastVax, LastVaxTime, Vaccino;
