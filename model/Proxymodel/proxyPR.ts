@@ -56,7 +56,7 @@ export class proxyPr implements proxyinterfacePR {
     public async getListaPr(userid?: number, centro?: number, data?: string) {
         
         this.model.getModel().belongsTo(this.modelU.getModel());
-        this.modelU.getModel().hasMany(this.model.getModel(),{foreignKey: 'user'});
+        this.modelU.getModel().hasMany(this.model.getModel(),{foreignKey: 'userid'});
 
         if(typeof(data) !== 'string' || !(DateTime.fromISO(data).isValid) || DateTime.now > DateTime.fromISO(data)) throw new Error ('La data che hai inserito non è corretta');
         if(typeof centro !== 'number' || isNaN(centro) || !isFinite(centro)) throw new Error ('il centro vaccinale che hai inserito non è corretto');
@@ -402,13 +402,13 @@ export class proxyPr implements proxyinterfacePR {
         }
         else {
                 list = await this.model.getModel().findAndCountAll({
-                attributes:['centro_vac','data'],
+                attributes:['centro_vac_id','data'],
                 where: {
                     centro_vac_id:id,
                     data: data,
                     stato: 2
                 },
-                group: ['centro_vac', 'data']
+                group: ['centro_vac_id', 'data']
             });
         }
         return list;

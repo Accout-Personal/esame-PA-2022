@@ -13,7 +13,7 @@ export class Users implements proxyInterfaceUsers {
     // questo model mi permette di compiere varie operazioni 
     //this.prenotazione = new Prenotazione(sequelize).getModel();
 
-    this.user = sequelize.define("user1", {
+    this.user = sequelize.define("user", {
       id: {
         type: DataTypes.BIGINT(),
         autoIncrement: true,
