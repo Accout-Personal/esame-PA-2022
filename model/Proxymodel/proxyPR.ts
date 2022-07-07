@@ -360,5 +360,17 @@ export class proxyPr implements proxyinterfacePR {
                 return b.media - a.media;
             });
             return statistic;
-    }    
+    }  
+    
+    // Metodo per impostare le prenotazioni come 'non andate a buon fine'
+    async setBadPrenotations(data:string): Promise<void> {
+        let list = await this.model.getModel().findAll({
+            attributes:['id','data'],
+            where: {
+                data: data,
+                stato: 0
+            }
+        });
+        console.log(list)
+    }
 }

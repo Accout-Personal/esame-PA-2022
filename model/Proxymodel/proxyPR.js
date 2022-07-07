@@ -535,7 +535,27 @@ var proxyPr = /** @class */ (function () {
                             statistic.sort(function (a, b) {
                                 return b.media - a.media;
                             });
-                        console.log(statistic);
+                        return [2 /*return*/, statistic];
+                }
+            });
+        });
+    };
+    // Metodo per impostare le prenotazioni come 'non andate a buon fine'
+    proxyPr.prototype.setBadPrenotations = function (data) {
+        return __awaiter(this, void 0, void 0, function () {
+            var list;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.model.getModel().findAll({
+                            attributes: ['id', 'data'],
+                            where: {
+                                data: data,
+                                stato: 0
+                            }
+                        })];
+                    case 1:
+                        list = _a.sent();
+                        console.log(list);
                         return [2 /*return*/];
                 }
             });
