@@ -97,6 +97,13 @@ var proxyUs = /** @class */ (function () {
             });
         });
     };
+    proxyUs.prototype.getPreUser = function (user) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/];
+            });
+        });
+    };
     proxyUs.prototype.TypeCheckCF = function (cf) {
         if ((typeof cf !== 'string' || cf.length > 255))
             throw new Error('Questo codice fiscale non è valido');

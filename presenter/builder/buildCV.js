@@ -68,7 +68,7 @@ var buildCV = /** @class */ (function () {
                                 latitude: val.dataValues.lati,
                                 longitude: val.dataValues.longi
                             };
-                            val.dataValues.distanza = haversine(start, end, { unit: 'meter' });
+                            val.dataValues.distanza = haversine(start, end, { unit: 'km' });
                             return val.dataValues;
                             /*if(val.dataValues.distanza <= distanza)
                             this.result.push(val.dataValues)*/
@@ -125,19 +125,8 @@ var buildCV = /** @class */ (function () {
                                 latitude: val.dataValues.lati,
                                 longitude: val.dataValues.longi
                             };
-                            val.dataValues.distanza = haversine(start, end, { unit: 'meter' });
+                            val.dataValues.distanza = haversine(start, end, { unit: 'km' });
                             return val.dataValues;
-                            /*if(val.dataValues.distanza <= distanza){
-                            prenotazioni.map(pre => {
-                                if(val.dataValues.id == pre.centro_vac && check){
-                                    val.dataValues.residuo = (val.dataValues.maxf1+val.dataValues.maxf2) - pre.count;
-                                    check = false ;
-                                }
-                                if(check)val.dataValues.residuo = val.dataValues.maxf1+val.dataValues.maxf2
-                            });
-                            if(!check)check = true;
-                            this.result.push(val.dataValues)
-                            }*/
                         });
                         this.result = all.filter(function (val) {
                             if (val.distanza <= distanza) {
@@ -180,24 +169,19 @@ var buildCV = /** @class */ (function () {
             var cv, prenotazioni, _loop_1, this_1, _i, date_1, d, _loop_2, this_2, _a, date_2, d, _loop_3, this_3, _b, date_3, d;
             return __generator(this, function (_c) {
                 switch (_c.label) {
-                    case 0:
-                        //let freeSlotF1 = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15];
-                        //let freeSlotF2 = [16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35];
-                        //let freeSlot = freeSlotF1.concat(freeSlotF2);
+                    case 0: return [4 /*yield*/, this.proxy.getProxyModel().getSpecificCV(centroCV)];
+                    case 1:
+                        cv = _c.sent();
                         if (fascia <= 0 || isNaN(fascia) || fascia >= 3 || !isFinite(fascia))
                             throw new Error('la fascia inserita non è valida');
                         if (date.length > 5)
                             throw new Error('Hai inserito troppe date');
                         if (typeof centroCV !== 'number' || isNaN(centroCV))
                             throw new Error('Il centro vaccinale inserito non è corretto');
-                        return [4 /*yield*/, this.proxy.getProxyModel().getSpecificCV(centroCV)];
-                    case 1:
-                        cv = _c.sent();
                         return [4 /*yield*/, this.proxyPre.getSlotFull(centroCV, date, fascia)];
                     case 2:
                         prenotazioni = _c.sent();
                         prenotazioni = prenotazioni.map(function (value) { return value.dataValues; });
-                        //console.log(prenotazioni)
                         if (typeof fascia === 'number' && fascia == 1) {
                             _loop_1 = function (d) {
                                 var freeSlotF1 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
@@ -276,17 +260,6 @@ var buildCV = /** @class */ (function () {
                             }
                         }
                         ;
-                        /*if(typeof fascia === 'number' && fascia == 2) range = cv[0].dataValues.maxf2;
-                        if(typeof fascia === 'undefined') range = cv[0].dataValues.maxf1+cv[0].dataValues.maxf2;
-                        let free = [];
-                        for(let d of date){
-                            for(let i = 1; i<= range ;i++){
-                                free.push({
-                                    data: d,
-                                    slot: i
-                                });
-                            }
-                        }*/
                         console.log(this.result);
                         return [2 /*return*/];
                 }

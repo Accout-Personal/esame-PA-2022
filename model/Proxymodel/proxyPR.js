@@ -543,20 +543,90 @@ var proxyPr = /** @class */ (function () {
     // Metodo per impostare le prenotazioni come 'non andate a buon fine'
     proxyPr.prototype.setBadPrenotations = function (data) {
         return __awaiter(this, void 0, void 0, function () {
+            var list, _i, list_1, i;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.getBadPrenotation(data)];
+                    case 1:
+                        list = _a.sent();
+                        list = list.map(function (value) {
+                            return value.dataValues.id;
+                        });
+                        console.log(list);
+                        _i = 0, list_1 = list;
+                        _a.label = 2;
+                    case 2:
+                        if (!(_i < list_1.length)) return [3 /*break*/, 5];
+                        i = list_1[_i];
+                        return [4 /*yield*/, this.model.getModel().update({ stato: 2 }, {
+                                where: {
+                                    id: i
+                                }
+                            })];
+                    case 3:
+                        _a.sent();
+                        _a.label = 4;
+                    case 4:
+                        _i++;
+                        return [3 /*break*/, 2];
+                    case 5:
+                        console.log('finito');
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    // Questo metodo ritorna il numero di prenotazioni che non sono andate a buon fine
+    proxyPr.prototype.getCountBadPrenotation = function (data, id) {
+        return __awaiter(this, void 0, void 0, function () {
+            var result;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (isNaN(id) || !isFinite(id) || typeof (id) !== 'number')
+                            throw new Error('il centro vaccinale che hai inserito non è corretto');
+                        if (typeof (data) !== 'string' || !(luxon_1.DateTime.fromISO(data).isValid))
+                            throw new Error('La data che hai inserito non è corretta');
+                        return [4 /*yield*/, this.getBadPrenotation(data, false, id)];
+                    case 1:
+                        result = _a.sent();
+                        console.log(result['count'][0].count);
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    proxyPr.prototype.getBadPrenotation = function (data, option, id) {
+        if (option === void 0) { option = true; }
+        return __awaiter(this, void 0, void 0, function () {
             var list;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.model.getModel().findAll({
-                            attributes: ['id', 'data'],
-                            where: {
-                                data: data,
-                                stato: 0
-                            }
-                        })];
+                    case 0:
+                        if (!option) return [3 /*break*/, 2];
+                        return [4 /*yield*/, this.model.getModel().findAll({
+                                attributes: ['id', 'data'],
+                                where: {
+                                    data: data,
+                                    stato: 0
+                                }
+                            })];
                     case 1:
                         list = _a.sent();
-                        console.log(list);
-                        return [2 /*return*/];
+                        return [3 /*break*/, 4];
+                    case 2: return [4 /*yield*/, this.model.getModel().findAndCountAll({
+                            attributes: ['centro_vac', 'data'],
+                            where: {
+                                centro_vac: id,
+                                data: data,
+                                stato: 2
+                            },
+                            group: ['centro_vac', 'data']
+                        })];
+                    case 3:
+                        list = _a.sent();
+                        _a.label = 4;
+                    case 4: return [2 /*return*/, list];
                 }
             });
         });

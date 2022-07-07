@@ -45,7 +45,7 @@ const connection = DBConnection.getInstance().getConnection();
 
 async function stampaAgain(){
     let prova = new proxyPr();
-    await prova.setBadPrenotations('2022-07-01')
+    await prova.getCountBadPrenotation('2022-07-01',3)
 }
 
 

@@ -359,13 +359,52 @@ export class proxyPr implements proxyinterfacePR {
     
     // Metodo per impostare le prenotazioni come 'non andate a buon fine'
     async setBadPrenotations(data:string): Promise<void> {
-        let list = await this.model.getModel().findAll({
-            attributes:['id','data'],
-            where: {
-                data: data,
-                stato: 0
-            }
-        });
+        let list = await this.getBadPrenotation(data);
+        list = list.map((value) => {
+            return value.dataValues.id
+        })
         console.log(list)
+        for(let i of list)
+            await this.model.getModel().update({ stato: 2}, {
+                where: {
+                    id: i
+                }
+              });
+          console.log('finito')
+    }
+
+    // Questo metodo ritorna il numero di prenotazioni che non sono andate a buon fine
+
+    async getCountBadPrenotation(data:string, id:number):Promise<number> {
+        if(isNaN(id) || !isFinite(id) || typeof(id) !== 'number') throw new Error ('il centro vaccinale che hai inserito non è corretto')
+        if(typeof(data) !== 'string' || !(DateTime.fromISO(data).isValid)) throw new Error ('La data che hai inserito non è corretta')
+        let result = await this.getBadPrenotation(data,false,id);
+        return result['count'][0].count
+    }
+
+    async getBadPrenotation(data:string,option:Boolean = true, id?:number): Promise<Array<any>>{
+        let list;
+        if(option)
+        {
+                list = await this.model.getModel().findAll({
+                attributes:['id','data'],
+                where: {
+                    data: data,
+                    stato: 0
+                }
+            });
+        }
+        else {
+                list = await this.model.getModel().findAndCountAll({
+                attributes:['centro_vac','data'],
+                where: {
+                    centro_vac:id,
+                    data: data,
+                    stato: 2
+                },
+                group: ['centro_vac', 'data']
+            });
+        }
+        return list;
     }
 }
