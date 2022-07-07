@@ -17,18 +17,23 @@ export class buildCV implements builderInterfaceCV {
 
     //In questo metodo viene utilizzata soltanto la funzione di filtraggio relativa alla distanza
     async producePartA(latitude: number, longitude: number, distanza: number, order: Boolean = true): Promise<void> {
+
+        // Qui andiamo ad eseguire tutta una serie di controlli sui valori di input inseriti dall'utente
+
         try{
-            if(!(this.proxy.TypeCheckLati(latitude)))throw new Error ('La latitudine inserita non è corretta')
+            if(!(this.proxy.TypeCheckLati(latitude)) || this.proxy.TypeCheckLati(latitude) instanceof Error )throw new Error ('La latitudine inserita non è corretta')
+            if(!(this.proxy.TypeCheckLongi(longitude))|| this.proxy.TypeCheckLongi(latitude) instanceof Error )throw new Error ('La longitudine inserita non è corretta')
+            if(typeof distanza !== 'number' || isNaN(distanza) || !isFinite(distanza))throw new Error ('La distanza inserita non è corretta')
 
         let start = {
             latitude: latitude,
             longitude: longitude
         }
-
+    //Qui andiamo a prendere tutti i dati di interesse dal DB
         let all = await this.proxy.getProxyModel().getModel().findAll({
             attributes: ['id', 'lati', 'longi']
         });
-
+    //Qui ad ogni centro vaccinale viene aggiunta la distanza
         all = all.map(val => {
             let end = {
                 latitude: val.dataValues.lati,
@@ -38,11 +43,12 @@ export class buildCV implements builderInterfaceCV {
             return val.dataValues;
             
         });
-
+    // I vari centri vaccinali vengono filtrati sulla base della distanza
         this.result = all.filter(value => {
             return value.distanza <= distanza;
 
         });
+    // Qui avviene l'ordinamento
         if (order) this.result.sort((a, b) => {
             return a.distanza - b.distanza
         });
@@ -60,24 +66,29 @@ export class buildCV implements builderInterfaceCV {
     //in questa funzione viene eseguita sia la funzione di filtraggio per la distanza che per la disponibilità
     async producePartB(latitude: number, longitude: number, distanza: number, data: string, order: Boolean = true): Promise<void> {
 
+        // Qui andiamo a effettuare tutta una serie di controlli che vengono 
+
+        if(!(this.proxy.TypeCheckLati(latitude)) || this.proxy.TypeCheckLati(latitude) instanceof Error )throw new Error ('La latitudine inserita non è corretta')
+        if(!(this.proxy.TypeCheckLongi(longitude))|| this.proxy.TypeCheckLongi(latitude) instanceof Error )throw new Error ('La longitudine inserita non è corretta')
+        if(typeof distanza !== 'number' || isNaN(distanza) || !isFinite(distanza))throw new Error ('La distanza inserita non è corretta')
+
         let prenotazioni;
         if (DateTime.fromISO(data).isValid) {
             let query = await this.proxyPre.takeNumberOfPrenotation(false);
-            //console.log(query)
             prenotazioni = query.filter((val) => { if (val.data == data) return true })
         }
         else throw new Error("Hai inserito una data non corretta");
 
-        //console.log(prenotazioni)
         let start = {
             latitude: latitude,
             longitude: longitude
         }
-
+    //Qui andiamo a prendere tutti i dati di interesse dal DB
         let all = await this.proxy.getProxyModel().getModel().findAll({
             attributes: ['id', 'lati', 'longi', 'maxf1', 'maxf2']
         });
         let check = true;
+    //Qui andiamo ad aggiungere la distanza ad ogni centro vaccinale
         all = all.map(val => {
             let end = {
                 latitude: val.dataValues.lati,
