@@ -6,6 +6,7 @@ import { directorRes } from "./builder/directorRes";
 
 import { buildCV } from "./builder/buildCV";
 import { proxyCV } from "../model/Proxymodel/proxyCV";
+import { DateTime } from 'luxon';
 
 export class userPresenter {
 
@@ -13,11 +14,12 @@ export class userPresenter {
         const proxy = new proxyUs();
         proxy.getUser(req.body.username).then((value) => {
             console.log(value);
-            if (value !== undefined && value.password === crypto.createHash('sha256').update(req.body.password).digest('hex')) {
+            if (value !== null && value.password === crypto.createHash('sha256').update(req.body.password).digest('hex')) {
                 res.send({ token: jwt.sign({ user: { "username": value.username, "tipo": value.tipo, "id": value.id } }, process.env.JWT_SECRET_KEY, { expiresIn: process.env.TOKEN_EXPIRE_TIME }) });
             }
             else
                 res.status(401).send({ message: "credenziale invalido" });
+                return;
         });
     };
 
@@ -79,40 +81,51 @@ export class userPresenter {
 
     //filtro centro per la distanza e disponibilita'
     public static async getCentro(req, res) {
-        //{lat:number,long:number,disp:boolean,data:string,filtro:boolean}
+        //{lat:number,long:number,dist:number,disp:boolean,filtro:boolean}
         let body = req.body;
         let user = req.user.user.id;
-        let Info = {};
         let proxy = new proxyCV();
         let builder = new buildCV(proxy);
-        //disponibilita' falsa, solo distanza
-        if(typeof body.disp === 'undefined' || !body.disp){
-            await builder.producePartA(body.lat,body.long,body.dist,body.order);
-            let result = builder.getResult();
-            res.send(result);
-        }else{
-            //disponibilita'distanza e disponibilita
-            await builder.producePartB(body.lat,body.long,body.dist,body.order);
-            let result = builder.getResult();
-            res.send(result);
-        }
+        try {
+            //disponibilita' falsa, solo distanza
+            if (typeof body.disp === 'undefined' || !body.disp) {
+                await builder.producePartA(body.lat, body.long, body.dist, body.order);
+                let result = builder.getResult();
+                res.send(result);
+            } else {
+                //disponibilita'distanza e disponibilita
+                if (typeof body.data === 'undefined') body.data = DateTime.now()
+                await builder.producePartB(body.lat, body.long, body.dist, body.data, body.order);
+                let result = builder.getResult();
+                res.send(result);
+            }
+        } catch (error) {
+            return res.status(400).send({ "errore": error.message });
+        };
     }
 
     //filtro centro per i max 5 giorni
     public static async getSlotsCentro(req, res) {
         //{centro:number,data:[...],fascie:number}
-        let body = req.body;
-        let user = req.user.user.id;
-        // Metodo per ottenere gli slot temporali disponibili
-        let proxy = new proxyCV();
-        let builder = new buildCV(proxy);
-        await builder.getSlotFree(body.centro,body.data,body.fascie);
-        let result = builder.getResult();
-        res.send(result);
+        try {
+
+            let body = req.body;
+            let user = req.user.user.id;
+            // Metodo per ottenere gli slot temporali disponibili
+            let proxy = new proxyCV();
+            let builder = new buildCV(proxy);
+            await builder.getSlotFree(body.centro, body.data, body.fascie);
+            let result = builder.getResult();
+            res.send(result);
+        } catch (error) {
+            return res.status(400).send({ "errore": error.message });
+        };
     }
 
-    public static async getMyPre(req,res){
-        let proxy = new proxyUs()
+    public static async getMyPre(req, res) {
+        let proxy = new proxyPr()
+        let list = await proxy.getListaPr(req.user.user.id);
+        return res.send(list);
     }
 
 }
