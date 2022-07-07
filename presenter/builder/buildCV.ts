@@ -32,7 +32,7 @@ export class buildCV implements builderInterfaceCV {
                 latitude: val.dataValues.lati,
                 longitude: val.dataValues.longi
             }
-            val.dataValues.distanza = haversine(start, end, { unit: 'km' });
+            val.dataValues.distanza = parseFloat(haversine(start, end, { unit: 'km' }).toFixed(2));
             return val.dataValues;
             /*if(val.dataValues.distanza <= distanza)
             this.result.push(val.dataValues)*/
@@ -80,7 +80,7 @@ export class buildCV implements builderInterfaceCV {
                 latitude: val.dataValues.lati,
                 longitude: val.dataValues.longi
             }
-            val.dataValues.distanza = haversine(start, end, { unit: 'km' });
+            val.dataValues.distanza = parseFloat(haversine(start, end, { unit: 'km' }).toFixed(2));
             return val.dataValues;
         });
 

@@ -65,6 +65,7 @@ export class proxyPr implements proxyinterfacePR {
         }
 
         this.TypeCheckUser(userid);
+        console.log("get user list");
         return await this.model.getPreUser(userid);
     }
 
@@ -274,12 +275,6 @@ export class proxyPr implements proxyinterfacePR {
         if (Object.keys(test).length == 0) throw new Error('Questo utente non esiste');
         return true;
     }
-
-    private TypeCheckStato(stato: number): Boolean {
-        if (typeof stato !== 'number' || isNaN(stato)) throw new Error('Questo stato non è valido');
-        return true;
-    }
-
 
     async takeNumberOfPrenotation(fascia: Boolean): Promise<Array<any>> {
         if (fascia) {

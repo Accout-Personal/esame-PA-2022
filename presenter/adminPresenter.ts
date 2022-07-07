@@ -3,6 +3,7 @@ import * as crypto from 'node:crypto';
 import * as jwt from 'jsonwebtoken';
 import { proxyCV } from "../model/Proxymodel/proxyCV";
 import { proxyVC } from "../model/Proxymodel/proxyVC";
+import { proxyPr } from "../model/Proxymodel/proxyPR";
 
 export class adminPresenter {
 
@@ -58,15 +59,31 @@ export class adminPresenter {
                 qrcode.decode(image.bitmap);
             });
         }
-        else{
+        else {
             //Legge dalla stringa
             let uuid = req.body.uuid;
-            
         }
-
         return res.send("decode completed");
-
     }
 
+    public static async getListaCentroData(req, res) {
+        //req:{centro,data,formato}
+        let body = req.body;
+        let proxy = new proxyPr();
+        if(typeof body.formato === 'undefined') body.formato = 'json';
 
+        switch (req.formato.toLowerCase()) {
+            case "pdf": {
+                
+                break;
+            }
+            case "json": {
+
+                break;
+            }
+            default: {
+                res.status(401).send({ message: "il formato non e' valido: il formato puo' essere solo di json o pdf" });
+            }
+        }
+    }
 }

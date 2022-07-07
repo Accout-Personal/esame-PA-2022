@@ -92,7 +92,7 @@ export class Prenotazione implements proxyinterfacePR {
       });
   }
 
-  async getPreUser(userid: number) {
+  public async getPreUser(userid: number) {
     return await this.prenotazione.findAll({
       where: {
         user: userid
@@ -100,7 +100,7 @@ export class Prenotazione implements proxyinterfacePR {
     });
   }
 
-  async getPreCentro(centro: number, data: string) {
+  public async getPreCentro(centro: number, data: string) {
     return await this.prenotazione.findAll({
       where: {
         centro_vac: centro,
