@@ -58,6 +58,9 @@ export class proxyPr implements proxyinterfacePR {
         this.model.getModel().belongsTo(this.modelU.getModel());
         this.modelU.getModel().hasMany(this.model.getModel(),{foreignKey: 'userid'});
 
+        if(typeof(data) !== 'string' || !(DateTime.fromISO(data).isValid) || DateTime.now > DateTime.fromISO(data)) throw new Error ('La data che hai inserito non è corretta');
+        if(typeof centro !== 'number' || isNaN(centro) || !isFinite(centro)) throw new Error ('il centro vaccinale che hai inserito non è corretto');
+
         if (typeof userid === "undefined" && typeof centro === "undefined") {
             throw Error("non hai inserito nessun paramentro");
         }
@@ -380,7 +383,7 @@ export class proxyPr implements proxyinterfacePR {
 
     async getCountBadPrenotation(data:string, id:number):Promise<number> {
         if(isNaN(id) || !isFinite(id) || typeof(id) !== 'number') throw new Error ('il centro vaccinale che hai inserito non è corretto')
-        if(typeof(data) !== 'string' || !(DateTime.fromISO(data).isValid)) throw new Error ('La data che hai inserito non è corretta')
+        if(typeof(data) !== 'string' || !(DateTime.fromISO(data).isValid) || DateTime.now > DateTime.fromISO(data)) throw new Error ('La data che hai inserito non è corretta')
         let result = await this.getBadPrenotation(data,false,id);
         return result['count'][0].count
     }

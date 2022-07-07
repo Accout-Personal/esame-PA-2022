@@ -18,6 +18,8 @@ export class buildCV implements builderInterfaceCV {
     //In questo metodo viene utilizzata soltanto la funzione di filtraggio relativa alla distanza
     async producePartA(latitude: number, longitude: number, distanza: number, order: Boolean = true): Promise<void> {
 
+        if(!(this.proxy.TypeCheckLati(latitude)))throw new Error ('La latitudine inserita non è corretta')
+
         let start = {
             latitude: latitude,
             longitude: longitude
@@ -34,11 +36,9 @@ export class buildCV implements builderInterfaceCV {
             }
             val.dataValues.distanza = parseFloat(haversine(start, end, { unit: 'km' }).toFixed(2));
             return val.dataValues;
-            /*if(val.dataValues.distanza <= distanza)
-            this.result.push(val.dataValues)*/
+            
         });
 
-        //console.log(all)
         this.result = all.filter(value => {
             return value.distanza <= distanza;
 
@@ -51,7 +51,6 @@ export class buildCV implements builderInterfaceCV {
                 return b.distanza - a.distanza
             });
         }
-        console.log(this.result)
     }
 
     //in questa funzione viene eseguita sia la funzione di filtraggio per la distanza che per la disponibilità
