@@ -17,8 +17,8 @@ export class buildCV implements builderInterfaceCV {
 
     //In questo metodo viene utilizzata soltanto la funzione di filtraggio relativa alla distanza
     async producePartA(latitude: number, longitude: number, distanza: number, order: Boolean = true): Promise<void> {
-
-        if(!(this.proxy.TypeCheckLati(latitude)))throw new Error ('La latitudine inserita non è corretta')
+        try{
+            if(!(this.proxy.TypeCheckLati(latitude)))throw new Error ('La latitudine inserita non è corretta')
 
         let start = {
             latitude: latitude,
@@ -50,6 +50,10 @@ export class buildCV implements builderInterfaceCV {
             this.result.sort((a, b) => {
                 return b.distanza - a.distanza
             });
+        }
+        }
+        catch(error){
+            console.error(error);
         }
     }
 
