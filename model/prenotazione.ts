@@ -73,7 +73,7 @@ export class Prenotazione implements proxyinterfacePR {
         userid: user
       });
   }
-
+// Metodo usato per effettuare una modifica di una prenotazione
   public async modifica(id: number, updatebody: any) {
     return await this.prenotazione.update(
       updatebody,
@@ -92,7 +92,7 @@ export class Prenotazione implements proxyinterfacePR {
         where: { id: id }
       });
   }
-
+// Metodo usato per prendere tutte le prenotazioni di un utente
   public async getPreUser(userid: number) {
     return await this.prenotazione.findAll({
       where: {
@@ -100,9 +100,8 @@ export class Prenotazione implements proxyinterfacePR {
       }
     });
   }
-
+// Metodo per prendere tutte le prenotazioni di centro vaccinale per una certa data
   public async getPreCentro(centro: number, data: string) {
-    console.log("get prenotazione centro")
     return await this.prenotazione.findAll({
       where: {
         centro_vac_id: centro,

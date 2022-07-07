@@ -369,14 +369,11 @@ export class proxyPr implements proxyinterfacePR {
         list = list.map((value) => {
             return value.dataValues.id
         })
-        console.log(list)
-        for(let i of list)
-            await this.model.getModel().update({ stato: 2}, {
-                where: {
-                    id: i
-                }
-              });
-          console.log('finito')
+        await this.model.getModel().update({stato: 2},{
+            where:{
+                id: list
+            }
+        })
     }
 
     // Questo metodo ritorna il numero di prenotazioni che non sono andate a buon fine

@@ -39,11 +39,11 @@ export class Users implements proxyInterfaceUsers {
       return false;
     }
   }
-
+// Metodo per prendere tutti gli elementi della tabella
   public async trovaTutto(connessione: object) {
     return await this.user.findAll();
   }
-
+// Metodo per prendere solo un risultato, infatti l'id è la Primary key della tabella
   public async getUser(id: number) {
     return await this.user.findOne({ where: { id: id } });
   }
