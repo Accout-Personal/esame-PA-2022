@@ -41,6 +41,10 @@ export class proxyUs implements proxyInterfaceUsers {
         } catch (error) { return error; }
     }
 
+    public async getPreUser(user:number){
+        
+    }
+
     TypeCheckCF(cf: string): Boolean {
         if ((typeof cf !== 'string' || cf.length > 255)) throw new Error('Questo codice fiscale non è valido');
         return true;

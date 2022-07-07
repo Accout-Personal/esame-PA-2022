@@ -32,7 +32,7 @@ export class buildCV implements builderInterfaceCV {
                 latitude: val.dataValues.lati,
                 longitude: val.dataValues.longi
             }
-            val.dataValues.distanza = haversine(start, end, { unit: 'meter' });
+            val.dataValues.distanza = haversine(start, end, { unit: 'km' });
             return val.dataValues;
             /*if(val.dataValues.distanza <= distanza)
             this.result.push(val.dataValues)*/
@@ -80,19 +80,8 @@ export class buildCV implements builderInterfaceCV {
                 latitude: val.dataValues.lati,
                 longitude: val.dataValues.longi
             }
-            val.dataValues.distanza = haversine(start, end, { unit: 'meter' });
+            val.dataValues.distanza = haversine(start, end, { unit: 'km' });
             return val.dataValues;
-            /*if(val.dataValues.distanza <= distanza){
-            prenotazioni.map(pre => {
-                if(val.dataValues.id == pre.centro_vac && check){
-                    val.dataValues.residuo = (val.dataValues.maxf1+val.dataValues.maxf2) - pre.count;
-                    check = false ;
-                }
-                if(check)val.dataValues.residuo = val.dataValues.maxf1+val.dataValues.maxf2
-            });
-            if(!check)check = true;
-            this.result.push(val.dataValues)
-            }*/
         });
 
         this.result = all.filter(val => {
@@ -189,18 +178,6 @@ export class buildCV implements builderInterfaceCV {
                 });
             }
         };
-        /*if(typeof fascia === 'number' && fascia == 2) range = cv[0].dataValues.maxf2;
-        if(typeof fascia === 'undefined') range = cv[0].dataValues.maxf1+cv[0].dataValues.maxf2;
-        let free = [];
-        for(let d of date){
-            for(let i = 1; i<= range ;i++){
-                free.push({
-                    data: d,
-                    slot: i
-                });
-            } 
-        }*/
-
         console.log(this.result)
     }
 

@@ -21,6 +21,7 @@ export class userPresenter {
         });
     };
 
+    //
     public static async register(req, res) {
         const proxy = new proxyUs();
         proxy.insertNewUsers(req.body.cf,
@@ -95,8 +96,6 @@ export class userPresenter {
             let result = builder.getResult();
             res.send(result);
         }
-
-
     }
 
     //filtro centro per i max 5 giorni
@@ -110,6 +109,10 @@ export class userPresenter {
         await builder.getSlotFree(body.centro,body.data,body.fascie);
         let result = builder.getResult();
         res.send(result);
+    }
+
+    public static async getMyPre(req,res){
+        let proxy = new proxyUs()
     }
 
 }
