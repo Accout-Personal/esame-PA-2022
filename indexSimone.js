@@ -89,7 +89,7 @@ function stampaAgain() {
             switch (_a.label) {
                 case 0:
                     prova = new proxyPR_1.proxyPr();
-                    return [4 /*yield*/, prova.getStatisticPositive()];
+                    return [4 /*yield*/, prova.setBadPrenotations('2022-07-01')];
                 case 1:
                     _a.sent();
                     return [2 /*return*/];
