@@ -31,21 +31,21 @@ export class Prenotazione implements proxyinterfacePR {
       data: { type: DataTypes.DATEONLY },
       fascia: { type: DataTypes.INTEGER },
       slot: { type: DataTypes.INTEGER },
-      centro_vac: {
+      centro_vac_id: {
         type: DataTypes.BIGINT(20),
         references: {
           model: this.centro_vaccinaleModel,
           key: 'id',
         }
       },
-      vaccino: {
+      vaccinoid: {
         type: DataTypes.BIGINT(20),
         references: {
           model: this.vaccinoModel,
           key: 'id'
         }
       },
-      user: {
+      userid: {
         type: DataTypes.BIGINT(20),
         references: {
           model: this.userModel,
@@ -58,6 +58,7 @@ export class Prenotazione implements proxyinterfacePR {
       tableName: 'prenotazione',
       timestamps: false
     });
+    
   }
 
   // metodo per inserire una prenotazione
@@ -67,9 +68,9 @@ export class Prenotazione implements proxyinterfacePR {
         data: DateTime.fromISO(data).toISODate(),
         fascia: fascia,
         slot: slot,
-        centro_vac: centro_vaccino,
-        vaccino: vaccino,
-        user: user
+        centro_vac_id: centro_vaccino,
+        vaccinoid: vaccino,
+        userid: user
       });
   }
 
@@ -95,7 +96,7 @@ export class Prenotazione implements proxyinterfacePR {
   public async getPreUser(userid: number) {
     return await this.prenotazione.findAll({
       where: {
-        user: userid
+        userid: userid
       }
     });
   }
@@ -103,9 +104,10 @@ export class Prenotazione implements proxyinterfacePR {
   public async getPreCentro(centro: number, data: string) {
     return await this.prenotazione.findAll({
       where: {
-        centro_vac: centro,
+        centro_vac_id: centro,
         data: data
-      }
+      },
+      include:'user1'
     });
   }
 

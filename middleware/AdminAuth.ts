@@ -1,6 +1,6 @@
 export const ControlloPrivilegio = function(req,res,next){
     console.log("admin middleware: "+ req.user);
-        if(req.user.tipo == 1){
+        if(req.user.user.tipo == 1){
             console.log("admin logged in...");
             next();
         }else{

@@ -54,6 +54,9 @@ export class proxyPr implements proxyinterfacePR {
     }
 
     public async getListaPr(userid?: number, centro?: number, data?: string) {
+        
+        this.model.getModel().belongsTo(this.modelU.getModel());
+        this.modelU.getModel().hasMany(this.model.getModel(),{foreignKey: 'user'});
 
         if (typeof userid === "undefined" && typeof centro === "undefined") {
             throw Error("non hai inserito nessun paramentro");
@@ -100,12 +103,12 @@ export class proxyPr implements proxyinterfacePR {
 
         if (typeof updateBody.centro_vac !== "undefined") {
             this.TypeCheckCV(updateBody.centro_vac);
-            safeBody.centro_vac = updateBody.centro_vac;
+            safeBody.centro_vac_id = updateBody.centro_vac;
         }
 
         if (typeof updateBody.vaccino !== "undefined")
             await this.TypeCheckVaccino(updateBody.vaccino);
-        safeBody.vaccino = updateBody.vaccino;
+        safeBody.vaccinoid = updateBody.vaccino;
         console.log("basic control finished");
 
         console.log(safeBody);
@@ -139,7 +142,7 @@ export class proxyPr implements proxyinterfacePR {
         let result = this.model.getModel().count({
             where: {
                 id: id,
-                user: user
+                userid: user
             }
         });
 
@@ -183,7 +186,7 @@ export class proxyPr implements proxyinterfacePR {
         let count = await this.model.getModel().count({
             where: {
                 data: data,
-                centro_vac: centro,
+                centro_vac_id: centro,
                 slot: slot
             }
         });
@@ -279,15 +282,15 @@ export class proxyPr implements proxyinterfacePR {
     async takeNumberOfPrenotation(fascia: Boolean): Promise<Array<any>> {
         if (fascia) {
             let result = await this.model.getModel().findAndCountAll({
-                attributes: ['centro_vac', 'data', 'fascia'],
-                group: ['centro_vac', 'data', 'fascia']
+                attributes: ['centro_vac_id', 'data', 'fascia'],
+                group: ['centro_vac_id', 'data', 'fascia']
             })
             return result.count
         }
         else {
             let result = await this.model.getModel().findAndCountAll({
-                attributes: ['centro_vac', 'data'],
-                group: ['centro_vac', 'data']
+                attributes: ['centro_vac_id', 'data'],
+                group: ['centro_vac_id', 'data']
             })
             return result.count
         }
@@ -310,7 +313,7 @@ export class proxyPr implements proxyinterfacePR {
             let query = await this.model.getModel().findAll({
                 attributes: ['data', 'slot'],
                 where: {
-                    centro_vac: id,
+                    centro_vac_id: id,
                     data: data
                 }
             });
@@ -320,7 +323,7 @@ export class proxyPr implements proxyinterfacePR {
             let query = await this.model.getModel().findAll({
                 attributes: ['data', 'slot'],
                 where: {
-                    centro_vac: id,
+                    centro_vac_id: id,
                     data: data,
                     fascia: fascia
                 }
@@ -332,17 +335,17 @@ export class proxyPr implements proxyinterfacePR {
     // Metodo per ottenere le statistiche sui centri vaccinali e sulle prenotazioni che hanno avuto esito positivo
     async getStatisticPositive(order:Boolean = true): Promise<Array<Object>>{
         let positiveResult = await this.model.getModel().findAndCountAll({
-            attributes: ['centro_vac', 'stato'],
+            attributes: ['centro_vac_id', 'stato'],
             where: {stato: 1},
-            group: ['centro_vac', 'stato']
+            group: ['centro_vac_id', 'stato']
         });
         let allResult = await this.model.getModel().findAndCountAll({
-            attributes: ['centro_vac'],
-            group: ['centro_vac']
+            attributes: ['centro_vac_id'],
+            group: ['centro_vac_id']
         });
         let statistic = positiveResult.count.map((value) => {
                 allResult.count.map((val) => {
-                    if(value.centro_vac == val.centro_vac){
+                    if(value.centro_vac_id == val.centro_vac_id){
                         value.media = (value.count/val.count).toFixed(2);
                     }
                 });
@@ -398,7 +401,7 @@ export class proxyPr implements proxyinterfacePR {
                 list = await this.model.getModel().findAndCountAll({
                 attributes:['centro_vac','data'],
                 where: {
-                    centro_vac:id,
+                    centro_vac_id:id,
                     data: data,
                     stato: 2
                 },

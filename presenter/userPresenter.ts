@@ -14,11 +14,12 @@ export class userPresenter {
         const proxy = new proxyUs();
         proxy.getUser(req.body.username).then((value) => {
             console.log(value);
-            if (value !== undefined && value.password === crypto.createHash('sha256').update(req.body.password).digest('hex')) {
+            if (value !== null && value.password === crypto.createHash('sha256').update(req.body.password).digest('hex')) {
                 res.send({ token: jwt.sign({ user: { "username": value.username, "tipo": value.tipo, "id": value.id } }, process.env.JWT_SECRET_KEY, { expiresIn: process.env.TOKEN_EXPIRE_TIME }) });
             }
             else
                 res.status(401).send({ message: "credenziale invalido" });
+                return;
         });
     };
 
