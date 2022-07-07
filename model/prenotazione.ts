@@ -102,12 +102,13 @@ export class Prenotazione implements proxyinterfacePR {
   }
 
   public async getPreCentro(centro: number, data: string) {
+    console.log("get prenotazione centro")
     return await this.prenotazione.findAll({
       where: {
         centro_vac_id: centro,
         data: data
       },
-      include:'user1'
+      include:"user"
     });
   }
 

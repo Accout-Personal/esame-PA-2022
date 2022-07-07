@@ -73,8 +73,7 @@ export class adminPresenter {
         let proxy = new proxyPr();
         if (typeof body.formato === 'undefined') body.formato = 'json';
         let result = await proxy.getListaPr(undefined, body.centro, body.data);
-
-        switch (req.formato.toLowerCase()) {
+        switch (body.formato.toLowerCase()) {
             case "pdf": {
                 const stream = res.writeHead(200, {
                     'Content-type': 'application/pdf',
