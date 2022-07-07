@@ -8,15 +8,8 @@ export class directorRes {
         let Prenotazione: any = value;
         let Response = new buildRes();
 
-        //tipo json
+        //default json
         switch (tipo) {
-            case 'json': {
-                await Response.ProduceInfo(value);
-                let Result = Response.getResult();
-                console.log(Result);
-                res.status(200).send({ "message": "prenotato con successo", "info": Result });
-                break;
-            }
             case 'qrcode': {
                 await Response.ProduceInfo(value);
                 let Stream: PassThrough = Response.ProduceQRCodeImmagine(value.uuid);
@@ -38,7 +31,11 @@ export class directorRes {
                 break;
             }
             default:{
-                throw Error("non e' un opzione valida");
+                await Response.ProduceInfo(value);
+                let Result = Response.getResult();
+                console.log(Result);
+                res.status(200).send({ "message": "prenotato con successo", "info": Result });
+                break;
             }
         }
     }

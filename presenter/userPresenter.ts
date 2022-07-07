@@ -4,6 +4,9 @@ import * as jwt from 'jsonwebtoken';
 import { proxyPr } from "../model/Proxymodel/proxyPR";
 import { directorRes } from "./builder/directorRes";
 
+import { buildCV } from "./builder/buildCV";
+import { proxyCV } from "../model/Proxymodel/proxyCV";
+
 export class userPresenter {
 
     public static async login(req, res) {
@@ -39,11 +42,10 @@ export class userPresenter {
         const body = req.body;
         try {
             let value = await Proxy.insertNewPr(body.data, body.slot, body.centro_vac, body.vaccino, req.user.user.id);
-            await directorRes.respose(res, value, body.tipo).catch(err=>{
+            await directorRes.respose(res, value, body.tipo).catch(err => {
                 console.log(err);
                 res.status(400).send({ "errore": err.message });
             });
-
         } catch (error) {
             console.log(error);
             res.status(400).send({ "errore": error.message });
@@ -61,11 +63,6 @@ export class userPresenter {
         catch (error) {
             res.status(401).send({ "errore": error.message });
         }
-
-        //TODO:QRcode,PDF...
-
-
-
     }
 
     public static cancellaPre(req, res) {
@@ -77,6 +74,42 @@ export class userPresenter {
             res.status(401).send({ "errore": error.message });
         });
 
+    }
+
+    //filtro centro per la distanza e disponibilita'
+    public static async getCentro(req, res) {
+        //{lat:number,long:number,disp:boolean,data:string,filtro:boolean}
+        let body = req.body;
+        let user = req.user.user.id;
+        let Info = {};
+        let proxy = new proxyCV();
+        let builder = new buildCV(proxy);
+        //disponibilita' falsa, solo distanza
+        if(typeof body.disp === 'undefined' || !body.disp){
+            await builder.producePartA(body.lat,body.long,body.dist,body.order);
+            let result = builder.getResult();
+            res.send(result);
+        }else{
+            //disponibilita'distanza e disponibilita
+            await builder.producePartB(body.lat,body.long,body.dist,body.order);
+            let result = builder.getResult();
+            res.send(result);
+        }
+
+
+    }
+
+    //filtro centro per i max 5 giorni
+    public static async getSlotsCentro(req, res) {
+        //{centro:number,data:[...],fascie:number}
+        let body = req.body;
+        let user = req.user.user.id;
+        // Metodo per ottenere gli slot temporali disponibili
+        let proxy = new proxyCV();
+        let builder = new buildCV(proxy);
+        await builder.getSlotFree(body.centro,body.data,body.fascie);
+        let result = builder.getResult();
+        res.send(result);
     }
 
 }

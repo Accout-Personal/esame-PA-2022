@@ -1,12 +1,14 @@
 import { UserRoute } from "../Route";
 import { AdminRoute } from "../Route";
-import {app} from "../Route";
+import {app,createRouting} from "../Route";
 import * as adminAuth from "./adminAuth";
 import * as auth from "./auth";
 import * as error from "./errors";
 import {unless} from 'express-unless';
 
-export function initMiddleware(){
+export function mediate(){
+
+    console.log("initialize routing mediator...");
     
     app.use(auth.ControllaToken.unless({
             path:[{url:'/qrcode/qrcodeEncode'},{url:'/qrcode/qrcodeDecode'},{url:'/login'}]
@@ -20,15 +22,18 @@ export function initMiddleware(){
     
 
     AdminRoute.use(adminAuth.ControlloPrivilegio);
+    createRouting();
+
+    app.use(error.logErrors);
+    app.use(error.errorHandler);
     
-    
-    console.log("mediator initialized..");
+    console.log("routing mediator initialized..");
+    app.listen(3000);
 
 }
 
 export function initErrorHandler(){
-    app.use(error.logErrors);
-    app.use(error.errorHandler);
+    
 }
 
 
