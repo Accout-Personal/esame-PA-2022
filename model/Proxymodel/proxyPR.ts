@@ -309,18 +309,7 @@ export class proxyPr implements proxyinterfacePR {
             return result.count
         }
     }
-/* Verificare se utilizzato
-    async takeSumF1F2() {
-        let result = await this.modelCV.getModel().findAll({
-            attributes: ['id', 'maxf1', 'maxf2']
-        })
-        result = result.map(val => {
-            val.dataValues.somma = val.dataValues.maxf1 + val.dataValues.maxf1
-            return val.dataValues;
-        });
-        return result;
-    }
-*/
+
 // Metodo che ritorna tutte le prenotazioni effettuate per una certa data, in un certo centro vaccinale e per una certa fascia
     async getSlotFull(id: number, data: Array<string>, fascia?: number): Promise<any> {
         if (typeof fascia === 'undefined') {
