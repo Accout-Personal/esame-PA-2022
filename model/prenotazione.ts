@@ -58,7 +58,18 @@ export class Prenotazione implements proxyinterfacePR {
       tableName: 'prenotazione',
       timestamps: false
     });
-    
+
+  }
+
+  public async confirmUUID(uuid: string) {
+    return await this.prenotazione.update(
+      { stato: 1 },
+      {
+        where: {
+          uuid: uuid
+        }
+      }
+    );
   }
 
   // metodo per inserire una prenotazione
@@ -73,7 +84,7 @@ export class Prenotazione implements proxyinterfacePR {
         userid: user
       });
   }
-// Metodo usato per effettuare una modifica di una prenotazione
+  // Metodo usato per effettuare una modifica di una prenotazione
   public async modifica(id: number, updatebody: any) {
     return await this.prenotazione.update(
       updatebody,
@@ -92,7 +103,7 @@ export class Prenotazione implements proxyinterfacePR {
         where: { id: id }
       });
   }
-// Metodo usato per prendere tutte le prenotazioni di un utente
+  // Metodo usato per prendere tutte le prenotazioni di un utente
   public async getPreUser(userid: number) {
     return await this.prenotazione.findAll({
       where: {
@@ -100,24 +111,24 @@ export class Prenotazione implements proxyinterfacePR {
       }
     });
   }
-// Metodo per prendere tutte le prenotazioni di centro vaccinale per una certa data
+  // Metodo per prendere tutte le prenotazioni di centro vaccinale per una certa data
   public async getPreCentro(centro: number, data: string) {
     return await this.prenotazione.findAll({
       where: {
         centro_vac_id: centro,
         data: data
       },
-      include:["user","vaccino"]
+      include: ["user", "vaccino"]
     });
   }
 
   //metodo per restituire informazioni della prenotazione
-  public async getInfo(uuid:number){
+  public async getInfo(uuid: number) {
     return await this.prenotazione.findOne({
-      where:{
-        uuid:uuid
+      where: {
+        uuid: uuid
       },
-      include:['user','vaccino']
+      include: ['user', 'vaccino']
     });
   }
 

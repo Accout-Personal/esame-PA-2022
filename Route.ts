@@ -31,9 +31,7 @@ export function createRouting() {
 
     AdminRoute.get('/listPrenota',adminPresenter.getListaCentroData);
 
-    AdminRoute.post('/confirmVax', (req, res, next) => {
-        res.send('conferma prenotazione');
-    });
+    AdminRoute.post('/confirmVax', adminPresenter.confermaUUID);
     AdminRoute.post('/verify', upload.single('qrcode_img'), adminPresenter.riceveQRCode);
 
     AdminRoute.get('/statCentro', (req, res, next) => {

@@ -19,7 +19,7 @@ export class userPresenter {
             }
             else
                 res.status(401).send({ message: "credenziale invalido" });
-                return;
+            return;
         });
     };
 
@@ -89,9 +89,9 @@ export class userPresenter {
         try {
             //disponibilita' falsa, solo distanza
             if (typeof body.disp === 'undefined' || !body.disp) {
-               // await builder.producePartA(body.lat, body.long, body.dist, body.order);
-               await builder.queryAlDB(false);
-                builder.filtraPerDistanza(body.lat,body.long,body.dist);
+                // await builder.producePartA(body.lat, body.long, body.dist, body.order);
+                await builder.queryAlDB(false);
+                builder.filtraPerDistanza(body.lat, body.long, body.dist);
                 builder.ordinamento(body.order)
                 let result = builder.getResult();
 
@@ -101,7 +101,7 @@ export class userPresenter {
                 if (typeof body.data === 'undefined') body.data = DateTime.now().toISODate();
                 //await builder.producePartB(body.lat, body.long, body.dist, body.data, body.order);
                 await builder.queryAlDB(true);
-                builder.filtraPerDistanza(body.lat,body.long,body.dist);
+                builder.filtraPerDistanza(body.lat, body.long, body.dist);
                 builder.filtraPrenData(body.data);
                 builder.filtraDisponibilita();
                 builder.trimdata();
