@@ -3,7 +3,6 @@ import { builderInterfaceCV } from "./builderInterface/builderInterfaceCV";
 import * as haversine from 'haversine'
 import { proxyPr } from "../../model/Proxymodel/proxyPR";
 import { DateTime } from "luxon";
-import { Prenotazione } from "../../model/prenotazione";
 
 export class buildCV implements builderInterfaceCV {
 
@@ -103,6 +102,7 @@ export class buildCV implements builderInterfaceCV {
         // Qui andiamo a effettuare dei controlli sui dati di inpit inseriti dall'utente
         if (fascia <= 0 || isNaN(fascia) || fascia >= 3 || !isFinite(fascia)) throw new Error('la fascia inserita non è valida');
         if (date.length > 5) throw new Error('Hai inserito troppe date');
+        date.filter(value => {return DateTime.fromISO(value).isValid && DateTime.now < DateTime.fromISO(value)})
         if (typeof centroCV !== 'number' || isNaN(centroCV) || !isFinite(centroCV)) throw new Error('Il centro vaccinale inserito non è corretto');
         // Qui andiamo a prendere i dati di interesse dalla tabella prenotazione
         let prenotazioni = await this.proxyPre.getSlotFull(centroCV, date, fascia);

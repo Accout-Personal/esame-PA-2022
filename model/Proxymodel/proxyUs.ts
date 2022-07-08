@@ -1,6 +1,6 @@
 import { proxyInterfaceUsers } from "../ProxyInterface/proxyinterfaceUsers";
 import { Users } from "../users";
-import { and, Sequelize } from "../../node_modules/sequelize/types/index";
+import { stringSanitizer } from "../../util/stringsanitizer";
 import * as crypto from 'node:crypto';
 import { DBConnection } from "../../config/sequelize";
 
@@ -14,6 +14,7 @@ export class proxyUs implements proxyInterfaceUsers {
     }
 // Questo metodo fa una query sulla tabella users del DB, passando come parametro uno username che è chiave
     public async getUser(username: string) {
+        username = stringSanitizer(username)
         if (this.TypeCheckUsername(username))
             return await this.model.getModel().findOne({
                 where: {
@@ -31,6 +32,9 @@ export class proxyUs implements proxyInterfaceUsers {
     }
 // Questo metodo serve per inserire un nuovo utente
     public async insertNewUsers(cf: string, username: string, password: string, tipo: number): Promise<Object> {
+        cf = stringSanitizer(cf);
+        username = stringSanitizer(username);
+        password = stringSanitizer(password);
         try {
             if (
             // Qui vengono sanificati i parametri di input inseriti dall'utente

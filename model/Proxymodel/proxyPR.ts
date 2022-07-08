@@ -425,6 +425,7 @@ export class proxyPr implements proxyinterfacePR {
 
     // Metodo per impostare le prenotazioni come 'non andate a buon fine'
     public async setBadPrenotations(data: string): Promise<void> {
+        if (typeof (data) !== 'string' || !(DateTime.fromISO(data).isValid)) throw new Error('La data inserita non è valida')
         let list = await this.getBadPrenotation(data);
         list = list.map((value) => {
             return value.dataValues.id

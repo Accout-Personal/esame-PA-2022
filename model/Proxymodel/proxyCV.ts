@@ -1,4 +1,3 @@
-import { and, Sequelize } from "../../node_modules/sequelize/types/index";
 import { Centro_vaccinale } from "../centro_vaccinale";
 import { proxyInterfaceCV } from "../ProxyInterface/proxyinterfaceCV";
 import {DBConnection} from "../../config/sequelize";

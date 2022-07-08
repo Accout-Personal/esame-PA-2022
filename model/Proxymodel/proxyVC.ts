@@ -1,6 +1,6 @@
 import { proxyInterfaceVac } from "../ProxyInterface/proxyinterfaceVacc";
 import { Vaccini } from "../vaccino";
-import { Sequelize, Model, DataTypes } from 'sequelize';
+import { stringSanitizer } from "../../util/stringsanitizer";
 import {DBConnection} from "../../config/sequelize"
 // Questa classe rappresenta il proxy per la componente model del vaccino
 export class proxyVC implements proxyInterfaceVac {
@@ -11,7 +11,8 @@ export class proxyVC implements proxyInterfaceVac {
         this.model = new Vaccini(DBConnection.getInstance().getConnection())
     }
 // Metodo per inserire un nuovo vaccino
-    async insertNewVacc(nome:string, validita:number): Promise<Object> {  
+    async insertNewVacc(nome:string, validita:number): Promise<Object> {
+        nome = stringSanitizer(nome);  
         try {
         if(this.TypeCheckNome(nome) && this.TypeCheckValidita(validita)) {
                 return await this.model.insertNewVacc(nome, validita);  
