@@ -30,10 +30,6 @@ export class Centro_vaccinale implements proxyInterfaceCV {
     });
   }
 
-  getProxyModel(): Centro_vaccinale {
-    return this;
-  }
-
   // Metodo per inserire un nuovo centro centro vaccinale
   public async insertNewCV(lati: number, longi: number, nome: string, maxf1: number, maxf2: number): Promise<Object> {
     try {
@@ -44,20 +40,10 @@ export class Centro_vaccinale implements proxyInterfaceCV {
     }
   }
 
-  // Metodo per ottenere il modello
+  // Metodo per ottenere il modello della tabella
   public getModel(): any {
     return this.centro_vaccinale;
   }
-
-  // Metodo per ottenere tutti i centri vaccinali
-  /*  async getAll():Promise<any>{
-      try {
-        let result = await this.centro_vaccinale.findAll()
-        return result;
-      } catch (error) {
-        return error;
-      }
-    }*/
 
   //Metodo per ottenere determinati centri vaccinali 
   async getSpecificCV(id: number): Promise<Object> {
@@ -69,7 +55,7 @@ export class Centro_vaccinale implements proxyInterfaceCV {
     });
     return query;
   }
-
+// Metodo per eseguire una query sulla tabella passando l'id del centro vaccinale
   public async findOne(id:number){
     return await this.centro_vaccinale.findOne({
       where:{
