@@ -1,6 +1,6 @@
 import * as jwt from 'jsonwebtoken';
 import {unless} from 'express-unless';
-
+// Questo metodo serve per controllare se il token è stato inviato oppure no
 export const ControllaToken = (req,res,next) => {
         const bearerHeader = req.headers.authorization;
         if(typeof bearerHeader!=='undefined'){
@@ -14,7 +14,7 @@ export const ControllaToken = (req,res,next) => {
         }
     }
 ControllaToken.unless = unless;
-
+// Questo metodo serve per controllare se il token inviato è valido oppure no
 export const verificaEAutorizza = (req,res,next) =>{
     try {
         let decoded = jwt.verify(req.token, process.env.JWT_SECRET_KEY);

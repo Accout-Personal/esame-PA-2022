@@ -1,3 +1,4 @@
+// Qui abbiamo definito una funzione che serve per controllare i privilegi dell'utente
 export const ControlloPrivilegio = function(req,res,next){
     console.log("admin middleware: "+ req.user);
         if(req.user.user.tipo == 1){
