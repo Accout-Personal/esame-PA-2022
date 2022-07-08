@@ -36,6 +36,15 @@ export class adminPresenter {
     }
 
     public static async riceveQRCode(req, res) {
+        var uuid = await this.decodeUUID(req);
+        let result = await new proxyPr().getPrInfo(uuid);
+        return res.send({CF:result.user.cf,
+            data:result.data,
+            ora:slotToTime(result.slot),
+            vaccino:result.vaccino.nome});
+    }
+
+    private static async decodeUUID(req){
         var uuid: string;
         if (typeof req.file !== 'undefined') {
             let img: Buffer = req.file.buffer;
@@ -55,12 +64,10 @@ export class adminPresenter {
             //Legge dalla json
             uuid = req.body.uuid;
         }
-        let result = await new proxyPr().getPrInfo(uuid);
-        return res.send({CF:result.user.cf,
-            data:result.data,
-            ora:slotToTime(result.slot),
-            vaccino:result.vaccino.nome});
+        return uuid;
     }
+
+
 
     public static async getListaCentroData(req, res) {
         //req:{centro,data,formato}
