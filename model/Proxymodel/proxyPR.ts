@@ -348,6 +348,7 @@ export class proxyPr implements proxyinterfacePR {
     }
     // Metodo che restituisce, per ogni centro vaccinale, per ogni fascia, e, per ogni data, il numero di prenotazioni, più gli altri attributi
     async takeNumberOfPrenotation(fascia: Boolean): Promise<Array<any>> {
+        if(typeof fascia !== 'boolean') throw new Error('L\' opzione inserita non è valida')
         if (fascia) {
             let result = await this.model.getModel().findAndCountAll({
                 attributes: ['centro_vac_id', 'data', 'fascia'],
@@ -366,6 +367,7 @@ export class proxyPr implements proxyinterfacePR {
 
 // Metodo che ritorna tutte le prenotazioni effettuate per una certa data, in un certo centro vaccinale e per una certa fascia
     async getSlotFull(id: number, data: Array<string>, fascia?: number): Promise<any> {
+        await this.TypeCheckCV(id);
         if (typeof fascia === 'undefined') {
             let query = await this.model.getModel().findAll({
                 attributes: ['data', 'slot'],
@@ -440,7 +442,7 @@ export class proxyPr implements proxyinterfacePR {
         if (isNaN(id) || !isFinite(id) || typeof (id) !== 'number') throw new Error('il centro vaccinale che hai inserito non è corretto')
         if (typeof (data) !== 'string' || !(DateTime.fromISO(data).isValid) || DateTime.now > DateTime.fromISO(data)) throw new Error('La data che hai inserito non è corretta')
         let result = await this.getBadPrenotation(data, false, id);
-        console.log(result);
+        if(typeof result['count'][0] === 'undefined') throw new Error('La data inserita non ha prodotto risultati')
         return result['count'][0].count
     }
     // Metodo che restituisce tutte le prenotazioni che non sono andate a buon fine, prende in input una data, un booleano, che modifica la query.

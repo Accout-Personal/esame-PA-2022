@@ -7,13 +7,12 @@ import { directorRes } from "./builder/directorRes";
 import { buildCV } from "./builder/buildCV";
 import { proxyCV } from "../model/Proxymodel/proxyCV";
 import { DateTime } from 'luxon';
-
+// Qui abbiamo il presenter per lo User
 export class userPresenter {
-
+// Metodo per effettuare il login 
     public static async login(req, res) {
         const proxy = new proxyUs();
         proxy.getUser(req.body.username).then((value) => {
-            console.log(value);
             if (value !== null && value.password === crypto.createHash('sha256').update(req.body.password).digest('hex')) {
                 res.send({ token: jwt.sign({ user: { "username": value.username, "tipo": value.tipo, "id": value.id } }, process.env.JWT_SECRET_KEY, { expiresIn: process.env.TOKEN_EXPIRE_TIME }) });
             }
@@ -23,7 +22,7 @@ export class userPresenter {
         });
     };
 
-    //
+    // Metodo per registrare un nuovo utente
     public static async register(req, res) {
         const proxy = new proxyUs();
         proxy.insertNewUsers(req.body.cf,
@@ -39,7 +38,7 @@ export class userPresenter {
 
             });
     };
-
+// Metodo per inserire una nuova prenotazione
     public static async prenota(req, res) {
         const Proxy = new proxyPr();
         const body = req.body;
@@ -54,7 +53,7 @@ export class userPresenter {
             res.status(400).send({ "errore": error.message });
         };
     }
-
+// Questo metodo serve per modificare una prenotazione
     public static async modificaPre(req, res) {
         const Proxy = new proxyPr();
         const body = req.body;

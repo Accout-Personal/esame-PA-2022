@@ -103,8 +103,7 @@ export class buildCV implements builderInterfaceCV {
         // Qui andiamo a effettuare dei controlli sui dati di inpit inseriti dall'utente
         if (fascia <= 0 || isNaN(fascia) || fascia >= 3 || !isFinite(fascia)) throw new Error('la fascia inserita non è valida');
         if (date.length > 5) throw new Error('Hai inserito troppe date');
-        if (typeof centroCV !== 'number' || isNaN(centroCV)) throw new Error('Il centro vaccinale inserito non è corretto');
-
+        if (typeof centroCV !== 'number' || isNaN(centroCV) || !isFinite(centroCV)) throw new Error('Il centro vaccinale inserito non è corretto');
         // Qui andiamo a prendere i dati di interesse dalla tabella prenotazione
         let prenotazioni = await this.proxyPre.getSlotFull(centroCV, date, fascia);
         prenotazioni = prenotazioni.map(value => { return value.dataValues });
