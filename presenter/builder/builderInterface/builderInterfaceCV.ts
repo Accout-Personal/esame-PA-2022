@@ -3,7 +3,7 @@
  */
 
 export interface builderInterfaceCV {
-    producePartA(latitude:number, longitude: number,distanza:number, order?: Boolean): void;
-    producePartB(latitude:number, longitude: number,distanza:number,data:string, order?: Boolean): Promise<void>;
+    queryAlDB(disp: boolean);
+    ordinamento(desc: boolean);
     getResult(): Array<any>
 }

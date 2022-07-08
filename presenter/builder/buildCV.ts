@@ -15,114 +15,85 @@ export class buildCV implements builderInterfaceCV {
         this.proxy = proxy;
     }
 
-    //In questo metodo viene utilizzata soltanto la funzione di filtraggio relativa alla distanza
-    async producePartA(latitude: number, longitude: number, distanza: number, order: Boolean = true): Promise<void> {
+    //CASO A: filtro solo per la distanza
+    //CASO B: filtro per la distanza e la disponibilita
+    //CASO C: restituisce lo slot libero di un centro dando max 5 giorni
 
-        // Qui andiamo ad eseguire tutta una serie di controlli sui valori di input inseriti dall'utente
 
-        this.proxy.TypeCheckLati(latitude);
-        this.proxy.TypeCheckLongi(longitude);
-        if (typeof distanza !== 'number' || isNaN(distanza) || !isFinite(distanza)) throw new Error('La distanza inserita non è corretta')
-
-        let start = {
-            latitude: latitude,
-            longitude: longitude
-        }
+    public async queryAlDB(disp: boolean) {
         //Qui andiamo a prendere tutti i dati di interesse dal DB
-        
-        let all = await this.proxy.getProxyModel().getModel().findAll({
-            attributes: ['id', 'lati', 'longi']
-        });
-        //Qui ad ogni centro vaccinale viene aggiunta la distanza
-        all = all.map(val => {
-            let end = {
-                latitude: val.dataValues.lati,
-                longitude: val.dataValues.longi
-            }
-            val.dataValues.distanza = parseFloat(haversine(start, end, { unit: 'km' }).toFixed(2));
-            return val.dataValues;
-
-        });
-        // I vari centri vaccinali vengono filtrati sulla base della distanza
-        this.result = all.filter(value => {
-            return value.distanza <= distanza;
-
-        });
-        // Qui avviene l'ordinamento
-        if (order) this.result.sort((a, b) => {
-            return a.distanza - b.distanza
-        });
+        this.proxy.makeRelationship();
+        if (disp) {
+            this.result = await this.proxy.getProxyModel().getModel().findAll({
+                attributes: ['id', 'lati', 'longi']
+            });
+        }
         else {
-            this.result.sort((a, b) => {
-                return b.distanza - a.distanza
+            this.result = await this.proxy.getProxyModel().getModel().findAll({
+                attributes: ['id', 'lati', 'longi', 'maxf1', 'maxf2'],
+                include: 'prenotaziones'
             });
         }
     }
+    //ordinamento in base alla distanza, true ordine decrescente, false crescente
+    public ordinamento(desc: boolean = true) {
+        // Qui avviene l'ordinamento
+        let order = desc || typeof desc === "undefined" ? 1 : -1;
+        this.result.sort((a, b) => {
+            return order * (a.distanza - b.distanza)
+        });
+    }
 
-    //in questa funzione viene eseguita sia la funzione di filtraggio per la distanza che per la disponibilità
-    async producePartB(latitude: number, longitude: number, distanza: number, data: string, order: Boolean = true): Promise<void> {
+    //Qui viene filtrato la data della prenotazione di centri vaccinali
+    public filtraPrenData(data: string) {
+        let data1 = DateTime.fromISO(data).isValid ? data : DateTime.now().toISODate();
+        console.log(data1);
+        this.result = this.result.map(value => {
+            let val = value;
+            val.prenotaziones = val.prenotaziones.filter(prenotazione => {
+                return prenotazione.data == data1;
+            });
+            return val;
+        })
+    }
 
-        // Qui andiamo a effettuare tutta una serie di controlli che vengono 
+    //qui viene filtrato per la disponibilita
+    public filtraDisponibilita() {
+        this.result = this.result.filter(val => {
+            return (val.maxf1 + val.maxf2) > val.prenotaziones.length
+        });
+    }
 
-        this.proxy.TypeCheckLati(latitude)
-        this.proxy.TypeCheckLongi(longitude)
-        if (typeof distanza !== 'number' || isNaN(distanza) || !isFinite(distanza)) throw new Error('La distanza inserita non è corretta')
-        // Qui prendiamo tutti i dati d'interesse dalla tabella prenotazione
-        let prenotazioni;
-        if (DateTime.fromISO(data).isValid) {
-            let query = await this.proxyPre.takeNumberOfPrenotation(false);
-            prenotazioni = query.filter((val) => { if (val.data == data) return true })
-        }
-        else throw new Error("Hai inserito una data non corretta");
-
+    //qui vengono tagliati i dati non interessati
+    public trimdata() {
+        this.result = this.result.map(val => {
+            delete val.prenotaziones;
+            return val;
+        });
+    }
+    
+    //qui viene filtrato per la distanza
+    public filtraPerDistanza(latitude: number, longitude: number, distanza: number) {
+        this.proxy.TypeCheckLati(latitude);
+        this.proxy.TypeCheckLongi(longitude);
+        if (typeof distanza !== 'number' || isNaN(distanza) || !isFinite(distanza))
+            throw new Error('La distanza inserita non è corretta')
         let start = {
             latitude: latitude,
             longitude: longitude
         }
-
-        this.proxy.makeRelationship();
-
-        //Qui andiamo a prendere tutti i dati di interesse dal DB
-        let all = await this.proxy.getProxyModel().getModel().findAll({
-            attributes: ['id', 'lati', 'longi', 'maxf1', 'maxf2'],
-            include:'prenotaziones'
-        });
-        
-        //Qui andiamo ad aggiungere la distanza ad ogni centro vaccinale
-        all = all.map(val => {
+        //Qui ad ogni centro vaccinale viene calcolata la distanza
+        this.result = this.result.map(val => {
             let end = {
                 latitude: val.dataValues.lati,
                 longitude: val.dataValues.longi
             }
             val.dataValues.distanza = parseFloat(haversine(start, end, { unit: 'km' }).toFixed(2));
             return val.dataValues;
-        });
 
-
-        //filtro per distanza
-        this.result = all.filter(val => {
-            return val.distanza <= distanza;
-        });
-
-        
-        //filtro per la disponibilita
-        this.result = this.result.filter(val=>{
-            return (val.maxf1 + val.maxf2) > val.prenotaziones.length
-        });
-
-        // Qui viene effettuato l'ordinamento del risultato finale
-        if (order) this.result.sort((a, b) => {
-            return a.distanza - b.distanza
-        });
-        else {
-            this.result.sort((a, b) => {
-                return b.distanza - a.distanza
-            });
-        }
-
-        this.result = this.result.map(val=>{
-            delete val.prenotaziones;
-            return val;
+        }).filter(value => {
+            // I vari centri vaccinali vengono filtrati sulla base della distanza
+            return value.distanza <= distanza;
         });
     }
 
