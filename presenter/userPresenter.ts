@@ -104,7 +104,8 @@ export class userPresenter {
                 builder.filtraPerDistanza(body.lat,body.long,body.dist);
                 builder.filtraPrenData(body.data);
                 builder.filtraDisponibilita();
-                builder.ordinamento(body.order)
+                builder.trimdata();
+                builder.ordinamento(body.order);
 
                 let result = builder.getResult();
                 res.send(result);
