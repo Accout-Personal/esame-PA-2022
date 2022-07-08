@@ -3,7 +3,7 @@ import { builderInterfaceCV } from "./builderInterface/builderInterfaceCV";
 import * as haversine from 'haversine'
 import { proxyPr } from "../../model/Proxymodel/proxyPR";
 import { DateTime } from "luxon";
-
+// Questa è la classe builder con la quale andremo a costruire il nostro risultato che verrà restituito all'utente
 export class buildCV implements builderInterfaceCV {
 
     private result = [];
