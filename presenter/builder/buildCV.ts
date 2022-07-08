@@ -20,19 +20,20 @@ export class buildCV implements builderInterfaceCV {
 
         // Qui andiamo ad eseguire tutta una serie di controlli sui valori di input inseriti dall'utente
 
-            this.proxy.TypeCheckLati(latitude)
-            this.proxy.TypeCheckLongi(longitude)
-            if(typeof distanza !== 'number' || isNaN(distanza) || !isFinite(distanza))throw new Error ('La distanza inserita non è corretta')
+        this.proxy.TypeCheckLati(latitude);
+        this.proxy.TypeCheckLongi(longitude);
+        if (typeof distanza !== 'number' || isNaN(distanza) || !isFinite(distanza)) throw new Error('La distanza inserita non è corretta')
 
         let start = {
             latitude: latitude,
             longitude: longitude
         }
-    //Qui andiamo a prendere tutti i dati di interesse dal DB
+        //Qui andiamo a prendere tutti i dati di interesse dal DB
+        
         let all = await this.proxy.getProxyModel().getModel().findAll({
             attributes: ['id', 'lati', 'longi']
         });
-    //Qui ad ogni centro vaccinale viene aggiunta la distanza
+        //Qui ad ogni centro vaccinale viene aggiunta la distanza
         all = all.map(val => {
             let end = {
                 latitude: val.dataValues.lati,
@@ -40,14 +41,14 @@ export class buildCV implements builderInterfaceCV {
             }
             val.dataValues.distanza = parseFloat(haversine(start, end, { unit: 'km' }).toFixed(2));
             return val.dataValues;
-            
+
         });
-    // I vari centri vaccinali vengono filtrati sulla base della distanza
+        // I vari centri vaccinali vengono filtrati sulla base della distanza
         this.result = all.filter(value => {
             return value.distanza <= distanza;
 
         });
-    // Qui avviene l'ordinamento
+        // Qui avviene l'ordinamento
         if (order) this.result.sort((a, b) => {
             return a.distanza - b.distanza
         });
@@ -65,7 +66,7 @@ export class buildCV implements builderInterfaceCV {
 
         this.proxy.TypeCheckLati(latitude)
         this.proxy.TypeCheckLongi(longitude)
-        if(typeof distanza !== 'number' || isNaN(distanza) || !isFinite(distanza))throw new Error ('La distanza inserita non è corretta')
+        if (typeof distanza !== 'number' || isNaN(distanza) || !isFinite(distanza)) throw new Error('La distanza inserita non è corretta')
         // Qui prendiamo tutti i dati d'interesse dalla tabella prenotazione
         let prenotazioni;
         if (DateTime.fromISO(data).isValid) {
@@ -78,12 +79,16 @@ export class buildCV implements builderInterfaceCV {
             latitude: latitude,
             longitude: longitude
         }
-    //Qui andiamo a prendere tutti i dati di interesse dal DB
+
+        this.proxy.makeRelationship();
+
+        //Qui andiamo a prendere tutti i dati di interesse dal DB
         let all = await this.proxy.getProxyModel().getModel().findAll({
-            attributes: ['id', 'lati', 'longi', 'maxf1', 'maxf2']
+            attributes: ['id', 'lati', 'longi', 'maxf1', 'maxf2'],
+            include:'prenotaziones'
         });
-        let check = true;
-    //Qui andiamo ad aggiungere la distanza ad ogni centro vaccinale
+        
+        //Qui andiamo ad aggiungere la distanza ad ogni centro vaccinale
         all = all.map(val => {
             let end = {
                 latitude: val.dataValues.lati,
@@ -92,26 +97,20 @@ export class buildCV implements builderInterfaceCV {
             val.dataValues.distanza = parseFloat(haversine(start, end, { unit: 'km' }).toFixed(2));
             return val.dataValues;
         });
-    // I vari centri vaccinali vengono filtrati sulla base della distanza
+
+
+        //filtro per distanza
         this.result = all.filter(val => {
-            if (val.distanza <= distanza) {
-                // Qui viene aggiunto il residuo ai vari centri vaccinali, cioè il numero di slot che sono ancora disponibili
-                prenotazioni.map(pre => {
-                    if (val.id == pre.centro_vac && check) {
-                        val.residuo = (val.maxf1 + val.maxf2) - pre.count;
-                        check = false;
-                    }
-                    if (check) val.residuo = val.maxf1 + val.maxf2
-                });
-                if (!check) check = true;
-                return true;
-            }
-            else return false;
+            return val.distanza <= distanza;
         });
-    // Qui viene effettuato l'ordinamento del risultato finale
-        this.result = this.result.filter(value => {
-            return value.residuo > 0;
+
+        
+        //filtro per la disponibilita
+        this.result = this.result.filter(val=>{
+            return (val.maxf1 + val.maxf2) > val.prenotaziones.length
         });
+
+        // Qui viene effettuato l'ordinamento del risultato finale
         if (order) this.result.sort((a, b) => {
             return a.distanza - b.distanza
         });
@@ -120,26 +119,31 @@ export class buildCV implements builderInterfaceCV {
                 return b.distanza - a.distanza
             });
         }
+
+        this.result = this.result.map(val=>{
+            delete val.prenotaziones;
+            return val;
+        });
     }
 
     // Metodo per ottenere gli slot temporali disponibili
     async getSlotFree(centroCV: number, date: Array<string>, fascia?: number): Promise<void> {
-        
-    // Qui andiamo a effettuare dei controlli sui dati di inpit inseriti dall'utente
+
+        // Qui andiamo a effettuare dei controlli sui dati di inpit inseriti dall'utente
         if (fascia <= 0 || isNaN(fascia) || fascia >= 3 || !isFinite(fascia)) throw new Error('la fascia inserita non è valida');
         if (date.length > 5) throw new Error('Hai inserito troppe date');
         if (typeof centroCV !== 'number' || isNaN(centroCV)) throw new Error('Il centro vaccinale inserito non è corretto');
 
-    // Qui andiamo a prendere i dati di interesse dalla tabella prenotazione
+        // Qui andiamo a prendere i dati di interesse dalla tabella prenotazione
         let prenotazioni = await this.proxyPre.getSlotFull(centroCV, date, fascia);
         prenotazioni = prenotazioni.map(value => { return value.dataValues });
-    // Caso in cui la fascia inserita sia uguale a 1
+        // Caso in cui la fascia inserita sia uguale a 1
         if (typeof fascia === 'number' && fascia == 1) {
             for (let d of date) {
                 let freeSlotF1 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
                 prenotazioni.map(value => {
                     if (d == value.data) {
-                    // Qui vado a rimuovere gli slot che sono già occupati
+                        // Qui vado a rimuovere gli slot che sono già occupati
                         freeSlotF1 = freeSlotF1.filter(val => {
                             if (val == value.slot) return false;
                             else return true;
@@ -153,7 +157,7 @@ export class buildCV implements builderInterfaceCV {
                 });
             }
         };
-    // Caso in cui la fascia è uguale a 2, analogo al caso precedente
+        // Caso in cui la fascia è uguale a 2, analogo al caso precedente
         if (typeof fascia === 'number' && fascia == 2) {
             for (let d of date) {
                 let freeSlotF2 = [16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35];
@@ -171,7 +175,7 @@ export class buildCV implements builderInterfaceCV {
                 });
             }
         };
-    // Caso in cui la fascia non è stata definita, analogo al caso precedente, solo che in questo caso consideriamo tutti gli slot
+        // Caso in cui la fascia non è stata definita, analogo al caso precedente, solo che in questo caso consideriamo tutti gli slot
         if (typeof fascia === 'undefined') {
             for (let d of date) {
                 let freeSlot = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35];

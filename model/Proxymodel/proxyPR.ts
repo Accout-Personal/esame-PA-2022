@@ -53,26 +53,49 @@ export class proxyPr implements proxyinterfacePR {
         return await this.model.insertNewPr(sanitizeddata, fascia, slot, centro_vaccino, vaccino, user);
     }
 
+    public async getPrInfo(uuid:string){
+        let sanitized = stringSanitizer(uuid);
+        this.makeRelationship();
+        console.log(sanitized);
+        if(typeof sanitized === 'undefined') throw Error("codice sconosciuto");
+        let result = await this.model.getInfo(sanitized);
+        if (result === null) throw Error("codice sconosciuto");
+        return result
+    }
+
+
     public async getListaPr(userid?: number, centro?: number, data?: string) {
-        
-        this.model.getModel().belongsTo(this.modelU.getModel());
-        this.modelU.getModel().hasMany(this.model.getModel(),{foreignKey: 'userid'});
 
-        if(typeof(data) !== 'string' || !(DateTime.fromISO(data).isValid) || DateTime.now > DateTime.fromISO(data)) throw new Error ('La data che hai inserito non è corretta');
-        if(typeof centro !== 'number' || isNaN(centro) || !isFinite(centro)) throw new Error ('il centro vaccinale che hai inserito non è corretto');
+        if (typeof (data) !== 'string' || !(DateTime.fromISO(data).isValid) || DateTime.now > DateTime.fromISO(data))
+            throw new Error('La data che hai inserito non è corretta');
+        if (typeof centro !== 'number' || isNaN(centro) || !isFinite(centro))
+            throw new Error('il centro vaccinale che hai inserito non è corretto');
 
-        if (typeof userid === "undefined" && typeof centro === "undefined") {
+        if (typeof userid === "undefined" && typeof centro === "undefined")
             throw Error("non hai inserito nessun paramentro");
-        }
 
         if (typeof userid === "undefined") {
             this.TypeCheckData(data);
+            this.makeRelationship();
             return await this.model.getPreCentro(centro, data);
         }
 
         this.TypeCheckUser(userid);
         console.log("get user list");
         return await this.model.getPreUser(userid);
+    }
+
+    //costruisce relazioni utilizzati tra le tabelle utilizzati
+    public makeRelationship() {
+
+        this.modelU.getModel().hasMany(this.model.getModel(), { foreignKey: 'userid' });
+        this.model.getModel().belongsTo(this.modelU.getModel(),{ foreignKey: 'userid' });
+
+        this.modelV.getModel().hasMany(this.model.getModel(), { foreignKey: 'vaccinoid' });
+        this.model.getModel().belongsTo(this.modelV.getModel(),{ foreignKey: 'vaccinoid' });
+
+        this.modelCV.getModel().hasMany(this.model.getModel(), { foreignKey: 'centro_vac_id' });
+        this.model.getModel().belongsTo(this.modelCV.getModel(), { foreignKey: 'centro_vac_id' });
     }
 
     public async cancellaPre(id: number, user: number) {
@@ -122,19 +145,10 @@ export class proxyPr implements proxyinterfacePR {
         console.log("data: " + data + " centro: " + centro + " fascia: " + fascia);
         console.log(oldPr);
         //devo controllare la disponibilita' solo se cambio la fascia o data.
-        if (oldPr.data != safeBody.data || oldPr.fascia != safeBody.fascia) {
-            //this.checkAvailability(safeBody.data ? safeBody.data : oldPr.data, safeBody.centro ? safeBody.centro : oldPr.centro_vac, safeBody.fascia ? safeBody.fascia : oldPr.fascia);
-            console.log("controllo disponibilita'");
+        if (oldPr.data != safeBody.data || oldPr.fascia != safeBody.fascia)
             await this.checkAvailability(data, centro, fascia);
-        }
-        console.log("check slot");
         await this.checkSlot(data, centro, safeBody.slot ? safeBody.slot : oldPr.slot);
-        //controllo vaccino
-        console.log("check vaccino");
-        console.log("user " + updateBody.user);
         await this.checkVaxValidity(data, safeBody.vaccino, updateBody.user, updateBody.id);
-
-        console.log("aggiornamento delle informazioni");
         return await this.model.modifica(updateBody.id, safeBody);
     }
 
@@ -157,8 +171,8 @@ export class proxyPr implements proxyinterfacePR {
 
         let DataPre = DateTime.fromISO(data);
         let queryBody = {
-            user: user,
-            vaccino: vaccino,
+            userid: user,
+            vaccinoid: vaccino,
             stato: [0, 1]
         };
         var LastVax = await this.model.getModel().findAll({
@@ -167,11 +181,11 @@ export class proxyPr implements proxyinterfacePR {
         });
 
         if (typeof excludeid !== 'undefined') {
-            LastVax = LastVax.filter((element)=>{
+            LastVax = LastVax.filter((element) => {
                 return element.id != excludeid;
             })
         }
-        
+
         //mai vaccinato
         if (JSON.parse(JSON.stringify(LastVax)).length == 0) {
             console.log("questo user non ha mai vaccinato.")
@@ -336,10 +350,10 @@ export class proxyPr implements proxyinterfacePR {
     }
 
     // Metodo per ottenere le statistiche sui centri vaccinali e sulle prenotazioni che hanno avuto esito positivo
-    async getStatisticPositive(order:Boolean = true): Promise<Array<Object>>{
+    async getStatisticPositive(order: Boolean = true): Promise<Array<Object>> {
         let positiveResult = await this.model.getModel().findAndCountAll({
             attributes: ['centro_vac_id', 'stato'],
-            where: {stato: 1},
+            where: { stato: 1 },
             group: ['centro_vac_id', 'stato']
         });
         let allResult = await this.model.getModel().findAndCountAll({
@@ -347,30 +361,30 @@ export class proxyPr implements proxyinterfacePR {
             group: ['centro_vac_id']
         });
         let statistic = positiveResult.count.map((value) => {
-                allResult.count.map((val) => {
-                    if(value.centro_vac_id == val.centro_vac_id){
-                        value.media = (value.count/val.count).toFixed(2);
-                    }
-                });
-                return value;
+            allResult.count.map((val) => {
+                if (value.centro_vac_id == val.centro_vac_id) {
+                    value.media = (value.count / val.count).toFixed(2);
+                }
             });
-        if(order) statistic.sort((a, b) => {
-                return a.media - b.media;
-            });
-        else  statistic.sort((a, b) => {
-                return b.media - a.media;
-            });
-            return statistic;
-    }  
-    
+            return value;
+        });
+        if (order) statistic.sort((a, b) => {
+            return a.media - b.media;
+        });
+        else statistic.sort((a, b) => {
+            return b.media - a.media;
+        });
+        return statistic;
+    }
+
     // Metodo per impostare le prenotazioni come 'non andate a buon fine'
-    async setBadPrenotations(data:string): Promise<void> {
+    async setBadPrenotations(data: string): Promise<void> {
         let list = await this.getBadPrenotation(data);
         list = list.map((value) => {
             return value.dataValues.id
         })
-        await this.model.getModel().update({stato: 2},{
-            where:{
+        await this.model.getModel().update({ stato: 2 }, {
+            where: {
                 id: list
             }
         })
@@ -378,19 +392,18 @@ export class proxyPr implements proxyinterfacePR {
 
     // Questo metodo ritorna il numero di prenotazioni che non sono andate a buon fine
 
-    async getCountBadPrenotation(data:string, id:number):Promise<number> {
-        if(isNaN(id) || !isFinite(id) || typeof(id) !== 'number') throw new Error ('il centro vaccinale che hai inserito non è corretto')
-        if(typeof(data) !== 'string' || !(DateTime.fromISO(data).isValid) || DateTime.now > DateTime.fromISO(data)) throw new Error ('La data che hai inserito non è corretta')
-        let result = await this.getBadPrenotation(data,false,id);
+    async getCountBadPrenotation(data: string, id: number): Promise<number> {
+        if (isNaN(id) || !isFinite(id) || typeof (id) !== 'number') throw new Error('il centro vaccinale che hai inserito non è corretto')
+        if (typeof (data) !== 'string' || !(DateTime.fromISO(data).isValid) || DateTime.now > DateTime.fromISO(data)) throw new Error('La data che hai inserito non è corretta')
+        let result = await this.getBadPrenotation(data, false, id);
         return result['count'][0].count
     }
 
-    async getBadPrenotation(data:string,option:Boolean = true, id?:number): Promise<Array<any>>{
+    async getBadPrenotation(data: string, option: Boolean = true, id?: number): Promise<Array<any>> {
         let list;
-        if(option)
-        {
-                list = await this.model.getModel().findAll({
-                attributes:['id','data'],
+        if (option) {
+            list = await this.model.getModel().findAll({
+                attributes: ['id', 'data'],
                 where: {
                     data: data,
                     stato: 0
@@ -398,10 +411,10 @@ export class proxyPr implements proxyinterfacePR {
             });
         }
         else {
-                list = await this.model.getModel().findAndCountAll({
-                attributes:['centro_vac_id','data'],
+            list = await this.model.getModel().findAndCountAll({
+                attributes: ['centro_vac_id', 'data'],
                 where: {
-                    centro_vac_id:id,
+                    centro_vac_id: id,
                     data: data,
                     stato: 2
                 },

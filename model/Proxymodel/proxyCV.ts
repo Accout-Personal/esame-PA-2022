@@ -3,14 +3,16 @@ import { Centro_vaccinale } from "../centro_vaccinale";
 import { proxyInterfaceCV } from "../ProxyInterface/proxyinterfaceCV";
 import {DBConnection} from "../../config/sequelize";
 import { stringSanitizer } from "../../util/stringsanitizer";
+import { Prenotazione } from "../prenotazione";
 // Nel proxy andiamo a implementare tutti i controlli e le sanificazioni sui dati di input per evitare problemi e crash del sistema
 
 export class proxyCV implements proxyInterfaceCV{
 
     private model:Centro_vaccinale;
-
+    private modelPR:Prenotazione;
     constructor(){
         this.model = new Centro_vaccinale(DBConnection.getInstance().getConnection())
+        this.modelPR = new Prenotazione(DBConnection.getInstance().getConnection());
     }
 
     async insertNewCV(lati: number, longi: number, nome: string, maxf1: number, maxf2: number): Promise<Object> {
@@ -66,9 +68,17 @@ export class proxyCV implements proxyInterfaceCV{
         return true;
     }
 
+    public makeRelationship(){
+        console.log("making relationship on proxyCV");
+        this.model.getModel().hasMany(this.modelPR.getModel(),{foreignKey: 'centro_vac_id'});
+        this.modelPR.getModel().belongsTo(this.model.getModel(),{foreignKey: 'centro_vac_id'});
+    }
+
     // Metodo per ottenere il riferimento al model
     public getProxyModel(){
         return this.model;
     }
+
+
 
 }

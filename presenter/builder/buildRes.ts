@@ -14,8 +14,8 @@ export class buildRes implements builderInterfaceRes {
 
     public async ProduceInfo(Values: any): Promise<void> {
 
-        let user: any = await new proxyUs().getUserByID(Values.user);
-        let centro: any = await new proxyCV().getCentro(Values.centro_vac);
+        let user: any = await new proxyUs().getUserByID(Values.userid);
+        let centro: any = await new proxyCV().getCentro(Values.centro_vac_id);
         this.Info = { uuid: Values.uuid, data: Values.data, ora: slotToTime(Values.slot), presso: centro.nome, cf: user.cf }
     };
 

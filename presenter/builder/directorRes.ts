@@ -20,7 +20,7 @@ export class directorRes {
             case 'pdf': {
                 const stream = res.writeHead(200, {
                     'Content-type': 'application/pdf',
-                    'Content-Disittion': 'attachment;filename=invoice.pdf'
+                    'Content-Disittion': 'attachment;filename=infoAppuntamento.pdf'
                 });
                 await Response.ProduceInfo(value);
                 await Response.ProduceQRCodeBuffer(value.uuid);

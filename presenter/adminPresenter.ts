@@ -5,7 +5,9 @@ import { proxyCV } from "../model/Proxymodel/proxyCV";
 import { proxyVC } from "../model/Proxymodel/proxyVC";
 import { proxyPr } from "../model/Proxymodel/proxyPR";
 import { generatePDF } from "../util/startPDF";
-
+import * as qrCode from 'qrcode-reader';
+import * as Jimp from 'jimp';
+import { slotToTime } from "../util/slotTotime";
 export class adminPresenter {
 
     public static async creaCentroVax(req, res) {
@@ -34,37 +36,30 @@ export class adminPresenter {
     }
 
     public static async riceveQRCode(req, res) {
+        var uuid: string;
         if (typeof req.file !== 'undefined') {
             let img: Buffer = req.file.buffer;
-            //Importing jimp module
-            var Jimp = require("jimp");
-            // Importing qrcode-reader module
-            var qrCode = require('qrcode-reader');
-
-            // Read the image and create a buffer
-            // Parse the image using Jimp.read() method
-            Jimp.read(img, function (err, image) {
+            
+            let image = await Jimp.read(img);
+            let qrcode = new qrCode();
+            qrcode.callback = function (err, value) {
                 if (err) {
                     console.error(err);
                 }
-                // Creating an instance of qrcode-reader module
-                let qrcode = new qrCode();
-                qrcode.callback = function (err, value) {
-                    if (err) {
-                        console.error(err);
-                    }
-                    // Printing the decrypted value
-                    console.log(value.result);
-                };
-                // Decoding the QR code
-                qrcode.decode(image.bitmap);
-            });
+                uuid = value.result;
+            };
+            // Decoding the QR code
+            qrcode.decode(image.bitmap);
         }
         else {
-            //Legge dalla stringa
-            let uuid = req.body.uuid;
+            //Legge dalla json
+            uuid = req.body.uuid;
         }
-        return res.send("decode completed");
+        let result = await new proxyPr().getPrInfo(uuid);
+        return res.send({CF:result.user.cf,
+            data:result.data,
+            ora:slotToTime(result.slot),
+            vaccino:result.vaccino.nome});
     }
 
     public static async getListaCentroData(req, res) {
@@ -73,6 +68,18 @@ export class adminPresenter {
         let proxy = new proxyPr();
         if (typeof body.formato === 'undefined') body.formato = 'json';
         let result = await proxy.getListaPr(undefined, body.centro, body.data);
+        result = result.sort((a,b)=>{
+            return a.slot - b.slot;
+        }).map(value=>{
+            return {
+                slot:slotToTime(value.slot),
+                CF:value.user.cf,
+                vaccino:value.vaccino.nome,
+                uuid:value.uuid
+            }
+        });
+        let centro = await new proxyCV().getCentro(body.centro);
+
         switch (body.formato.toLowerCase()) {
             case "pdf": {
                 const stream = res.writeHead(200, {
@@ -84,15 +91,14 @@ export class adminPresenter {
                 doc.on('data', (chunk) => stream.write(chunk),);
                 doc.on('end', () => stream.end());
                 //Scrittura del documento.
-                doc.font('OpenSans', 25).text('Informazione della prenotazione del centro', 50, 10);
+                doc.font('OpenSans', 25).text('Appuntamenti del centro: '+ centro.nome, 50, 10);
+                doc.font('OpenSans', 20).text('Del giorno: '+ body.data);
                 doc.font('OpenSans', 10);
-                result = result.sort((a,b)=>{
-                    return a.slot - b.slot;
-                });
-
+                console.log(result);
                 result.forEach(element => {
-                    doc.text(element.slot+" "+element.user+" "+element.vaccino);
+                    doc.text(element.slot + "-----" + element.CF + "-----" + element.vaccino+"-----"+element.uuid);
                 });
+                doc.end();
 
                 break;
             }

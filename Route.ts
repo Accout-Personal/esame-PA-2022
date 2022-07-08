@@ -15,8 +15,6 @@ export function createRouting() {
     app.use('/user', UserRoute);
     app.use('/admin', AdminRoute);
 
-
-
     app.get('/login', userPresenter.login);
 
     UserRoute.get('/getCentro', userPresenter.getCentro);
@@ -33,10 +31,10 @@ export function createRouting() {
 
     AdminRoute.get('/listPrenota',adminPresenter.getListaCentroData);
 
-    AdminRoute.post('/verify', (req, res, next) => {
-        res.send('rotta lista prenotazione');
+    AdminRoute.post('/confirmVax', (req, res, next) => {
+        res.send('conferma prenotazione');
     });
-    app.post('/qrcode/qrcodeDecode', upload.single('qrcode_img'), adminPresenter.riceveQRCode);
+    AdminRoute.post('/verify', upload.single('qrcode_img'), adminPresenter.riceveQRCode);
 
     AdminRoute.get('/statCentro', (req, res, next) => {
         res.send('rotta statistica centro');

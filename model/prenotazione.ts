@@ -107,7 +107,17 @@ export class Prenotazione implements proxyinterfacePR {
         centro_vac_id: centro,
         data: data
       },
-      include:"user"
+      include:["user","vaccino"]
+    });
+  }
+
+  //metodo per restituire informazioni della prenotazione
+  public async getInfo(uuid:number){
+    return await this.prenotazione.findOne({
+      where:{
+        uuid:uuid
+      },
+      include:['user','vaccino']
     });
   }
 
