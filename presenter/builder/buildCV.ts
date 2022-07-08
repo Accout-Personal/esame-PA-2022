@@ -71,7 +71,7 @@ export class buildCV implements builderInterfaceCV {
             return val;
         });
     }
-    
+
     //qui viene filtrato per la distanza
     public filtraPerDistanza(latitude: number, longitude: number, distanza: number) {
         this.proxy.TypeCheckLati(latitude);
@@ -146,6 +146,7 @@ export class buildCV implements builderInterfaceCV {
                 });
             }
         };
+        
         // Caso in cui la fascia non è stata definita, analogo al caso precedente, solo che in questo caso consideriamo tutti gli slot
         if (typeof fascia === 'undefined') {
             for (let d of date) {
