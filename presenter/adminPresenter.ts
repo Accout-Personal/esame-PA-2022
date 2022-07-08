@@ -42,10 +42,10 @@ export class adminPresenter {
                 data: result.data,
                 ora: slotToTime(result.slot),
                 vaccino: result.vaccino.nome,
-                stato:result.stato
+                stato: result.stato
             });
         } catch (error) {
-            res.status(400).send({"message":error.message});
+            res.status(400).send({ "message": error.message });
         }
 
     }
@@ -53,9 +53,9 @@ export class adminPresenter {
     public static async confermaUUID(req, res) {
         try {
             await new proxyPr().confermatUUID(req);
-            res.send("ordine confermato");
+            res.status(200).send({message:"confermato con successo"});
         } catch (error) {
-            res.status(400).send({"message":error.message});
+            res.status(400).send({ "message": error.message });
         }
     }
 
@@ -107,6 +107,27 @@ export class adminPresenter {
                 res.status(401).send({ message: "il formato non e' valido: il formato puo' essere solo di json o pdf" });
                 break;
             }
+        }
+    }
+
+    public static async getStatCentri(req, res) {
+        try {
+            let body = req.body;
+            let result = await new proxyPr().getStatisticPositive(body.order);
+            res.send(result);
+        } catch (error) {
+            res.status(400).send({message:error.message});
+        }
+    }
+
+    public static async getBadStat(req,res){
+        try {
+            let body = req.body;
+            let result = await new proxyPr().getCountBadPrenotation(body.data,body.id);
+            res.send(result);
+        } catch (error) {
+            console.log(error);
+            res.status(400).send({message:error.message});
         }
     }
 }

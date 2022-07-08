@@ -34,9 +34,9 @@ export function createRouting() {
     AdminRoute.post('/confirmVax', adminPresenter.confermaUUID);
     AdminRoute.post('/verify', upload.single('qrcode_img'), adminPresenter.riceveQRCode);
 
-    AdminRoute.get('/statCentro', (req, res, next) => {
-        res.send('rotta statistica centro');
-    });
+    AdminRoute.get('/statCentro', adminPresenter.getStatCentri);
+
+    AdminRoute.get('/getassenze', adminPresenter.getBadStat);
 
     console.log('routing initialized..');
 }

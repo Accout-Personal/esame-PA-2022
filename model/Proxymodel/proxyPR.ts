@@ -390,7 +390,10 @@ export class proxyPr implements proxyinterfacePR {
     }
 
     // Metodo per ottenere le statistiche sui centri vaccinali e sulle prenotazioni che hanno avuto esito positivo
-    async getStatisticPositive(order: Boolean = true): Promise<Array<Object>> {
+    public async getStatisticPositive(order: Boolean = true): Promise<Array<Object>> {
+
+        let asc = typeof order === 'undefined'? true :order;
+
         let positiveResult = await this.model.getModel().findAndCountAll({
             attributes: ['centro_vac_id', 'stato'],
             where: { stato: 1 },
@@ -409,7 +412,7 @@ export class proxyPr implements proxyinterfacePR {
             return value;
         });
         // Qui andiamo ad effettuare l'ordinamento del risultato finale
-        if (order) statistic.sort((a, b) => {
+        if (asc) statistic.sort((a, b) => {
             return a.media - b.media;
         });
         else statistic.sort((a, b) => {
@@ -419,7 +422,7 @@ export class proxyPr implements proxyinterfacePR {
     }
 
     // Metodo per impostare le prenotazioni come 'non andate a buon fine'
-    async setBadPrenotations(data: string): Promise<void> {
+    public async setBadPrenotations(data: string): Promise<void> {
         let list = await this.getBadPrenotation(data);
         list = list.map((value) => {
             return value.dataValues.id
@@ -433,15 +436,16 @@ export class proxyPr implements proxyinterfacePR {
 
     // Questo metodo ritorna il numero di prenotazioni che non sono andate a buon fine
 
-    async getCountBadPrenotation(data: string, id: number): Promise<number> {
+    public async getCountBadPrenotation(data: string, id: number): Promise<number> {
         if (isNaN(id) || !isFinite(id) || typeof (id) !== 'number') throw new Error('il centro vaccinale che hai inserito non è corretto')
         if (typeof (data) !== 'string' || !(DateTime.fromISO(data).isValid) || DateTime.now > DateTime.fromISO(data)) throw new Error('La data che hai inserito non è corretta')
         let result = await this.getBadPrenotation(data, false, id);
+        console.log(result);
         return result['count'][0].count
     }
     // Metodo che restituisce tutte le prenotazioni che non sono andate a buon fine, prende in input una data, un booleano, che modifica la query.
     // Infine, viene passato un centro vaccinale.
-    async getBadPrenotation(data: string, option: Boolean = true, id?: number): Promise<Array<any>> {
+    private async getBadPrenotation(data: string, option: Boolean = true, id?: number): Promise<Array<any>> {
         let list;
         if (option) {
             list = await this.model.getModel().findAll({
