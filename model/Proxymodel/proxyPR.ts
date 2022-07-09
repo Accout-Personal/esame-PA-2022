@@ -9,7 +9,7 @@ import { DateTime } from "luxon";
 import { stringSanitizer } from "../../util/stringsanitizer";
 import * as qrCode from 'qrcode-reader';
 import * as Jimp from 'jimp';
-
+// Classe che implementa il proxy per la componente prenotazione nel model
 export class proxyPr implements proxyinterfacePR {
 
     private model: Prenotazione;
@@ -53,29 +53,27 @@ export class proxyPr implements proxyinterfacePR {
 
         return await this.model.insertNewPr(sanitizeddata, fascia, slot, centro_vaccino, vaccino, user);
     }
-
+// Metodo usato per recuperare informazioni relative ad una prenotazione, utilizzando il codice uuid
     public async getPrInfo(req) {
         let uuid = await this.decodeUUID(req)
         let sanitized = stringSanitizer(uuid);
         this.makeRelationship();
-        console.log(sanitized);
         if (typeof sanitized === 'undefined') throw Error("codice sconosciuto");
         let result = await this.model.getInfo(sanitized);
         if (result === null) throw Error("codice sconosciuto");
         return result
     }
-
+// Metodo usato per confermare il codice uuid e lo stato della prenotazione
     public async confermatUUID(req){
         
         let uuid = await this.decodeUUID(req);            
         await this.checkUUID(uuid);
 
-        console.log(uuid);
         let result = await this.model.confirmUUID(uuid);
         console.log(result);
-        //return;
     }
-
+// Metodo utilizzato per ottenere una lista di prenotazioni, passando come parametri, uno user id, un centro vaccinale, e una data.
+// I parametri sono opzionali, il risultato del metodo cambia a seconda dei parametri passati
     public async getListaPr(userid?: number, centro?: number, data?: string) {
 
         if (typeof (data) !== 'string' || !(DateTime.fromISO(data).isValid) || DateTime.now > DateTime.fromISO(data))
@@ -109,7 +107,7 @@ export class proxyPr implements proxyinterfacePR {
         this.modelCV.getModel().hasMany(this.model.getModel(), { foreignKey: 'centro_vac_id' });
         this.model.getModel().belongsTo(this.modelCV.getModel(), { foreignKey: 'centro_vac_id' });
     }
-
+// Metodo usato per cancellare una prenotazione
     public async cancellaPre(id: number, user: number) {
         await this.checkPreID(id, user);
         console.log("cheking success");
@@ -159,7 +157,7 @@ export class proxyPr implements proxyinterfacePR {
         await this.checkVaxValidity(data, safeBody.vaccino, updateBody.user, updateBody.id);
         return await this.model.modifica(updateBody.id, safeBody);
     }
-
+// Metodo usato per decodificare il codice uuid quando viene passato sotto forma di QRcode. Questo codice può essere inviato anche tramite json
     private async decodeUUID(req){
         var uuid: string;
         if (typeof req.file !== 'undefined') {
@@ -183,7 +181,7 @@ export class proxyPr implements proxyinterfacePR {
         return uuid;
     }
 
-
+// Metodo usato per controllare l'id di una prenotazione
     private async checkPreID(id: number, user: number) {
         if (typeof id !== 'number' || isNaN(id)) throw new Error('Id non è valido');
 
@@ -278,7 +276,7 @@ export class proxyPr implements proxyinterfacePR {
         else
             return { count: res.length, centro: centro_vac };
     }
-
+// Metodo usato per controllare un codice uuid
     private async checkUUID(uuid:string){
         let sanitized = stringSanitizer(uuid);
         if(typeof sanitized === 'undefined')

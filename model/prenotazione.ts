@@ -60,7 +60,7 @@ export class Prenotazione implements proxyinterfacePR {
     });
 
   }
-
+// Metodo usato per cambiare lo stato della prenotazione in accettato
   public async confirmUUID(uuid: string) {
     return await this.prenotazione.update(
       { stato: 1 },
