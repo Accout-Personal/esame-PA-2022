@@ -66,7 +66,7 @@ export class userPresenter {
             res.status(401).send({ "errore": error.message });
         }
     }
-
+// Questo metodo serve per eliminare una prenotazione
     public static cancellaPre(req, res) {
         const Proxy = new proxyPr();
         const body = req.body;
@@ -131,7 +131,7 @@ export class userPresenter {
             return res.status(400).send({ "errore": error.message });
         };
     }
-
+// Questo metodo restituisce le prenotazioni effettuate da un utente
     public static async getMyPre(req, res) {
         let proxy = new proxyPr()
         let list = await proxy.getListaPr(req.user.user.id);

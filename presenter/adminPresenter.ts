@@ -5,10 +5,10 @@ import { proxyCV } from "../model/Proxymodel/proxyCV";
 import { proxyVC } from "../model/Proxymodel/proxyVC";
 import { proxyPr } from "../model/Proxymodel/proxyPR";
 import { generatePDF } from "../util/startPDF";
-
 import { slotToTime } from "../util/slotTotime";
+// Questa classe implementa il presenter per l'amministratore
 export class adminPresenter {
-
+    // Questo metodo permette di inserire un nuovo centro vaccinale
     public static async creaCentroVax(req, res) {
 
         const centrVax = new proxyCV();
@@ -21,7 +21,7 @@ export class adminPresenter {
             }
         });
     }
-
+// Questo metodo permette di inserire un nuovo vaccino
     public static async creaVaccino(req, res) {
         const Vaccini = new proxyVC();
         Vaccini.insertNewVacc(req.body.name, req.body.validita).then(value => {
@@ -33,7 +33,7 @@ export class adminPresenter {
             }
         });
     }
-
+// Metodo che permette di ricevere un QRcode
     public static async riceveQRCode(req, res) {
         try {
             let result = await new proxyPr().getPrInfo(req);
@@ -49,7 +49,7 @@ export class adminPresenter {
         }
 
     }
-
+// Metodo usato per validare l’utente in fase di accettazione 
     public static async confermaUUID(req, res) {
         try {
             await new proxyPr().confermatUUID(req);
@@ -58,9 +58,10 @@ export class adminPresenter {
             res.status(400).send({ "message": error.message });
         }
     }
-
+// Questo metodo ritorna la lista delle prenotazioni di un certo centro vaccinale e per una certa data.
+// Il risultato può essere restituito sotto forma di json o pdf.
     public static async getListaCentroData(req, res) {
-        //req:{centro,data,formato}
+        
         let body = req.body;
         let proxy = new proxyPr();
         if (typeof body.formato === 'undefined') body.formato = 'json';
@@ -109,7 +110,7 @@ export class adminPresenter {
             }
         }
     }
-
+// Metodo per ottenere le statistiche positive di tutti i centri vaccinali
     public static async getStatCentri(req, res) {
         try {
             let body = req.body;
@@ -119,7 +120,7 @@ export class adminPresenter {
             res.status(400).send({message:error.message});
         }
     }
-
+// Metodo per ottenere le statistiche negative di un centro vaccinale per un dato giorno
     public static async getBadStat(req,res){
         try {
             let body = req.body;

@@ -1,9 +1,10 @@
 import { buildRes } from "./buildRes";
 import { PassThrough } from 'stream';
-
+// Questa classe permette di restituire le informazioni relative ad una prenotazione.
+//Basato sul tipo richiesto dall'utente che ha fatto la prenotazione
 export class directorRes {
 
-
+// Metodo che costruisce la risposta
     public static async respose(res, value, tipo: string = 'json') {
         let Prenotazione: any = value;
         let Response = new buildRes();
