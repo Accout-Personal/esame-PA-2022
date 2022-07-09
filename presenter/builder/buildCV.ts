@@ -3,12 +3,16 @@ import { builderInterfaceCV } from "./builderInterface/builderInterfaceCV";
 import * as haversine from 'haversine'
 import { proxyPr } from "../../model/Proxymodel/proxyPR";
 import { DateTime } from "luxon";
+import { mapValueFieldNames } from "sequelize/types/utils";
 // Questa è la classe builder con la quale andremo a costruire il nostro risultato che verrà restituito all'utente
 export class buildCV implements builderInterfaceCV {
 
     private result = [];
     private proxy;
     private proxyPre = new proxyPr();
+
+    private fasciaSlot: Array<number>;
+    private prenotazioni
 
     constructor(proxy: proxyInterfaceCV) {
         this.proxy = proxy;
@@ -96,75 +100,66 @@ export class buildCV implements builderInterfaceCV {
         });
     }
 
-    // Metodo per ottenere gli slot temporali disponibili
-    async getSlotFree(centroCV: number, date: Array<string>, fascia?: number): Promise<void> {
-
-        // Qui andiamo a effettuare dei controlli sui dati di inpit inseriti dall'utente
-        if (fascia <= 0 || isNaN(fascia) || fascia >= 3 || !isFinite(fascia)) throw new Error('la fascia inserita non è valida');
+    public async getSlotFull(centroCV: number, date: Array<string>, fascia?: number) {
+        // Qui vengono a effettuati dei controlli sui dati di inpit inseriti dall'utente
+        if (typeof fascia !== 'undefined') //in caso fascia sia non definita, vengono considerati intera giornata
+            if (fascia <= 0 || isNaN(fascia) || fascia >= 3 || !isFinite(fascia)) throw new Error('la fascia inserita non è valida');
         if (date.length > 5) throw new Error('Hai inserito troppe date');
-        date.filter(value => {return DateTime.fromISO(value).isValid && DateTime.now < DateTime.fromISO(value)})
+        let datesanitized = date.filter(value => { return DateTime.fromISO(value).isValid && DateTime.now() < DateTime.fromISO(value) })
         if (typeof centroCV !== 'number' || isNaN(centroCV) || !isFinite(centroCV)) throw new Error('Il centro vaccinale inserito non è corretto');
-        // Qui andiamo a prendere i dati di interesse dalla tabella prenotazione
-        let prenotazioni = await this.proxyPre.getSlotFull(centroCV, date, fascia);
-        prenotazioni = prenotazioni.map(value => { return value.dataValues });
-        // Caso in cui la fascia inserita sia uguale a 1
-        if (typeof fascia === 'number' && fascia == 1) {
-            for (let d of date) {
-                let freeSlotF1 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
-                prenotazioni.map(value => {
-                    if (d == value.data) {
-                        // Qui vado a rimuovere gli slot che sono già occupati
-                        freeSlotF1 = freeSlotF1.filter(val => {
-                            if (val == value.slot) return false;
-                            else return true;
-                        });
-                    };
-                });
-                // Inserisco il risultato finale nella variabile result
-                this.result.push({
-                    date: d,
-                    slotLiberi: freeSlotF1
-                });
+        // Qui vengono ottenuti i dati di interesse dalla tabella prenotazione
+        let prenotazioni = await this.proxyPre.getSlotFull(centroCV, datesanitized, fascia);
+        this.prenotazioni = prenotazioni.map(value => { return value.dataValues });
+    }
+
+    //qui viene ricavato timeslot dipende dalla fascia oraria scelta
+    public setFascia(fascia?: number) {
+        //let freeSlots = [1,...36];
+        let freeSlot = Array.from(Array(36).keys()).map(v => v + 1);
+        switch (fascia) {
+            case 1: {
+                this.fasciaSlot = freeSlot.filter(slot => slot < 17); //da 1 a 16
+                break;
             }
-        };
-        // Caso in cui la fascia è uguale a 2, analogo al caso precedente
-        if (typeof fascia === 'number' && fascia == 2) {
-            for (let d of date) {
-                let freeSlotF2 = [16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35];
-                prenotazioni.map(value => {
-                    if (d == value.data) {
-                        freeSlotF2 = freeSlotF2.filter(val => {
-                            if (val == value.slot) return false;
-                            else return true;
-                        });
-                    };
-                });
-                this.result.push({
-                    date: d,
-                    slotLiberi: freeSlotF2
-                });
+            case 2: {
+                this.fasciaSlot = freeSlot.filter(slot => slot > 16); //da 1 a 16
+                break;
             }
-        };
+            default: {
+                this.fasciaSlot = freeSlot;
+            }
+        }
+    }
+
+    public filtroFascia(date: Array<string>) {
+        let datesanitized = date.filter(value => { return (DateTime.fromISO(value).isValid && DateTime.now() < DateTime.fromISO(value)) });
+        //metodo 1 per filtro della fascia
+        this.result = datesanitized.map(d => {
+            //ottengo slot occupati in una fascia
+            let occupiedSlots = this.prenotazioni.filter(value => {
+                return d == value.data
+            }).map(v => {
+                return v.slot;
+            });
+            //ottengo differenza fra gli slot della fascia e slot occupati (slot possibili - slot occupati = slot liberi)
+            let freeSlots = this.fasciaSlot.filter(s => !occupiedSlots.includes(s));
+            //ottengo il risultato
+            return { date: d, slotLiberi: freeSlots }
+        });
+        /*
+        //metodo 2 (forse meno leggibile) per filtro della fascia
+        this.result = date.map(d => {
+            //differenza fra gli slot della fascia e slot occupati
+            let freeSlots = this.fasciaSlot.filter(s => !this.prenotazioni.filter(value => {
+                return d == value.data
+            }).map(v => {
+                return v.slot;
+            }).includes(s));
         
-        // Caso in cui la fascia non è stata definita, analogo al caso precedente, solo che in questo caso consideriamo tutti gli slot
-        if (typeof fascia === 'undefined') {
-            for (let d of date) {
-                let freeSlot = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35];
-                prenotazioni.map(value => {
-                    if (d == value.data) {
-                        freeSlot = freeSlot.filter(val => {
-                            if (val == value.slot) return false;
-                            else return true;
-                        });
-                    };
-                });
-                this.result.push({
-                    date: d,
-                    slotLiberi: freeSlot
-                });
-            }
-        };
-        console.log(this.result)
+            //ottengo il risultato
+            return { date: d, slotLiberi: freeSlots }
+        });     
+        */
     }
 
     //metodo per ottenere il risultato finale

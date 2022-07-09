@@ -116,7 +116,7 @@ export class userPresenter {
 
     //filtro centro per i max 5 giorni
     public static async getSlotsCentro(req, res) {
-        //{centro:number,data:[...],fascie:number}
+        //{centro:number,date:[...],fascie:number}
         try {
 
             let body = req.body;
@@ -124,10 +124,15 @@ export class userPresenter {
             // Metodo per ottenere gli slot temporali disponibili
             let proxy = new proxyCV();
             let builder = new buildCV(proxy);
-            await builder.getSlotFree(body.centro, body.data, body.fascie);
+            //await builder.getSlotFree(body.centro, body.data, body.fascie);
+            await builder.getSlotFull(body.centro, body.date, body.fascia);
+            builder.setFascia(body.fascia);
+            builder.filtroFascia(body.date);
+
             let result = builder.getResult();
             res.send(result);
         } catch (error) {
+            console.log(error);
             return res.status(400).send({ "errore": error.message });
         };
     }
