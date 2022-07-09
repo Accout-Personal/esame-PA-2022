@@ -36,77 +36,61 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.Users = void 0;
-var sequelize_1 = require("sequelize");
-/**
- *  Classe model che rappresenta la tabella 'users' nel database
- */
-var Users = /** @class */ (function () {
-    function Users(sequelize) {
-        //nel costruttore vado a definire la struttura della tabella usando sequelize,
-        // questo model mi permette di compiere varie operazioni 
-        //this.prenotazione = new Prenotazione(sequelize).getModel();
-        this.user = sequelize.define("user", {
-            id: {
-                type: sequelize_1.DataTypes.BIGINT(),
-                autoIncrement: true,
-                primaryKey: true
-            },
-            cf: { type: sequelize_1.DataTypes.STRING },
-            username: { type: sequelize_1.DataTypes.STRING },
-            password: { type: sequelize_1.DataTypes.STRING },
-            tipo: { type: sequelize_1.DataTypes.INTEGER }
-        }, {
-            tableName: 'users',
-            timestamps: false
-        });
+exports.directorRes = void 0;
+var buildRes_1 = require("./buildRes");
+// Questa classe permette di restituire le informazioni relative ad una prenotazione.
+//Basato sul tipo richiesto dall'utente che ha fatto la prenotazione
+var directorRes = /** @class */ (function () {
+    function directorRes() {
     }
-    // Metodo per inserire un nuovo user
-    Users.prototype.insertNewUsers = function (cf, username, password, tipo) {
+    // Metodo che costruisce la risposta
+    directorRes.respose = function (res, value, tipo) {
+        if (tipo === void 0) { tipo = 'json'; }
         return __awaiter(this, void 0, void 0, function () {
-            var _a;
+            var Prenotazione, Response, _a, Stream, stream_1, Result;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
-                        _b.trys.push([0, 2, , 3]);
-                        return [4 /*yield*/, this.user.create({ cf: cf, username: username, password: password, tipo: tipo.toString() })];
-                    case 1:
-                        _b.sent();
-                        return [2 /*return*/, true];
+                        Prenotazione = value;
+                        Response = new buildRes_1.buildRes();
+                        _a = tipo.toLowerCase();
+                        switch (_a) {
+                            case 'qrcode': return [3 /*break*/, 1];
+                            case 'pdf': return [3 /*break*/, 3];
+                        }
+                        return [3 /*break*/, 6];
+                    case 1: return [4 /*yield*/, Response.ProduceInfo(value)];
                     case 2:
-                        _a = _b.sent();
-                        return [2 /*return*/, false];
-                    case 3: return [2 /*return*/];
+                        _b.sent();
+                        Stream = Response.ProduceQRCodeImmagine(value.uuid);
+                        res.set('content-type', "image/png");
+                        Stream.pipe(res);
+                        return [3 /*break*/, 8];
+                    case 3:
+                        stream_1 = res.writeHead(200, {
+                            'Content-type': 'application/pdf',
+                            'Content-Disittion': 'attachment;filename=infoAppuntamento.pdf'
+                        });
+                        return [4 /*yield*/, Response.ProduceInfo(value)];
+                    case 4:
+                        _b.sent();
+                        return [4 /*yield*/, Response.ProduceQRCodeBuffer(value.uuid)];
+                    case 5:
+                        _b.sent();
+                        Response.ProducePDFeStream(function (chunk) { return stream_1.write(chunk); }, function () { return stream_1.end(); });
+                        return [3 /*break*/, 8];
+                    case 6: return [4 /*yield*/, Response.ProduceInfo(value)];
+                    case 7:
+                        _b.sent();
+                        Result = Response.getResult();
+                        console.log(Result);
+                        res.status(200).send({ "message": "prenotato con successo", "info": Result });
+                        return [3 /*break*/, 8];
+                    case 8: return [2 /*return*/];
                 }
             });
         });
     };
-    // Metodo per prendere tutti gli elementi della tabella
-    Users.prototype.trovaTutto = function (connessione) {
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.user.findAll()];
-                    case 1: return [2 /*return*/, _a.sent()];
-                }
-            });
-        });
-    };
-    // Metodo per prendere solo un risultato, infatti l'id è la Primary key della tabella
-    Users.prototype.getUser = function (id) {
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.user.findOne({ where: { id: id } })];
-                    case 1: return [2 /*return*/, _a.sent()];
-                }
-            });
-        });
-    };
-    // Metodo per ottenere il modello
-    Users.prototype.getModel = function () {
-        return this.user;
-    };
-    return Users;
+    return directorRes;
 }());
-exports.Users = Users;
+exports.directorRes = directorRes;

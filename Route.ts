@@ -15,12 +15,12 @@ export function createRouting() {
     app.use('/user', UserRoute);
     app.use('/admin', AdminRoute);
 
-    app.get('/login', userPresenter.login);
+    app.get('/login', userPresenter.login); //tested
 
-    UserRoute.get('/getCentro', userPresenter.getCentro);
-    UserRoute.get('/getSlotCentro', userPresenter.getSlotsCentro);
+    UserRoute.get('/getCentro', userPresenter.getCentro); //tested
+    UserRoute.get('/getSlotCentro', userPresenter.getSlotsCentro); //tested
     
-    UserRoute.post('/prenota', userPresenter.prenota);
+    UserRoute.post('/prenota', userPresenter.prenota); // tested
     UserRoute.post('/cancella', userPresenter.cancellaPre);
 
     UserRoute.post('/modifica', userPresenter.modificaPre);

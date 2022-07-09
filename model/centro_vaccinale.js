@@ -61,9 +61,6 @@ var Centro_vaccinale = /** @class */ (function () {
             timestamps: false
         });
     }
-    Centro_vaccinale.prototype.getProxyModel = function () {
-        return this;
-    };
     // Metodo per inserire un nuovo centro centro vaccinale
     Centro_vaccinale.prototype.insertNewCV = function (lati, longi, nome, maxf1, maxf2) {
         return __awaiter(this, void 0, void 0, function () {
@@ -84,19 +81,10 @@ var Centro_vaccinale = /** @class */ (function () {
             });
         });
     };
-    // Metodo per ottenere il modello
+    // Metodo per ottenere il modello della tabella
     Centro_vaccinale.prototype.getModel = function () {
         return this.centro_vaccinale;
     };
-    // Metodo per ottenere tutti i centri vaccinali
-    /*  async getAll():Promise<any>{
-        try {
-          let result = await this.centro_vaccinale.findAll()
-          return result;
-        } catch (error) {
-          return error;
-        }
-      }*/
     //Metodo per ottenere determinati centri vaccinali 
     Centro_vaccinale.prototype.getSpecificCV = function (id) {
         return __awaiter(this, void 0, void 0, function () {
@@ -112,6 +100,7 @@ var Centro_vaccinale = /** @class */ (function () {
             });
         });
     };
+    // Metodo per eseguire una query sulla tabella passando l'id del centro vaccinale
     Centro_vaccinale.prototype.findOne = function (id) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {

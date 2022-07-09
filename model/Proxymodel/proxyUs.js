@@ -38,17 +38,21 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 exports.__esModule = true;
 exports.proxyUs = void 0;
 var users_1 = require("../users");
+var stringsanitizer_1 = require("../../util/stringsanitizer");
 var crypto = require("node:crypto");
 var sequelize_1 = require("../../config/sequelize");
+// Questo è il proxy per la componente nel model users
 var proxyUs = /** @class */ (function () {
     function proxyUs() {
         this.model = new users_1.Users(sequelize_1.DBConnection.getInstance().getConnection());
     }
+    // Questo metodo fa una query sulla tabella users del DB, passando come parametro uno username che è chiave
     proxyUs.prototype.getUser = function (username) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
+                        username = (0, stringsanitizer_1.stringSanitizer)(username);
                         if (!this.TypeCheckUsername(username)) return [3 /*break*/, 2];
                         return [4 /*yield*/, this.model.getModel().findOne({
                                 where: {
@@ -61,6 +65,7 @@ var proxyUs = /** @class */ (function () {
             });
         });
     };
+    // Questo metodo fa una query sulla tabella users del DB, passando come parametro un id che è chiave primaria
     proxyUs.prototype.getUserByID = function (id) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
@@ -75,24 +80,34 @@ var proxyUs = /** @class */ (function () {
             });
         });
     };
+    // Questo metodo serve per inserire un nuovo utente
     proxyUs.prototype.insertNewUsers = function (cf, username, password, tipo) {
         return __awaiter(this, void 0, void 0, function () {
             var error_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        _a.trys.push([0, 3, , 4]);
-                        if (!(this.TypeCheckCF(cf) &&
+                        cf = (0, stringsanitizer_1.stringSanitizer)(cf);
+                        username = (0, stringsanitizer_1.stringSanitizer)(username);
+                        password = (0, stringsanitizer_1.stringSanitizer)(password);
+                        _a.label = 1;
+                    case 1:
+                        _a.trys.push([1, 4, , 5]);
+                        if (!
+                        // Qui vengono sanificati i parametri di input inseriti dall'utente
+                        (this.TypeCheckCF(cf) &&
                             this.TypeCheckUsername(username) &&
                             this.TypeCheckPassword(password) &&
-                            this.TypeCheckTipo(tipo))) return [3 /*break*/, 2];
+                            this.TypeCheckTipo(tipo))) 
+                        // Qui vengono sanificati i parametri di input inseriti dall'utente
+                        return [3 /*break*/, 3];
                         return [4 /*yield*/, this.model.insertNewUsers(cf, username, crypto.createHash('sha256').update(password).digest('hex'), tipo)];
-                    case 1: return [2 /*return*/, _a.sent()];
-                    case 2: return [3 /*break*/, 4];
-                    case 3:
+                    case 2: return [2 /*return*/, _a.sent()];
+                    case 3: return [3 /*break*/, 5];
+                    case 4:
                         error_1 = _a.sent();
                         return [2 /*return*/, error_1];
-                    case 4: return [2 /*return*/];
+                    case 5: return [2 /*return*/];
                 }
             });
         });
@@ -104,23 +119,27 @@ var proxyUs = /** @class */ (function () {
             });
         });
     };
+    // Questo metodo fa un controllo sul codice fiscale inserito dall'utente
     proxyUs.prototype.TypeCheckCF = function (cf) {
         if ((typeof cf !== 'string' || cf.length > 255))
             throw new Error('Questo codice fiscale non è valido');
         return true;
     };
+    // Questo metodo fa un controllo sullo username inserito dall'utente
     proxyUs.prototype.TypeCheckUsername = function (username) {
         if ((typeof username !== 'string' || username.length > 255))
             throw new Error('Questo username non è valido');
         return true;
     };
+    // Questo metodo fa un controllo sulla password inserita dall'utente
     proxyUs.prototype.TypeCheckPassword = function (password) {
         if ((typeof password !== 'string' || password.length > 255))
             throw new Error('Questa password non è corretta');
         return true;
     };
+    // Questo metodo fa un controllo sul tipo inserito dall'utente
     proxyUs.prototype.TypeCheckTipo = function (tipo) {
-        if (typeof tipo !== 'number' || isNaN(tipo))
+        if (typeof tipo !== 'number' || isNaN(tipo) || !isFinite(tipo))
             throw new Error('Questo valore non è un numero');
         return true;
     };

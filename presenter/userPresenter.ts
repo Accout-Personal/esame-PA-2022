@@ -20,6 +20,8 @@ export class userPresenter {
             else
                 res.status(401).send({ message: "credenziale invalido" });
             return;
+        }).catch(error=>{
+            res.status(401).send({ message: "credenziale invalido" });
         });
     };
 
@@ -45,7 +47,7 @@ export class userPresenter {
         const body = req.body;
         try {
             let value = await Proxy.insertNewPr(body.data, body.slot, body.centro_vac, body.vaccino, req.user.user.id);
-            await directorRes.respose(res, value, body.tipo).catch(err => {
+            await directorRes.respose(res, value, body.formato).catch(err => {
                 console.log(err);
                 res.status(400).send({ "errore": err.message });
             });
@@ -88,10 +90,17 @@ export class userPresenter {
         let builder = new buildCV(proxy);
         try {
             //disponibilita' falsa, solo distanza
+            if(typeof body.disp !== 'undefined' && typeof body.disp !== 'boolean')
+                throw new Error("il valore della diponibilità non è corretta");
+
+            if(typeof body.order !== 'undefined' && typeof body.order !== 'boolean')
+                throw new Error("il valore di ordinamento non è corretto");
+
             if (typeof body.disp === 'undefined' || !body.disp) {
                 // await builder.producePartA(body.lat, body.long, body.dist, body.order);
                 await builder.queryAlDB(false);
                 builder.filtraPerDistanza(body.lat, body.long, body.dist);
+                builder.trimdata();
                 builder.ordinamento(body.order)
                 let result = builder.getResult();
 
@@ -111,6 +120,7 @@ export class userPresenter {
                 res.send(result);
             }
         } catch (error) {
+            console.log(error);
             return res.status(400).send({ "errore": error.message });
         };
     }

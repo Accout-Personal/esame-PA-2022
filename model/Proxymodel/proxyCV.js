@@ -40,11 +40,14 @@ exports.proxyCV = void 0;
 var centro_vaccinale_1 = require("../centro_vaccinale");
 var sequelize_1 = require("../../config/sequelize");
 var stringsanitizer_1 = require("../../util/stringsanitizer");
+var prenotazione_1 = require("../prenotazione");
 // Nel proxy andiamo a implementare tutti i controlli e le sanificazioni sui dati di input per evitare problemi e crash del sistema
 var proxyCV = /** @class */ (function () {
     function proxyCV() {
         this.model = new centro_vaccinale_1.Centro_vaccinale(sequelize_1.DBConnection.getInstance().getConnection());
+        this.modelPR = new prenotazione_1.Prenotazione(sequelize_1.DBConnection.getInstance().getConnection());
     }
+    // Metodo per inserire un nuovo centro vaccinale
     proxyCV.prototype.insertNewCV = function (lati, longi, nome, maxf1, maxf2) {
         return __awaiter(this, void 0, void 0, function () {
             var sanitizednome, result, error_1;
@@ -55,11 +58,15 @@ var proxyCV = /** @class */ (function () {
                         _a.label = 1;
                     case 1:
                         _a.trys.push([1, 4, , 5]);
-                        if (!(this.TypeCheckLati(lati) &&
+                        if (!
+                        //Qui andiamo a sanificare i dati inseriti dall'utente
+                        (this.TypeCheckLati(lati) &&
                             this.TypeCheckLati(longi) &&
                             this.TypeCheckNome(sanitizednome) &&
                             this.TypeCheckMaxf1(maxf1) &&
-                            this.TypeCheckMaxf2(maxf2))) return [3 /*break*/, 3];
+                            this.TypeCheckMaxf2(maxf2))) 
+                        //Qui andiamo a sanificare i dati inseriti dall'utente
+                        return [3 /*break*/, 3];
                         return [4 /*yield*/, this.model.insertNewCV(lati, longi, sanitizednome, maxf1, maxf2)];
                     case 2:
                         result = _a.sent();
@@ -84,6 +91,7 @@ var proxyCV = /** @class */ (function () {
             });
         });
     };
+    // Metodo per ottenere un centro vaccinale passando l'id
     proxyCV.prototype.getCentro = function (id) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
@@ -94,30 +102,39 @@ var proxyCV = /** @class */ (function () {
             });
         });
     };
+    // Metodo per sanificare la latitudine
     proxyCV.prototype.TypeCheckLati = function (lati) {
-        if (typeof lati !== 'number' || isNaN(lati))
+        if (typeof lati !== 'number' || isNaN(lati) || !isFinite(lati))
             throw new Error('Questo valore di latitudine non è un numero');
         return true;
     };
+    // Metodo per sanificare la longitudine
     proxyCV.prototype.TypeCheckLongi = function (longi) {
-        if (typeof longi !== 'number' || isNaN(longi))
+        if (typeof longi !== 'number' || isNaN(longi) || !isFinite(longi))
             throw new Error('Questo valore di longitudine non è un numero');
         return true;
     };
+    // Metodo per sanificare il nome del centro vaccinale
     proxyCV.prototype.TypeCheckNome = function (nome) {
         if (typeof nome !== 'string' || nome.length > 255)
             throw new Error('Questo nome non è composto da lettere');
         return true;
     };
+    // Metodo per sanificare il numero massimo di vaccinazioni che il centro puo' fare durante la prima fascia oraria
     proxyCV.prototype.TypeCheckMaxf1 = function (maxf1) {
-        if (typeof maxf1 !== 'number' || isNaN(maxf1))
-            throw new Error('Questo valore non è un numero');
+        if (typeof maxf1 !== 'number' || isNaN(maxf1) || !isFinite(maxf1))
+            throw new Error('Il valore usato per maxf1 non è corretto');
         return true;
     };
+    // Metodo per sanificare il numero massimo di vaccinazioni che il centro puo' fare durante la seconda fascia oraria
     proxyCV.prototype.TypeCheckMaxf2 = function (maxf2) {
-        if (typeof maxf2 !== 'number' || isNaN(maxf2))
-            throw new Error('Questo valore non è un numero');
+        if (typeof maxf2 !== 'number' || isNaN(maxf2) || !isFinite(maxf2))
+            throw new Error('Il valore usato per maxf2 non è corretto');
         return true;
+    };
+    proxyCV.prototype.makeRelationship = function () {
+        this.model.getModel().hasMany(this.modelPR.getModel(), { foreignKey: 'centro_vac_id' });
+        this.modelPR.getModel().belongsTo(this.model.getModel(), { foreignKey: 'centro_vac_id' });
     };
     // Metodo per ottenere il riferimento al model
     proxyCV.prototype.getProxyModel = function () {

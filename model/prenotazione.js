@@ -61,21 +61,21 @@ var Prenotazione = /** @class */ (function () {
             data: { type: DataTypes.DATEONLY },
             fascia: { type: DataTypes.INTEGER },
             slot: { type: DataTypes.INTEGER },
-            centro_vac: {
+            centro_vac_id: {
                 type: DataTypes.BIGINT(20),
                 references: {
                     model: this.centro_vaccinaleModel,
                     key: 'id'
                 }
             },
-            vaccino: {
+            vaccinoid: {
                 type: DataTypes.BIGINT(20),
                 references: {
                     model: this.vaccinoModel,
                     key: 'id'
                 }
             },
-            user: {
+            userid: {
                 type: DataTypes.BIGINT(20),
                 references: {
                     model: this.userModel,
@@ -89,6 +89,21 @@ var Prenotazione = /** @class */ (function () {
             timestamps: false
         });
     }
+    // Metodo usato per cambiare lo stato della prenotazione in accettato
+    Prenotazione.prototype.confirmUUID = function (uuid) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.prenotazione.update({ stato: 1 }, {
+                            where: {
+                                uuid: uuid
+                            }
+                        })];
+                    case 1: return [2 /*return*/, _a.sent()];
+                }
+            });
+        });
+    };
     // metodo per inserire una prenotazione
     Prenotazione.prototype.insertNewPr = function (data, fascia, slot, centro_vaccino, vaccino, user) {
         return __awaiter(this, void 0, void 0, function () {
@@ -98,15 +113,16 @@ var Prenotazione = /** @class */ (function () {
                             data: luxon_1.DateTime.fromISO(data).toISODate(),
                             fascia: fascia,
                             slot: slot,
-                            centro_vac: centro_vaccino,
-                            vaccino: vaccino,
-                            user: user
+                            centro_vac_id: centro_vaccino,
+                            vaccinoid: vaccino,
+                            userid: user
                         })];
                     case 1: return [2 /*return*/, _a.sent()];
                 }
             });
         });
     };
+    // Metodo usato per effettuare una modifica di una prenotazione
     Prenotazione.prototype.modifica = function (id, updatebody) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
@@ -134,13 +150,14 @@ var Prenotazione = /** @class */ (function () {
             });
         });
     };
+    // Metodo usato per prendere tutte le prenotazioni di un utente
     Prenotazione.prototype.getPreUser = function (userid) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, this.prenotazione.findAll({
                             where: {
-                                user: userid
+                                userid: userid
                             }
                         })];
                     case 1: return [2 /*return*/, _a.sent()];
@@ -148,15 +165,33 @@ var Prenotazione = /** @class */ (function () {
             });
         });
     };
+    // Metodo per prendere tutte le prenotazioni di centro vaccinale per una certa data
     Prenotazione.prototype.getPreCentro = function (centro, data) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, this.prenotazione.findAll({
                             where: {
-                                centro_vac: centro,
+                                centro_vac_id: centro,
                                 data: data
-                            }
+                            },
+                            include: ["user", "vaccino"]
+                        })];
+                    case 1: return [2 /*return*/, _a.sent()];
+                }
+            });
+        });
+    };
+    //metodo per restituire informazioni della prenotazione
+    Prenotazione.prototype.getInfo = function (uuid) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.prenotazione.findOne({
+                            where: {
+                                uuid: uuid
+                            },
+                            include: ['user', 'vaccino']
                         })];
                     case 1: return [2 /*return*/, _a.sent()];
                 }

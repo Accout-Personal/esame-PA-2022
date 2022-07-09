@@ -42,13 +42,9 @@ export class proxyPr implements proxyinterfacePR {
             fascia = 1;
         }
 
-        console.log("checking validity")
-        await this.checkAvailability(sanitizeddata, centro_vaccino, fascia).then(() => { console.log("validity checking success..") });
-        console.log("checking slot")
-        await this.checkSlot(sanitizeddata, centro_vaccino, slot).then(() => { console.log("slot checking success..") });
-
-        console.log("checking vax validity")
-        await this.checkVaxValidity(sanitizeddata, vaccino, user).then(() => { console.log("vax validity checking success..") });
+        await this.checkAvailability(sanitizeddata, centro_vaccino, fascia);
+        await this.checkSlot(sanitizeddata, centro_vaccino, slot)
+        await this.checkVaxValidity(sanitizeddata, vaccino, user);
 
 
         return await this.model.insertNewPr(sanitizeddata, fascia, slot, centro_vaccino, vaccino, user);
@@ -70,7 +66,6 @@ export class proxyPr implements proxyinterfacePR {
         await this.checkUUID(uuid);
 
         let result = await this.model.confirmUUID(uuid);
-        console.log(result);
     }
 // Metodo utilizzato per ottenere una lista di prenotazioni, passando come parametri, uno user id, un centro vaccinale, e una data.
 // I parametri sono opzionali, il risultato del metodo cambia a seconda dei parametri passati
@@ -91,7 +86,6 @@ export class proxyPr implements proxyinterfacePR {
         }
 
         this.TypeCheckUser(userid);
-        console.log("get user list");
         return await this.model.getPreUser(userid);
     }
 
@@ -110,7 +104,6 @@ export class proxyPr implements proxyinterfacePR {
 // Metodo usato per cancellare una prenotazione
     public async cancellaPre(id: number, user: number) {
         await this.checkPreID(id, user);
-        console.log("cheking success");
         return await this.model.delete(id);
     }
     // Metodo per effettuare una modifica ad una prenotazione
@@ -219,7 +212,6 @@ export class proxyPr implements proxyinterfacePR {
 
         //mai vaccinato
         if (JSON.parse(JSON.stringify(LastVax)).length == 0) {
-            console.log("questo user non ha mai vaccinato.")
             return;
         }
         let LastVaxTime = DateTime.fromISO(LastVax[0].data);
@@ -333,14 +325,12 @@ export class proxyPr implements proxyinterfacePR {
     }
     // Metodo usato per effettuare dei controlli sull'utente
     private async TypeCheckUser(user: number): Promise<Boolean> {
-        console.log(user);
         if (typeof user !== 'number' || isNaN(user)) throw new Error('Questo utente non è valido');
         let test = await this.modelU.getModel().findAll({
             where: {
                 id: user
             }
         });
-        console.log(test);
         if (Object.keys(test).length == 0) throw new Error('Questo utente non esiste');
         return true;
     }

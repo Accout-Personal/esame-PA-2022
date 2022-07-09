@@ -40,230 +40,161 @@ exports.buildCV = void 0;
 var haversine = require("haversine");
 var proxyPR_1 = require("../../model/Proxymodel/proxyPR");
 var luxon_1 = require("luxon");
+// Questa è la classe builder con la quale andremo a costruire il nostro risultato che verrà restituito all'utente
 var buildCV = /** @class */ (function () {
     function buildCV(proxy) {
         this.result = [];
         this.proxyPre = new proxyPR_1.proxyPr();
         this.proxy = proxy;
     }
-    //In questo metodo viene utilizzata soltanto la funzione di filtraggio relativa alla distanza
-    buildCV.prototype.producePartA = function (latitude, longitude, distanza, order) {
-        if (order === void 0) { order = true; }
+    //CASO A: filtro solo per la distanza
+    //CASO B: filtro per la distanza e la disponibilita
+    //CASO C: restituisce lo slot libero di un centro dando max 5 giorni
+    buildCV.prototype.queryAlDB = function (disp) {
         return __awaiter(this, void 0, void 0, function () {
-            var start, all;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var _a, _b;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
                     case 0:
-                        start = {
-                            latitude: latitude,
-                            longitude: longitude
-                        };
+                        //Qui andiamo a prendere tutti i dati di interesse dal DB
+                        this.proxy.makeRelationship();
+                        if (!!disp) return [3 /*break*/, 2];
+                        _a = this;
                         return [4 /*yield*/, this.proxy.getProxyModel().getModel().findAll({
                                 attributes: ['id', 'lati', 'longi']
                             })];
                     case 1:
-                        all = _a.sent();
-                        all = all.map(function (val) {
-                            var end = {
-                                latitude: val.dataValues.lati,
-                                longitude: val.dataValues.longi
-                            };
-                            val.dataValues.distanza = haversine(start, end, { unit: 'km' });
-                            return val.dataValues;
-                            /*if(val.dataValues.distanza <= distanza)
-                            this.result.push(val.dataValues)*/
-                        });
-                        //console.log(all)
-                        this.result = all.filter(function (value) {
-                            return value.distanza <= distanza;
-                        });
-                        if (order)
-                            this.result.sort(function (a, b) {
-                                return a.distanza - b.distanza;
-                            });
-                        else {
-                            this.result.sort(function (a, b) {
-                                return b.distanza - a.distanza;
-                            });
-                        }
-                        console.log(this.result);
-                        return [2 /*return*/];
+                        _a.result = _c.sent();
+                        return [3 /*break*/, 4];
+                    case 2:
+                        _b = this;
+                        return [4 /*yield*/, this.proxy.getProxyModel().getModel().findAll({
+                                attributes: ['id', 'lati', 'longi', 'maxf1', 'maxf2'],
+                                include: 'prenotaziones'
+                            })];
+                    case 3:
+                        _b.result = _c.sent();
+                        _c.label = 4;
+                    case 4: return [2 /*return*/];
                 }
             });
         });
     };
-    //in questa funzione viene eseguita sia la funzione di filtraggio per la distanza che per la disponibilità
-    buildCV.prototype.producePartB = function (latitude, longitude, distanza, data, order) {
-        if (order === void 0) { order = true; }
+    //ordinamento in base alla distanza, true ordine decrescente, false crescente
+    buildCV.prototype.ordinamento = function (desc) {
+        if (desc === void 0) { desc = true; }
+        // Qui avviene l'ordinamento
+        var order = desc || typeof desc === "undefined" ? 1 : -1;
+        this.result.sort(function (a, b) {
+            return order * (a.distanza - b.distanza);
+        });
+    };
+    //Qui viene filtrato la data della prenotazione di centri vaccinali
+    buildCV.prototype.filtraPrenData = function (data) {
+        if (typeof data !== 'string')
+            throw new Error("la data inserita non e' corretta");
+        var data1 = luxon_1.DateTime.fromISO(data).isValid ? data : luxon_1.DateTime.now().toISODate();
+        this.result = this.result.map(function (value) {
+            var val = value;
+            val.prenotaziones = val.prenotaziones.filter(function (prenotazione) {
+                return prenotazione.data == data1;
+            });
+            return val;
+        });
+    };
+    //qui viene filtrato per la disponibilita
+    buildCV.prototype.filtraDisponibilita = function () {
+        this.result = this.result.filter(function (val) {
+            return (val.maxf1 + val.maxf2) > val.prenotaziones.length;
+        });
+    };
+    //qui vengono tagliati i dati non interessati
+    buildCV.prototype.trimdata = function () {
+        this.result = this.result.map(function (val) {
+            delete val.prenotaziones;
+            return val;
+        });
+    };
+    //qui viene filtrato per la distanza
+    buildCV.prototype.filtraPerDistanza = function (latitude, longitude, distanza) {
+        this.proxy.TypeCheckLati(latitude);
+        this.proxy.TypeCheckLongi(longitude);
+        if (typeof distanza !== 'number' || isNaN(distanza) || !isFinite(distanza) || distanza <= 0)
+            throw new Error('La distanza inserita non è corretta');
+        var start = {
+            latitude: latitude,
+            longitude: longitude
+        };
+        //Qui ad ogni centro vaccinale viene calcolata la distanza
+        this.result = this.result.map(function (val) {
+            var end = {
+                latitude: val.dataValues.lati,
+                longitude: val.dataValues.longi
+            };
+            val.dataValues.distanza = parseFloat(haversine(start, end, { unit: 'km' }).toFixed(2));
+            return val.dataValues;
+        }).filter(function (value) {
+            // I vari centri vaccinali vengono filtrati sulla base della distanza
+            return value.distanza <= distanza;
+        });
+    };
+    buildCV.prototype.getSlotFull = function (centroCV, date, fascia) {
         return __awaiter(this, void 0, void 0, function () {
-            var prenotazioni, query, start, all, check;
+            var datesanitized, prenotazioni;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        if (!luxon_1.DateTime.fromISO(data).isValid) return [3 /*break*/, 2];
-                        return [4 /*yield*/, this.proxyPre.takeNumberOfPrenotation(false)];
+                        // Qui vengono a effettuati dei controlli sui dati di inpit inseriti dall'utente
+                        if (typeof fascia !== 'undefined') //in caso fascia sia non definita, vengono considerati intera giornata
+                            if (fascia <= 0 || isNaN(fascia) || fascia >= 3 || !isFinite(fascia))
+                                throw new Error('la fascia inserita non è valida');
+                        if (date.length > 5)
+                            throw new Error('Hai inserito troppe date');
+                        datesanitized = date.filter(function (value) { return luxon_1.DateTime.fromISO(value).isValid && luxon_1.DateTime.now() < luxon_1.DateTime.fromISO(value); });
+                        if (typeof centroCV !== 'number' || isNaN(centroCV) || !isFinite(centroCV))
+                            throw new Error('Il centro vaccinale inserito non è corretto');
+                        return [4 /*yield*/, this.proxyPre.getSlotFull(centroCV, datesanitized, fascia)];
                     case 1:
-                        query = _a.sent();
-                        //console.log(query)
-                        prenotazioni = query.filter(function (val) { if (val.data == data)
-                            return true; });
-                        return [3 /*break*/, 3];
-                    case 2: throw new Error("Hai inserito una data non corretta");
-                    case 3:
-                        start = {
-                            latitude: latitude,
-                            longitude: longitude
-                        };
-                        return [4 /*yield*/, this.proxy.getProxyModel().getModel().findAll({
-                                attributes: ['id', 'lati', 'longi', 'maxf1', 'maxf2']
-                            })];
-                    case 4:
-                        all = _a.sent();
-                        check = true;
-                        all = all.map(function (val) {
-                            var end = {
-                                latitude: val.dataValues.lati,
-                                longitude: val.dataValues.longi
-                            };
-                            val.dataValues.distanza = haversine(start, end, { unit: 'km' });
-                            return val.dataValues;
-                        });
-                        this.result = all.filter(function (val) {
-                            if (val.distanza <= distanza) {
-                                prenotazioni.map(function (pre) {
-                                    if (val.id == pre.centro_vac && check) {
-                                        val.residuo = (val.maxf1 + val.maxf2) - pre.count;
-                                        check = false;
-                                    }
-                                    if (check)
-                                        val.residuo = val.maxf1 + val.maxf2;
-                                });
-                                if (!check)
-                                    check = true;
-                                return true;
-                            }
-                            else
-                                return false;
-                        });
-                        this.result = this.result.filter(function (value) {
-                            return value.residuo > 0;
-                        });
-                        if (order)
-                            this.result.sort(function (a, b) {
-                                return a.distanza - b.distanza;
-                            });
-                        else {
-                            this.result.sort(function (a, b) {
-                                return b.distanza - a.distanza;
-                            });
-                        }
-                        console.log(this.result);
+                        prenotazioni = _a.sent();
+                        this.prenotazioni = prenotazioni.map(function (value) { return value.dataValues; });
                         return [2 /*return*/];
                 }
             });
         });
     };
-    // Metodo per ottenere gli slot temporali disponibili
-    buildCV.prototype.getSlotFree = function (centroCV, date, fascia) {
-        return __awaiter(this, void 0, void 0, function () {
-            var cv, prenotazioni, _loop_1, this_1, _i, date_1, d, _loop_2, this_2, _a, date_2, d, _loop_3, this_3, _b, date_3, d;
-            return __generator(this, function (_c) {
-                switch (_c.label) {
-                    case 0: return [4 /*yield*/, this.proxy.getProxyModel().getSpecificCV(centroCV)];
-                    case 1:
-                        cv = _c.sent();
-                        if (fascia <= 0 || isNaN(fascia) || fascia >= 3 || !isFinite(fascia))
-                            throw new Error('la fascia inserita non è valida');
-                        if (date.length > 5)
-                            throw new Error('Hai inserito troppe date');
-                        if (typeof centroCV !== 'number' || isNaN(centroCV))
-                            throw new Error('Il centro vaccinale inserito non è corretto');
-                        return [4 /*yield*/, this.proxyPre.getSlotFull(centroCV, date, fascia)];
-                    case 2:
-                        prenotazioni = _c.sent();
-                        prenotazioni = prenotazioni.map(function (value) { return value.dataValues; });
-                        if (typeof fascia === 'number' && fascia == 1) {
-                            _loop_1 = function (d) {
-                                var freeSlotF1 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
-                                prenotazioni.map(function (value) {
-                                    if (d == value.data) {
-                                        freeSlotF1 = freeSlotF1.filter(function (val) {
-                                            if (val == value.slot)
-                                                return false;
-                                            else
-                                                return true;
-                                        });
-                                    }
-                                    ;
-                                });
-                                this_1.result.push({
-                                    date: d,
-                                    slotLiberi: freeSlotF1
-                                });
-                            };
-                            this_1 = this;
-                            for (_i = 0, date_1 = date; _i < date_1.length; _i++) {
-                                d = date_1[_i];
-                                _loop_1(d);
-                            }
-                        }
-                        ;
-                        if (typeof fascia === 'number' && fascia == 2) {
-                            _loop_2 = function (d) {
-                                var freeSlotF2 = [16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35];
-                                prenotazioni.map(function (value) {
-                                    if (d == value.data) {
-                                        freeSlotF2 = freeSlotF2.filter(function (val) {
-                                            if (val == value.slot)
-                                                return false;
-                                            else
-                                                return true;
-                                        });
-                                    }
-                                    ;
-                                });
-                                this_2.result.push({
-                                    date: d,
-                                    slotLiberi: freeSlotF2
-                                });
-                            };
-                            this_2 = this;
-                            for (_a = 0, date_2 = date; _a < date_2.length; _a++) {
-                                d = date_2[_a];
-                                _loop_2(d);
-                            }
-                        }
-                        ;
-                        if (typeof fascia === 'undefined') {
-                            _loop_3 = function (d) {
-                                var freeSlot = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35];
-                                prenotazioni.map(function (value) {
-                                    if (d == value.data) {
-                                        freeSlot = freeSlot.filter(function (val) {
-                                            if (val == value.slot)
-                                                return false;
-                                            else
-                                                return true;
-                                        });
-                                    }
-                                    ;
-                                });
-                                this_3.result.push({
-                                    date: d,
-                                    slotLiberi: freeSlot
-                                });
-                            };
-                            this_3 = this;
-                            for (_b = 0, date_3 = date; _b < date_3.length; _b++) {
-                                d = date_3[_b];
-                                _loop_3(d);
-                            }
-                        }
-                        ;
-                        console.log(this.result);
-                        return [2 /*return*/];
-                }
+    //qui viene ricavato timeslot dipende dalla fascia oraria scelta
+    buildCV.prototype.setFascia = function (fascia) {
+        //let freeSlots = [1,...36];
+        var freeSlot = Array.from(Array(36).keys()).map(function (v) { return v + 1; });
+        switch (fascia) {
+            case 1: {
+                this.fasciaSlot = freeSlot.filter(function (slot) { return slot < 17; }); //da 1 a 16
+                break;
+            }
+            case 2: {
+                this.fasciaSlot = freeSlot.filter(function (slot) { return slot > 16; }); //da 1 a 16
+                break;
+            }
+            default: {
+                this.fasciaSlot = freeSlot;
+            }
+        }
+    };
+    buildCV.prototype.filtroFascia = function (date) {
+        var _this = this;
+        var datesanitized = date.filter(function (value) { return (luxon_1.DateTime.fromISO(value).isValid && luxon_1.DateTime.now() < luxon_1.DateTime.fromISO(value)); });
+        //metodo 1 per filtro della fascia
+        this.result = datesanitized.map(function (d) {
+            //ottengo slot occupati in una fascia
+            var occupiedSlots = _this.prenotazioni.filter(function (value) {
+                return d == value.data;
+            }).map(function (v) {
+                return v.slot;
             });
+            //ottengo differenza fra gli slot della fascia e slot occupati (slot possibili - slot occupati = slot liberi)
+            var freeSlots = _this.fasciaSlot.filter(function (s) { return !occupiedSlots.includes(s); });
+            //ottengo il risultato
+            return { date: d, slotLiberi: freeSlots };
         });
     };
     //metodo per ottenere il risultato finale

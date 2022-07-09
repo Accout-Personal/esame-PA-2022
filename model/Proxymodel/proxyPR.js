@@ -44,13 +44,18 @@ var centro_vaccinale_1 = require("../centro_vaccinale");
 var sequelize_1 = require("../../config/sequelize");
 var luxon_1 = require("luxon");
 var stringsanitizer_1 = require("../../util/stringsanitizer");
+var qrCode = require("qrcode-reader");
+var Jimp = require("jimp");
+// Classe che implementa il proxy per la componente prenotazione nel model
 var proxyPr = /** @class */ (function () {
+    // Nel costruttore andiamo a inizializzare tutti i model necessari per lavorare con le prenotazioni
     function proxyPr() {
         this.model = new prenotazione_1.Prenotazione(sequelize_1.DBConnection.getInstance().getConnection());
         this.modelV = new vaccino_1.Vaccini(sequelize_1.DBConnection.getInstance().getConnection());
         this.modelU = new users_1.Users(sequelize_1.DBConnection.getInstance().getConnection());
         this.modelCV = new centro_vaccinale_1.Centro_vaccinale(sequelize_1.DBConnection.getInstance().getConnection());
     }
+    //Metodo per inserire una nuova prenotazione
     proxyPr.prototype.insertNewPr = function (data, slot, centro_vaccino, vaccino, user) {
         return __awaiter(this, void 0, void 0, function () {
             var sanitizeddata, fascia;
@@ -76,16 +81,13 @@ var proxyPr = /** @class */ (function () {
                         else {
                             fascia = 1;
                         }
-                        console.log("checking validity");
-                        return [4 /*yield*/, this.checkAvailability(sanitizeddata, centro_vaccino, fascia).then(function () { console.log("validity checking success.."); })];
+                        return [4 /*yield*/, this.checkAvailability(sanitizeddata, centro_vaccino, fascia)];
                     case 4:
                         _a.sent();
-                        console.log("checking slot");
-                        return [4 /*yield*/, this.checkSlot(sanitizeddata, centro_vaccino, slot).then(function () { console.log("slot checking success.."); })];
+                        return [4 /*yield*/, this.checkSlot(sanitizeddata, centro_vaccino, slot)];
                     case 5:
                         _a.sent();
-                        console.log("checking vax validity");
-                        return [4 /*yield*/, this.checkVaxValidity(sanitizeddata, vaccino, user).then(function () { console.log("vax validity checking success.."); })];
+                        return [4 /*yield*/, this.checkVaxValidity(sanitizeddata, vaccino, user)];
                     case 6:
                         _a.sent();
                         return [4 /*yield*/, this.model.insertNewPr(sanitizeddata, fascia, slot, centro_vaccino, vaccino, user)];
@@ -94,16 +96,65 @@ var proxyPr = /** @class */ (function () {
             });
         });
     };
+    // Metodo usato per recuperare informazioni relative ad una prenotazione, utilizzando il codice uuid
+    proxyPr.prototype.getPrInfo = function (req) {
+        return __awaiter(this, void 0, void 0, function () {
+            var uuid, sanitized, result;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.decodeUUID(req)];
+                    case 1:
+                        uuid = _a.sent();
+                        sanitized = (0, stringsanitizer_1.stringSanitizer)(uuid);
+                        this.makeRelationship();
+                        if (typeof sanitized === 'undefined')
+                            throw Error("codice sconosciuto");
+                        return [4 /*yield*/, this.model.getInfo(sanitized)];
+                    case 2:
+                        result = _a.sent();
+                        if (result === null)
+                            throw Error("codice sconosciuto");
+                        return [2 /*return*/, result];
+                }
+            });
+        });
+    };
+    // Metodo usato per confermare il codice uuid e lo stato della prenotazione
+    proxyPr.prototype.confermatUUID = function (req) {
+        return __awaiter(this, void 0, void 0, function () {
+            var uuid, result;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.decodeUUID(req)];
+                    case 1:
+                        uuid = _a.sent();
+                        return [4 /*yield*/, this.checkUUID(uuid)];
+                    case 2:
+                        _a.sent();
+                        return [4 /*yield*/, this.model.confirmUUID(uuid)];
+                    case 3:
+                        result = _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    // Metodo utilizzato per ottenere una lista di prenotazioni, passando come parametri, uno user id, un centro vaccinale, e una data.
+    // I parametri sono opzionali, il risultato del metodo cambia a seconda dei parametri passati
     proxyPr.prototype.getListaPr = function (userid, centro, data) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        if (typeof userid === "undefined" && typeof centro === "undefined") {
+                        if (typeof (data) !== 'string' || !(luxon_1.DateTime.fromISO(data).isValid) || luxon_1.DateTime.now > luxon_1.DateTime.fromISO(data))
+                            throw new Error('La data che hai inserito non è corretta');
+                        if (typeof centro !== 'number' || isNaN(centro) || !isFinite(centro))
+                            throw new Error('il centro vaccinale che hai inserito non è corretto');
+                        if (typeof userid === "undefined" && typeof centro === "undefined")
                             throw Error("non hai inserito nessun paramentro");
-                        }
                         if (!(typeof userid === "undefined")) return [3 /*break*/, 2];
                         this.TypeCheckData(data);
+                        this.makeRelationship();
                         return [4 /*yield*/, this.model.getPreCentro(centro, data)];
                     case 1: return [2 /*return*/, _a.sent()];
                     case 2:
@@ -114,6 +165,16 @@ var proxyPr = /** @class */ (function () {
             });
         });
     };
+    //costruisce relazioni utilizzati tra le tabelle utilizzati
+    proxyPr.prototype.makeRelationship = function () {
+        this.modelU.getModel().hasMany(this.model.getModel(), { foreignKey: 'userid' });
+        this.model.getModel().belongsTo(this.modelU.getModel(), { foreignKey: 'userid' });
+        this.modelV.getModel().hasMany(this.model.getModel(), { foreignKey: 'vaccinoid' });
+        this.model.getModel().belongsTo(this.modelV.getModel(), { foreignKey: 'vaccinoid' });
+        this.modelCV.getModel().hasMany(this.model.getModel(), { foreignKey: 'centro_vac_id' });
+        this.model.getModel().belongsTo(this.modelCV.getModel(), { foreignKey: 'centro_vac_id' });
+    };
+    // Metodo usato per cancellare una prenotazione
     proxyPr.prototype.cancellaPre = function (id, user) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
@@ -121,13 +182,13 @@ var proxyPr = /** @class */ (function () {
                     case 0: return [4 /*yield*/, this.checkPreID(id, user)];
                     case 1:
                         _a.sent();
-                        console.log("cheking success");
                         return [4 /*yield*/, this.model["delete"](id)];
                     case 2: return [2 /*return*/, _a.sent()];
                 }
             });
         });
     };
+    // Metodo per effettuare una modifica ad una prenotazione
     proxyPr.prototype.modifica = function (updateBody) {
         return __awaiter(this, void 0, void 0, function () {
             var oldPr, safeBody, sanitizedData, data, centro, fascia;
@@ -158,7 +219,7 @@ var proxyPr = /** @class */ (function () {
                         }
                         if (typeof updateBody.centro_vac !== "undefined") {
                             this.TypeCheckCV(updateBody.centro_vac);
-                            safeBody.centro_vac = updateBody.centro_vac;
+                            safeBody.centro_vac_id = updateBody.centro_vac;
                         }
                         if (!(typeof updateBody.vaccino !== "undefined")) return [3 /*break*/, 5];
                         return [4 /*yield*/, this.TypeCheckVaccino(updateBody.vaccino)];
@@ -166,39 +227,59 @@ var proxyPr = /** @class */ (function () {
                         _a.sent();
                         _a.label = 5;
                     case 5:
-                        safeBody.vaccino = updateBody.vaccino;
-                        console.log("basic control finished");
-                        console.log(safeBody);
+                        safeBody.vaccinoid = updateBody.vaccino;
                         data = safeBody.data ? safeBody.data : oldPr.data;
                         centro = safeBody.centro_vac ? safeBody.centro_vac : oldPr.centro_vac;
                         fascia = safeBody.fascia ? safeBody.fascia : oldPr.fascia;
-                        console.log("data: " + data + " centro: " + centro + " fascia: " + fascia);
-                        console.log(oldPr);
                         if (!(oldPr.data != safeBody.data || oldPr.fascia != safeBody.fascia)) return [3 /*break*/, 7];
-                        //this.checkAvailability(safeBody.data ? safeBody.data : oldPr.data, safeBody.centro ? safeBody.centro : oldPr.centro_vac, safeBody.fascia ? safeBody.fascia : oldPr.fascia);
-                        console.log("controllo disponibilita'");
                         return [4 /*yield*/, this.checkAvailability(data, centro, fascia)];
                     case 6:
                         _a.sent();
                         _a.label = 7;
-                    case 7:
-                        console.log("check slot");
-                        return [4 /*yield*/, this.checkSlot(data, centro, safeBody.slot ? safeBody.slot : oldPr.slot)];
+                    case 7: return [4 /*yield*/, this.checkSlot(data, centro, safeBody.slot ? safeBody.slot : oldPr.slot)];
                     case 8:
                         _a.sent();
-                        //controllo vaccino
-                        console.log("check vaccino");
-                        console.log("user " + updateBody.user);
                         return [4 /*yield*/, this.checkVaxValidity(data, safeBody.vaccino, updateBody.user, updateBody.id)];
                     case 9:
                         _a.sent();
-                        console.log("aggiornamento delle informazioni");
                         return [4 /*yield*/, this.model.modifica(updateBody.id, safeBody)];
                     case 10: return [2 /*return*/, _a.sent()];
                 }
             });
         });
     };
+    // Metodo usato per decodificare il codice uuid quando viene passato sotto forma di QRcode. Questo codice può essere inviato anche tramite json
+    proxyPr.prototype.decodeUUID = function (req) {
+        return __awaiter(this, void 0, void 0, function () {
+            var uuid, img, image, qrcode;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!(typeof req.file !== 'undefined')) return [3 /*break*/, 2];
+                        img = req.file.buffer;
+                        return [4 /*yield*/, Jimp.read(img)];
+                    case 1:
+                        image = _a.sent();
+                        qrcode = new qrCode();
+                        qrcode.callback = function (err, value) {
+                            if (err) {
+                                console.error(err);
+                            }
+                            uuid = value.result;
+                        };
+                        // Decoding the QR code
+                        qrcode.decode(image.bitmap);
+                        return [3 /*break*/, 3];
+                    case 2:
+                        //Legge dalla json
+                        uuid = req.body.uuid;
+                        _a.label = 3;
+                    case 3: return [2 /*return*/, uuid];
+                }
+            });
+        });
+    };
+    // Metodo usato per controllare l'id di una prenotazione
     proxyPr.prototype.checkPreID = function (id, user) {
         return __awaiter(this, void 0, void 0, function () {
             var result;
@@ -208,7 +289,7 @@ var proxyPr = /** @class */ (function () {
                 result = this.model.getModel().count({
                     where: {
                         id: id,
-                        user: user
+                        userid: user
                     }
                 });
                 if (result < 1)
@@ -217,6 +298,8 @@ var proxyPr = /** @class */ (function () {
             });
         });
     };
+    // Questo metodo serve per controllare se l'utente si sta prenotando per un vaccino che non gli è mai stato sommistrato.
+    // Oppure, se si sta prenotando ad un vaccino già ricevuto, pero', dopo il relativo periodo di validità.
     proxyPr.prototype.checkVaxValidity = function (data, vaccino, user, excludeid) {
         return __awaiter(this, void 0, void 0, function () {
             var DataPre, queryBody, LastVax, LastVaxTime, Vaccino;
@@ -225,8 +308,8 @@ var proxyPr = /** @class */ (function () {
                     case 0:
                         DataPre = luxon_1.DateTime.fromISO(data);
                         queryBody = {
-                            user: user,
-                            vaccino: vaccino,
+                            userid: user,
+                            vaccinoid: vaccino,
                             stato: [0, 1]
                         };
                         return [4 /*yield*/, this.model.getModel().findAll({
@@ -235,6 +318,7 @@ var proxyPr = /** @class */ (function () {
                             })];
                     case 1:
                         LastVax = _a.sent();
+                        // Devo escludere la prenotazione attuale, durante la modifica, per escludere il controllo sul periodo di validità del vaccino
                         if (typeof excludeid !== 'undefined') {
                             LastVax = LastVax.filter(function (element) {
                                 return element.id != excludeid;
@@ -242,7 +326,6 @@ var proxyPr = /** @class */ (function () {
                         }
                         //mai vaccinato
                         if (JSON.parse(JSON.stringify(LastVax)).length == 0) {
-                            console.log("questo user non ha mai vaccinato.");
                             return [2 /*return*/];
                         }
                         LastVaxTime = luxon_1.DateTime.fromISO(LastVax[0].data);
@@ -257,6 +340,7 @@ var proxyPr = /** @class */ (function () {
             });
         });
     };
+    // Metodo per controllare se lo slot è occupato
     proxyPr.prototype.checkSlot = function (data, centro, slot) {
         return __awaiter(this, void 0, void 0, function () {
             var count;
@@ -265,7 +349,7 @@ var proxyPr = /** @class */ (function () {
                     case 0: return [4 /*yield*/, this.model.getModel().count({
                             where: {
                                 data: data,
-                                centro_vac: centro,
+                                centro_vac_id: centro,
                                 slot: slot
                             }
                         })];
@@ -280,6 +364,7 @@ var proxyPr = /** @class */ (function () {
             });
         });
     };
+    // Metodo per controllare se una fascia ha ancora slot liberi
     proxyPr.prototype.checkAvailability = function (dataAppuntamento, centro, fasciaOraria) {
         return __awaiter(this, void 0, void 0, function () {
             var res;
@@ -304,6 +389,7 @@ var proxyPr = /** @class */ (function () {
             });
         });
     };
+    //Metodo che ritorna il numero di prenotazioni di un dato centro vaccinale in una certa data
     proxyPr.prototype.getPRCentroFascia = function (dataAppuntamento, centro, fasciaOraria) {
         return __awaiter(this, void 0, void 0, function () {
             var list, centro_vac, res;
@@ -331,6 +417,33 @@ var proxyPr = /** @class */ (function () {
             });
         });
     };
+    // Metodo usato per controllare un codice uuid
+    proxyPr.prototype.checkUUID = function (uuid) {
+        return __awaiter(this, void 0, void 0, function () {
+            var sanitized, res;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        sanitized = (0, stringsanitizer_1.stringSanitizer)(uuid);
+                        if (typeof sanitized === 'undefined')
+                            throw Error("non hai inserito uuid");
+                        return [4 /*yield*/, this.model.getModel().findOne({
+                                where: {
+                                    uuid: sanitized
+                                }
+                            })];
+                    case 1:
+                        res = _a.sent();
+                        if (res === null)
+                            throw Error("codice uuid non valido");
+                        if (res.stato == 1)
+                            throw Error("questo appuntamento e' gia confermato");
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    // Metodo per effettuare controlli sulla data
     proxyPr.prototype.TypeCheckData = function (data) {
         var sanitizeddata = (0, stringsanitizer_1.stringSanitizer)(data);
         var dataIns = luxon_1.DateTime.fromISO(sanitizeddata);
@@ -341,6 +454,7 @@ var proxyPr = /** @class */ (function () {
             throw new Error("Puoi prenotare solo in un dato futuro.");
         return true;
     };
+    // Metodo usato per effettuare dei controlli sullo slot inserito dall'utente
     proxyPr.prototype.TypeCheckSlot = function (slot) {
         if (typeof slot !== 'number' || isNaN(slot))
             throw new Error('Questa slot non è valido');
@@ -348,6 +462,7 @@ var proxyPr = /** @class */ (function () {
             throw new Error('Questa fascia non è valida');
         return true;
     };
+    // Metodo usato per effettuare dei controlli sul centro vaccinale inserito dall'utente
     proxyPr.prototype.TypeCheckCV = function (Cv) {
         return __awaiter(this, void 0, void 0, function () {
             var test;
@@ -370,6 +485,7 @@ var proxyPr = /** @class */ (function () {
             });
         });
     };
+    // Metodo usato per effettuare dei controlli sul vaccino inserito dall'utente
     proxyPr.prototype.TypeCheckVaccino = function (vaccino) {
         return __awaiter(this, void 0, void 0, function () {
             var test;
@@ -392,13 +508,13 @@ var proxyPr = /** @class */ (function () {
             });
         });
     };
+    // Metodo usato per effettuare dei controlli sull'utente
     proxyPr.prototype.TypeCheckUser = function (user) {
         return __awaiter(this, void 0, void 0, function () {
             var test;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        console.log(user);
                         if (typeof user !== 'number' || isNaN(user))
                             throw new Error('Questo utente non è valido');
                         return [4 /*yield*/, this.modelU.getModel().findAll({
@@ -408,7 +524,6 @@ var proxyPr = /** @class */ (function () {
                             })];
                     case 1:
                         test = _a.sent();
-                        console.log(test);
                         if (Object.keys(test).length == 0)
                             throw new Error('Questo utente non esiste');
                         return [2 /*return*/, true];
@@ -416,28 +531,26 @@ var proxyPr = /** @class */ (function () {
             });
         });
     };
-    proxyPr.prototype.TypeCheckStato = function (stato) {
-        if (typeof stato !== 'number' || isNaN(stato))
-            throw new Error('Questo stato non è valido');
-        return true;
-    };
+    // Metodo che restituisce, per ogni centro vaccinale, per ogni fascia, e, per ogni data, il numero di prenotazioni, più gli altri attributi
     proxyPr.prototype.takeNumberOfPrenotation = function (fascia) {
         return __awaiter(this, void 0, void 0, function () {
             var result, result;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
+                        if (typeof fascia !== 'boolean')
+                            throw new Error('L\' opzione inserita non è valida');
                         if (!fascia) return [3 /*break*/, 2];
                         return [4 /*yield*/, this.model.getModel().findAndCountAll({
-                                attributes: ['centro_vac', 'data', 'fascia'],
-                                group: ['centro_vac', 'data', 'fascia']
+                                attributes: ['centro_vac_id', 'data', 'fascia'],
+                                group: ['centro_vac_id', 'data', 'fascia']
                             })];
                     case 1:
                         result = _a.sent();
                         return [2 /*return*/, result.count];
                     case 2: return [4 /*yield*/, this.model.getModel().findAndCountAll({
-                            attributes: ['centro_vac', 'data'],
-                            group: ['centro_vac', 'data']
+                            attributes: ['centro_vac_id', 'data'],
+                            group: ['centro_vac_id', 'data']
                         })];
                     case 3:
                         result = _a.sent();
@@ -446,53 +559,35 @@ var proxyPr = /** @class */ (function () {
             });
         });
     };
-    proxyPr.prototype.takeSumF1F2 = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var complete, result;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        complete = [];
-                        return [4 /*yield*/, this.modelCV.getModel().findAll({
-                                attributes: ['id', 'maxf1', 'maxf2']
-                            })];
-                    case 1:
-                        result = _a.sent();
-                        result.map(function (val) {
-                            val.dataValues.somma = val.dataValues.maxf1 + val.dataValues.maxf1;
-                            complete.push(val.dataValues);
-                        });
-                        return [2 /*return*/, complete];
-                }
-            });
-        });
-    };
+    // Metodo che ritorna tutte le prenotazioni effettuate per una certa data, in un certo centro vaccinale e per una certa fascia
     proxyPr.prototype.getSlotFull = function (id, data, fascia) {
         return __awaiter(this, void 0, void 0, function () {
             var query, query;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        if (!(typeof fascia === 'undefined')) return [3 /*break*/, 2];
+                    case 0: return [4 /*yield*/, this.TypeCheckCV(id)];
+                    case 1:
+                        _a.sent();
+                        if (!(typeof fascia === 'undefined')) return [3 /*break*/, 3];
                         return [4 /*yield*/, this.model.getModel().findAll({
                                 attributes: ['data', 'slot'],
                                 where: {
-                                    centro_vac: id,
+                                    centro_vac_id: id,
                                     data: data
                                 }
                             })];
-                    case 1:
+                    case 2:
                         query = _a.sent();
                         return [2 /*return*/, query];
-                    case 2: return [4 /*yield*/, this.model.getModel().findAll({
+                    case 3: return [4 /*yield*/, this.model.getModel().findAll({
                             attributes: ['data', 'slot'],
                             where: {
-                                centro_vac: id,
+                                centro_vac_id: id,
                                 data: data,
                                 fascia: fascia
                             }
                         })];
-                    case 3:
+                    case 4:
                         query = _a.sent();
                         return [2 /*return*/, query];
                 }
@@ -503,31 +598,34 @@ var proxyPr = /** @class */ (function () {
     proxyPr.prototype.getStatisticPositive = function (order) {
         if (order === void 0) { order = true; }
         return __awaiter(this, void 0, void 0, function () {
-            var positiveResult, allResult, statistic;
+            var asc, positiveResult, allResult, statistic;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.model.getModel().findAndCountAll({
-                            attributes: ['centro_vac', 'stato'],
-                            where: { stato: 1 },
-                            group: ['centro_vac', 'stato']
-                        })];
+                    case 0:
+                        asc = typeof order === 'undefined' ? true : order;
+                        return [4 /*yield*/, this.model.getModel().findAndCountAll({
+                                attributes: ['centro_vac_id', 'stato'],
+                                where: { stato: 1 },
+                                group: ['centro_vac_id', 'stato']
+                            })];
                     case 1:
                         positiveResult = _a.sent();
                         return [4 /*yield*/, this.model.getModel().findAndCountAll({
-                                attributes: ['centro_vac'],
-                                group: ['centro_vac']
+                                attributes: ['centro_vac_id'],
+                                group: ['centro_vac_id']
                             })];
                     case 2:
                         allResult = _a.sent();
                         statistic = positiveResult.count.map(function (value) {
                             allResult.count.map(function (val) {
-                                if (value.centro_vac == val.centro_vac) {
+                                if (value.centro_vac_id == val.centro_vac_id) {
                                     value.media = (value.count / val.count).toFixed(2);
                                 }
                             });
                             return value;
                         });
-                        if (order)
+                        // Qui andiamo ad effettuare l'ordinamento del risultato finale
+                        if (asc)
                             statistic.sort(function (a, b) {
                                 return a.media - b.media;
                             });
@@ -543,34 +641,25 @@ var proxyPr = /** @class */ (function () {
     // Metodo per impostare le prenotazioni come 'non andate a buon fine'
     proxyPr.prototype.setBadPrenotations = function (data) {
         return __awaiter(this, void 0, void 0, function () {
-            var list, _i, list_1, i;
+            var list;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.getBadPrenotation(data)];
+                    case 0:
+                        if (typeof (data) !== 'string' || !(luxon_1.DateTime.fromISO(data).isValid))
+                            throw new Error('La data inserita non è valida');
+                        return [4 /*yield*/, this.getBadPrenotation(data)];
                     case 1:
                         list = _a.sent();
                         list = list.map(function (value) {
                             return value.dataValues.id;
                         });
-                        console.log(list);
-                        _i = 0, list_1 = list;
-                        _a.label = 2;
-                    case 2:
-                        if (!(_i < list_1.length)) return [3 /*break*/, 5];
-                        i = list_1[_i];
                         return [4 /*yield*/, this.model.getModel().update({ stato: 2 }, {
                                 where: {
-                                    id: i
+                                    id: list
                                 }
                             })];
-                    case 3:
+                    case 2:
                         _a.sent();
-                        _a.label = 4;
-                    case 4:
-                        _i++;
-                        return [3 /*break*/, 2];
-                    case 5:
-                        console.log('finito');
                         return [2 /*return*/];
                 }
             });
@@ -585,17 +674,20 @@ var proxyPr = /** @class */ (function () {
                     case 0:
                         if (isNaN(id) || !isFinite(id) || typeof (id) !== 'number')
                             throw new Error('il centro vaccinale che hai inserito non è corretto');
-                        if (typeof (data) !== 'string' || !(luxon_1.DateTime.fromISO(data).isValid))
+                        if (typeof (data) !== 'string' || !(luxon_1.DateTime.fromISO(data).isValid) || luxon_1.DateTime.now > luxon_1.DateTime.fromISO(data))
                             throw new Error('La data che hai inserito non è corretta');
                         return [4 /*yield*/, this.getBadPrenotation(data, false, id)];
                     case 1:
                         result = _a.sent();
-                        console.log(result['count'][0].count);
-                        return [2 /*return*/];
+                        if (typeof result['count'][0] === 'undefined')
+                            throw new Error('La data inserita non ha prodotto risultati');
+                        return [2 /*return*/, result['count'][0].count];
                 }
             });
         });
     };
+    // Metodo che restituisce tutte le prenotazioni che non sono andate a buon fine, prende in input una data, un booleano, che modifica la query.
+    // Infine, viene passato un centro vaccinale.
     proxyPr.prototype.getBadPrenotation = function (data, option, id) {
         if (option === void 0) { option = true; }
         return __awaiter(this, void 0, void 0, function () {
@@ -613,20 +705,23 @@ var proxyPr = /** @class */ (function () {
                             })];
                     case 1:
                         list = _a.sent();
-                        return [3 /*break*/, 4];
-                    case 2: return [4 /*yield*/, this.model.getModel().findAndCountAll({
-                            attributes: ['centro_vac', 'data'],
-                            where: {
-                                centro_vac: id,
-                                data: data,
-                                stato: 2
-                            },
-                            group: ['centro_vac', 'data']
-                        })];
+                        return [3 /*break*/, 5];
+                    case 2: return [4 /*yield*/, this.TypeCheckCV(id)];
                     case 3:
+                        _a.sent();
+                        return [4 /*yield*/, this.model.getModel().findAndCountAll({
+                                attributes: ['centro_vac_id', 'data'],
+                                where: {
+                                    centro_vac_id: id,
+                                    data: data,
+                                    stato: 2
+                                },
+                                group: ['centro_vac_id', 'data']
+                            })];
+                    case 4:
                         list = _a.sent();
-                        _a.label = 4;
-                    case 4: return [2 /*return*/, list];
+                        _a.label = 5;
+                    case 5: return [2 /*return*/, list];
                 }
             });
         });

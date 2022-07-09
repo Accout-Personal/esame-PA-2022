@@ -8,9 +8,8 @@ export class directorRes {
     public static async respose(res, value, tipo: string = 'json') {
         let Prenotazione: any = value;
         let Response = new buildRes();
-
         //default json
-        switch (tipo) {
+        switch (tipo.toLowerCase()) {
             case 'qrcode': {
                 await Response.ProduceInfo(value);
                 let Stream: PassThrough = Response.ProduceQRCodeImmagine(value.uuid);

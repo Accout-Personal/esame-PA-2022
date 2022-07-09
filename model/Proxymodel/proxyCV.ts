@@ -69,7 +69,6 @@ export class proxyCV implements proxyInterfaceCV{
     }
 
     public makeRelationship(){
-        console.log("making relationship on proxyCV");
         this.model.getModel().hasMany(this.modelPR.getModel(),{foreignKey: 'centro_vac_id'});
         this.modelPR.getModel().belongsTo(this.model.getModel(),{foreignKey: 'centro_vac_id'});
     }

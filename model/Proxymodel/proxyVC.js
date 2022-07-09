@@ -38,37 +38,45 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 exports.__esModule = true;
 exports.proxyVC = void 0;
 var vaccino_1 = require("../vaccino");
+var stringsanitizer_1 = require("../../util/stringsanitizer");
 var sequelize_1 = require("../../config/sequelize");
+// Questa classe rappresenta il proxy per la componente model del vaccino
 var proxyVC = /** @class */ (function () {
     function proxyVC() {
         this.model = new vaccino_1.Vaccini(sequelize_1.DBConnection.getInstance().getConnection());
     }
+    // Metodo per inserire un nuovo vaccino
     proxyVC.prototype.insertNewVacc = function (nome, validita) {
         return __awaiter(this, void 0, void 0, function () {
             var error_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        _a.trys.push([0, 3, , 4]);
-                        if (!(this.TypeCheckNome(nome) && this.TypeCheckValidita(validita))) return [3 /*break*/, 2];
+                        nome = (0, stringsanitizer_1.stringSanitizer)(nome);
+                        _a.label = 1;
+                    case 1:
+                        _a.trys.push([1, 4, , 5]);
+                        if (!(this.TypeCheckNome(nome) && this.TypeCheckValidita(validita))) return [3 /*break*/, 3];
                         return [4 /*yield*/, this.model.insertNewVacc(nome, validita)];
-                    case 1: return [2 /*return*/, _a.sent()];
-                    case 2: return [3 /*break*/, 4];
-                    case 3:
+                    case 2: return [2 /*return*/, _a.sent()];
+                    case 3: return [3 /*break*/, 5];
+                    case 4:
                         error_1 = _a.sent();
                         return [2 /*return*/, error_1];
-                    case 4: return [2 /*return*/];
+                    case 5: return [2 /*return*/];
                 }
             });
         });
     };
+    // Metodo per sanificare il nome del vaccino
     proxyVC.prototype.TypeCheckNome = function (nome) {
         if ((typeof nome !== 'string' || nome.length > 255))
             throw new Error('Questo nome non è valido');
         return true;
     };
+    // Metodo per sanificare la validità del vaccino
     proxyVC.prototype.TypeCheckValidita = function (validita) {
-        if (typeof validita !== 'number' || isNaN(validita))
+        if (typeof validita !== 'number' || isNaN(validita) || !isFinite(validita))
             throw new Error('Questo valore di validità non è un numero');
         return true;
     };

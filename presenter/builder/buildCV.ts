@@ -26,7 +26,7 @@ export class buildCV implements builderInterfaceCV {
     public async queryAlDB(disp: boolean) {
         //Qui andiamo a prendere tutti i dati di interesse dal DB
         this.proxy.makeRelationship();
-        if (disp) {
+        if (!disp) {
             this.result = await this.proxy.getProxyModel().getModel().findAll({
                 attributes: ['id', 'lati', 'longi']
             });
@@ -49,8 +49,9 @@ export class buildCV implements builderInterfaceCV {
 
     //Qui viene filtrato la data della prenotazione di centri vaccinali
     public filtraPrenData(data: string) {
+        if (typeof data !== 'string')
+            throw new Error("la data inserita non e' corretta");
         let data1 = DateTime.fromISO(data).isValid ? data : DateTime.now().toISODate();
-        console.log(data1);
         this.result = this.result.map(value => {
             let val = value;
             val.prenotaziones = val.prenotaziones.filter(prenotazione => {
@@ -79,7 +80,7 @@ export class buildCV implements builderInterfaceCV {
     public filtraPerDistanza(latitude: number, longitude: number, distanza: number) {
         this.proxy.TypeCheckLati(latitude);
         this.proxy.TypeCheckLongi(longitude);
-        if (typeof distanza !== 'number' || isNaN(distanza) || !isFinite(distanza))
+        if (typeof distanza !== 'number' || isNaN(distanza) || !isFinite(distanza) || distanza <= 0)
             throw new Error('La distanza inserita non è corretta')
         let start = {
             latitude: latitude,
@@ -146,20 +147,7 @@ export class buildCV implements builderInterfaceCV {
             //ottengo il risultato
             return { date: d, slotLiberi: freeSlots }
         });
-        /*
-        //metodo 2 (forse meno leggibile) per filtro della fascia
-        this.result = date.map(d => {
-            //differenza fra gli slot della fascia e slot occupati
-            let freeSlots = this.fasciaSlot.filter(s => !this.prenotazioni.filter(value => {
-                return d == value.data
-            }).map(v => {
-                return v.slot;
-            }).includes(s));
-        
-            //ottengo il risultato
-            return { date: d, slotLiberi: freeSlots }
-        });     
-        */
+
     }
 
     //metodo per ottenere il risultato finale
