@@ -64,6 +64,7 @@ var userPresenter = /** @class */ (function () {
                         res.status(401).send({ message: "credenziale invalido" });
                     return;
                 })["catch"](function (error) {
+                    console.log(error);
                     res.status(401).send({ message: "credenziale invalido" });
                 });
                 return [2 /*return*/];
@@ -144,6 +145,7 @@ var userPresenter = /** @class */ (function () {
                         return [3 /*break*/, 4];
                     case 3:
                         error_2 = _a.sent();
+                        console.log(error_2);
                         res.status(401).send({ "errore": error_2.message });
                         return [3 /*break*/, 4];
                     case 4: return [2 /*return*/];
@@ -158,6 +160,7 @@ var userPresenter = /** @class */ (function () {
         Proxy.cancellaPre(body.id, req.user.user.id).then(function (value) {
             res.status(200).send({ "message": "cancellato con successo" });
         })["catch"](function (error) {
+            console.log(error);
             res.status(401).send({ "errore": error.message });
         });
     };

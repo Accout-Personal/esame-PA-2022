@@ -49,40 +49,43 @@ export class proxyPr implements proxyinterfacePR {
 
         return await this.model.insertNewPr(sanitizeddata, fascia, slot, centro_vaccino, vaccino, user);
     }
-// Metodo usato per recuperare informazioni relative ad una prenotazione, utilizzando il codice uuid
+    // Metodo usato per recuperare informazioni relative ad una prenotazione, utilizzando il codice uuid
     public async getPrInfo(req) {
         let uuid = await this.decodeUUID(req)
-        let sanitized = stringSanitizer(uuid);
         this.makeRelationship();
-        if (typeof sanitized === 'undefined') throw Error("codice sconosciuto");
-        let result = await this.model.getInfo(sanitized);
+        let result = await this.checkUUID(uuid);
         if (result === null) throw Error("codice sconosciuto");
         return result
     }
-// Metodo usato per confermare il codice uuid e lo stato della prenotazione
-    public async confermatUUID(req){
-        
-        let uuid = await this.decodeUUID(req);            
-        await this.checkUUID(uuid);
+    // Metodo usato per confermare il codice uuid e lo stato della prenotazione
+    public async confermatUUID(req) {
+
+        let uuid = await this.decodeUUID(req);
+        let res = await this.checkUUID(uuid);
+        if (res === null)
+            throw Error("codice uuid non valido");
+        if (res.stato == 1)
+            throw Error("questo appuntamento e' gia confermato");
 
         let result = await this.model.confirmUUID(uuid);
     }
-// Metodo utilizzato per ottenere una lista di prenotazioni, passando come parametri, uno user id, un centro vaccinale, e una data.
-// I parametri sono opzionali, il risultato del metodo cambia a seconda dei parametri passati
+    // Metodo utilizzato per ottenere una lista di prenotazioni, passando come parametri, uno user id, un centro vaccinale, e una data.
+    // I parametri sono opzionali, il risultato del metodo cambia a seconda dei parametri passati
     public async getListaPr(userid?: number, centro?: number, data?: string) {
-
-        if (typeof (data) !== 'string' || !(DateTime.fromISO(data).isValid) || DateTime.now > DateTime.fromISO(data))
-            throw new Error('La data che hai inserito non è corretta');
-        if (typeof centro !== 'number' || isNaN(centro) || !isFinite(centro))
-            throw new Error('il centro vaccinale che hai inserito non è corretto');
+        let datasanitized = stringSanitizer(data);
+        if (typeof centro !== 'undefined' || typeof datasanitized !== 'undefined') {
+            if (typeof (datasanitized) !== 'string' || !(DateTime.fromISO(datasanitized).isValid) || DateTime.now > DateTime.fromISO(datasanitized))
+                throw new Error('La data che hai inserito non è corretta');
+            await this.TypeCheckCV(centro);
+        }
 
         if (typeof userid === "undefined" && typeof centro === "undefined")
             throw Error("non hai inserito nessun paramentro");
 
         if (typeof userid === "undefined") {
-            this.TypeCheckData(data);
+            this.TypeCheckDataListaPrenotazione(datasanitized);
             this.makeRelationship();
-            return await this.model.getPreCentro(centro, data);
+            return await this.model.getPreCentro(centro, datasanitized);
         }
 
         this.TypeCheckUser(userid);
@@ -101,21 +104,22 @@ export class proxyPr implements proxyinterfacePR {
         this.modelCV.getModel().hasMany(this.model.getModel(), { foreignKey: 'centro_vac_id' });
         this.model.getModel().belongsTo(this.modelCV.getModel(), { foreignKey: 'centro_vac_id' });
     }
-// Metodo usato per cancellare una prenotazione
+    // Metodo usato per cancellare una prenotazione
     public async cancellaPre(id: number, user: number) {
-        await this.checkPreID(id, user);
-        return await this.model.delete(id);
+        await this.checkPreIDStato(id, user);
+        return await this.model.delete(id, user);
     }
     // Metodo per effettuare una modifica ad una prenotazione
     public async modifica(updateBody: { id: number, user: number, data?: string, slot?: number, centro_vac?: number, vaccino?: number }) {
 
 
         await this.TypeCheckUser(updateBody.user);
-        await this.checkPreID(updateBody.id, updateBody.user);
+        await this.checkPreIDStato(updateBody.id, updateBody.user);
+
         // Qui vengono effettuate tutta una serie di operazioni di sanificazione degli input inseriti dall'utente
         let oldPr = await this.model.getModel().findOne({ where: { id: updateBody.id } });
         if (typeof oldPr === "undefined" || oldPr === null) {
-            throw Error("Questo appunto e' inesistente");
+            throw Error("Questo appuntamento e' inesistente");
         }
         var safeBody: any = {};
         if (typeof updateBody.data !== "undefined") {
@@ -135,32 +139,39 @@ export class proxyPr implements proxyinterfacePR {
             safeBody.centro_vac_id = updateBody.centro_vac;
         }
 
-        if (typeof updateBody.vaccino !== "undefined")
+        if (typeof updateBody.vaccino !== "undefined") {
             await this.TypeCheckVaccino(updateBody.vaccino);
-        safeBody.vaccinoid = updateBody.vaccino;
+            safeBody.vaccinoid = updateBody.vaccino;
+        }
+        else {
+            safeBody.vaccinoid = oldPr.vaccinoid;
+        }
 
         let data = safeBody.data ? safeBody.data : oldPr.data;
-        let centro = safeBody.centro_vac ? safeBody.centro_vac : oldPr.centro_vac;
+        let centro = safeBody.centro_vac_id ? safeBody.centro_vac_id : oldPr.centro_vac_id;
         let fascia = safeBody.fascia ? safeBody.fascia : oldPr.fascia;
+        if ((typeof updateBody.slot !== 'undefined' && updateBody.slot !== oldPr.slot) || (typeof updateBody.data !== 'undefined' && updateBody.data !== oldPr.data) || (typeof updateBody.centro_vac !== 'undefined' && updateBody.centro_vac !== oldPr.centro_vac_id)) {
+            await this.checkSlot(data, centro, safeBody.slot ? safeBody.slot : oldPr.slot);
 
+        }
         //devo controllare la disponibilita' solo se cambio la fascia o data.
-        if (oldPr.data != safeBody.data || oldPr.fascia != safeBody.fascia)
+        if (oldPr.data != safeBody.data || oldPr.fascia != safeBody.fascia || (typeof updateBody.centro_vac !== 'undefined' && updateBody.centro_vac !== oldPr.slot))
             await this.checkAvailability(data, centro, fascia);
-        await this.checkSlot(data, centro, safeBody.slot ? safeBody.slot : oldPr.slot);
-        await this.checkVaxValidity(data, safeBody.vaccino, updateBody.user, updateBody.id);
+
+        await this.checkVaxValidity(data, safeBody.vaccinoid, updateBody.user, updateBody.id);
         return await this.model.modifica(updateBody.id, safeBody);
     }
-// Metodo usato per decodificare il codice uuid quando viene passato sotto forma di QRcode. Questo codice può essere inviato anche tramite json
-    private async decodeUUID(req){
+    // Metodo usato per decodificare il codice uuid quando viene passato sotto forma di QRcode. Questo codice può essere inviato anche tramite json
+    private async decodeUUID(req) {
         var uuid: string;
         if (typeof req.file !== 'undefined') {
             let img: Buffer = req.file.buffer;
-            
+
             let image = await Jimp.read(img);
             let qrcode = new qrCode();
             qrcode.callback = function (err, value) {
                 if (err) {
-                    console.error(err);
+                    throw new Error("qr code sconosciuto");
                 }
                 uuid = value.result;
             };
@@ -174,21 +185,23 @@ export class proxyPr implements proxyinterfacePR {
         return uuid;
     }
 
-// Metodo usato per controllare l'id di una prenotazione
-    private async checkPreID(id: number, user: number) {
+    // Metodo usato per controllare l'appartenenza di una prenotazione
+    private async checkPreIDStato(id: number, user: number) {
         if (typeof id !== 'number' || isNaN(id)) throw new Error('Id non è valido');
 
         //un utente non puo' cancellare o modificare le prenotazione degli altri.
-        let result = this.model.getModel().count({
+        let result = await this.model.getModel().count({
             where: {
                 id: id,
-                userid: user
+                userid: user,
+                stato: 0
             }
         });
 
         if (result < 1) throw Error("informazione non e' valido");
 
     }
+
     // Questo metodo serve per controllare se l'utente si sta prenotando per un vaccino che non gli è mai stato sommistrato.
     // Oppure, se si sta prenotando ad un vaccino già ricevuto, pero', dopo il relativo periodo di validità.
     private async checkVaxValidity(data: string, vaccino: number, user: number, excludeid?: number) {
@@ -207,7 +220,7 @@ export class proxyPr implements proxyinterfacePR {
         if (typeof excludeid !== 'undefined') {
             LastVax = LastVax.filter((element) => {
                 return element.id != excludeid;
-            })
+            });
         }
 
         //mai vaccinato
@@ -268,23 +281,27 @@ export class proxyPr implements proxyinterfacePR {
         else
             return { count: res.length, centro: centro_vac };
     }
-// Metodo usato per controllare un codice uuid
-    private async checkUUID(uuid:string){
+    // Metodo usato per controllare un codice uuid
+    private async checkUUID(uuid: string) {
         let sanitized = stringSanitizer(uuid);
-        if(typeof sanitized === 'undefined')
-            throw Error("non hai inserito uuid");
-
-        let res = await this.model.getModel().findOne({
-            where:{
-                uuid:sanitized
+        if (typeof sanitized === 'undefined') throw Error("codice sconosciuto");
+        if (sanitized.length != 36) throw Error("codice sconosciuto");
+        return await this.model.getModel().findOne({
+            where: {
+                uuid: sanitized
             }
         });
-        if(res === null)
-            throw Error ("codice uuid non valido");
-        if(res.stato == 1)
-            throw Error ("questo appuntamento e' gia confermato");
+        
     }
 
+    // Metodo per effettuare controlli sulla data
+    private TypeCheckDataListaPrenotazione(data: string): Boolean {
+        let sanitizeddata = stringSanitizer(data);
+        let dataIns = DateTime.fromISO(sanitizeddata);
+        let dataNow = DateTime.now();
+        if ((typeof sanitizeddata !== 'string' || !dataIns.isValid)) throw new Error('Questa data non è valida');
+        return true;
+    }
 
     // Metodo per effettuare controlli sulla data
     private TypeCheckData(data: string): Boolean {
@@ -336,7 +353,7 @@ export class proxyPr implements proxyinterfacePR {
     }
     // Metodo che restituisce, per ogni centro vaccinale, per ogni fascia, e, per ogni data, il numero di prenotazioni, più gli altri attributi
     async takeNumberOfPrenotation(fascia: Boolean): Promise<Array<any>> {
-        if(typeof fascia !== 'boolean') throw new Error('L\' opzione inserita non è valida')
+        if (typeof fascia !== 'boolean') throw new Error('L\' opzione inserita non è valida')
         if (fascia) {
             let result = await this.model.getModel().findAndCountAll({
                 attributes: ['centro_vac_id', 'data', 'fascia'],
@@ -353,7 +370,7 @@ export class proxyPr implements proxyinterfacePR {
         }
     }
 
-// Metodo che ritorna tutte le prenotazioni effettuate per una certa data, in un certo centro vaccinale e per una certa fascia
+    // Metodo che ritorna tutte le prenotazioni effettuate per una certa data, in un certo centro vaccinale e per una certa fascia
     async getSlotFull(id: number, data: Array<string>, fascia?: number): Promise<any> {
         await this.TypeCheckCV(id);
         if (typeof fascia === 'undefined') {
@@ -382,7 +399,7 @@ export class proxyPr implements proxyinterfacePR {
     // Metodo per ottenere le statistiche sui centri vaccinali e sulle prenotazioni che hanno avuto esito positivo
     public async getStatisticPositive(order: Boolean = true): Promise<Array<Object>> {
 
-        let asc = typeof order === 'undefined'? true :order;
+        let asc = typeof order === 'undefined' ? true : order;
 
         let positiveResult = await this.model.getModel().findAndCountAll({
             attributes: ['centro_vac_id', 'stato'],
@@ -428,10 +445,11 @@ export class proxyPr implements proxyinterfacePR {
     // Questo metodo ritorna il numero di prenotazioni che non sono andate a buon fine
 
     public async getCountBadPrenotation(data: string, id: number): Promise<number> {
+        let datasanitized = stringSanitizer(data);
         if (isNaN(id) || !isFinite(id) || typeof (id) !== 'number') throw new Error('il centro vaccinale che hai inserito non è corretto')
-        if (typeof (data) !== 'string' || !(DateTime.fromISO(data).isValid) || DateTime.now > DateTime.fromISO(data)) throw new Error('La data che hai inserito non è corretta')
-        let result = await this.getBadPrenotation(data, false, id);
-        if(typeof result['count'][0] === 'undefined') throw new Error('La data inserita non ha prodotto risultati')
+        if (typeof (datasanitized) !== 'string' || !(DateTime.fromISO(datasanitized).isValid) || DateTime.now > DateTime.fromISO(datasanitized)) throw new Error('La data che hai inserito non è corretta')
+        let result = await this.getBadPrenotation(datasanitized, false, id);
+        if (typeof result['count'][0] === 'undefined') throw new Error('La data inserita non ha prodotto risultati')
         return result['count'][0].count
     }
     // Metodo che restituisce tutte le prenotazioni che non sono andate a buon fine, prende in input una data, un booleano, che modifica la query.

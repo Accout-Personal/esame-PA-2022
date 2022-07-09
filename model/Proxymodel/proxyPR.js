@@ -99,17 +99,14 @@ var proxyPr = /** @class */ (function () {
     // Metodo usato per recuperare informazioni relative ad una prenotazione, utilizzando il codice uuid
     proxyPr.prototype.getPrInfo = function (req) {
         return __awaiter(this, void 0, void 0, function () {
-            var uuid, sanitized, result;
+            var uuid, result;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, this.decodeUUID(req)];
                     case 1:
                         uuid = _a.sent();
-                        sanitized = (0, stringsanitizer_1.stringSanitizer)(uuid);
                         this.makeRelationship();
-                        if (typeof sanitized === 'undefined')
-                            throw Error("codice sconosciuto");
-                        return [4 /*yield*/, this.model.getInfo(sanitized)];
+                        return [4 /*yield*/, this.checkUUID(uuid)];
                     case 2:
                         result = _a.sent();
                         if (result === null)
@@ -122,7 +119,7 @@ var proxyPr = /** @class */ (function () {
     // Metodo usato per confermare il codice uuid e lo stato della prenotazione
     proxyPr.prototype.confermatUUID = function (req) {
         return __awaiter(this, void 0, void 0, function () {
-            var uuid, result;
+            var uuid, res, result;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, this.decodeUUID(req)];
@@ -130,7 +127,11 @@ var proxyPr = /** @class */ (function () {
                         uuid = _a.sent();
                         return [4 /*yield*/, this.checkUUID(uuid)];
                     case 2:
-                        _a.sent();
+                        res = _a.sent();
+                        if (res === null)
+                            throw Error("codice uuid non valido");
+                        if (res.stato == 1)
+                            throw Error("questo appuntamento e' gia confermato");
                         return [4 /*yield*/, this.model.confirmUUID(uuid)];
                     case 3:
                         result = _a.sent();
@@ -143,24 +144,30 @@ var proxyPr = /** @class */ (function () {
     // I parametri sono opzionali, il risultato del metodo cambia a seconda dei parametri passati
     proxyPr.prototype.getListaPr = function (userid, centro, data) {
         return __awaiter(this, void 0, void 0, function () {
+            var datasanitized;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        if (typeof (data) !== 'string' || !(luxon_1.DateTime.fromISO(data).isValid) || luxon_1.DateTime.now > luxon_1.DateTime.fromISO(data))
+                        datasanitized = (0, stringsanitizer_1.stringSanitizer)(data);
+                        if (!(typeof centro !== 'undefined' || typeof datasanitized !== 'undefined')) return [3 /*break*/, 2];
+                        if (typeof (datasanitized) !== 'string' || !(luxon_1.DateTime.fromISO(datasanitized).isValid) || luxon_1.DateTime.now > luxon_1.DateTime.fromISO(datasanitized))
                             throw new Error('La data che hai inserito non è corretta');
-                        if (typeof centro !== 'number' || isNaN(centro) || !isFinite(centro))
-                            throw new Error('il centro vaccinale che hai inserito non è corretto');
+                        return [4 /*yield*/, this.TypeCheckCV(centro)];
+                    case 1:
+                        _a.sent();
+                        _a.label = 2;
+                    case 2:
                         if (typeof userid === "undefined" && typeof centro === "undefined")
                             throw Error("non hai inserito nessun paramentro");
-                        if (!(typeof userid === "undefined")) return [3 /*break*/, 2];
-                        this.TypeCheckData(data);
+                        if (!(typeof userid === "undefined")) return [3 /*break*/, 4];
+                        this.TypeCheckDataListaPrenotazione(datasanitized);
                         this.makeRelationship();
-                        return [4 /*yield*/, this.model.getPreCentro(centro, data)];
-                    case 1: return [2 /*return*/, _a.sent()];
-                    case 2:
+                        return [4 /*yield*/, this.model.getPreCentro(centro, datasanitized)];
+                    case 3: return [2 /*return*/, _a.sent()];
+                    case 4:
                         this.TypeCheckUser(userid);
                         return [4 /*yield*/, this.model.getPreUser(userid)];
-                    case 3: return [2 /*return*/, _a.sent()];
+                    case 5: return [2 /*return*/, _a.sent()];
                 }
             });
         });
@@ -179,10 +186,10 @@ var proxyPr = /** @class */ (function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.checkPreID(id, user)];
+                    case 0: return [4 /*yield*/, this.checkPreIDStato(id, user)];
                     case 1:
                         _a.sent();
-                        return [4 /*yield*/, this.model["delete"](id)];
+                        return [4 /*yield*/, this.model["delete"](id, user)];
                     case 2: return [2 /*return*/, _a.sent()];
                 }
             });
@@ -197,14 +204,14 @@ var proxyPr = /** @class */ (function () {
                     case 0: return [4 /*yield*/, this.TypeCheckUser(updateBody.user)];
                     case 1:
                         _a.sent();
-                        return [4 /*yield*/, this.checkPreID(updateBody.id, updateBody.user)];
+                        return [4 /*yield*/, this.checkPreIDStato(updateBody.id, updateBody.user)];
                     case 2:
                         _a.sent();
                         return [4 /*yield*/, this.model.getModel().findOne({ where: { id: updateBody.id } })];
                     case 3:
                         oldPr = _a.sent();
                         if (typeof oldPr === "undefined" || oldPr === null) {
-                            throw Error("Questo appunto e' inesistente");
+                            throw Error("Questo appuntamento e' inesistente");
                         }
                         safeBody = {};
                         if (typeof updateBody.data !== "undefined") {
@@ -225,25 +232,31 @@ var proxyPr = /** @class */ (function () {
                         return [4 /*yield*/, this.TypeCheckVaccino(updateBody.vaccino)];
                     case 4:
                         _a.sent();
-                        _a.label = 5;
-                    case 5:
                         safeBody.vaccinoid = updateBody.vaccino;
-                        data = safeBody.data ? safeBody.data : oldPr.data;
-                        centro = safeBody.centro_vac ? safeBody.centro_vac : oldPr.centro_vac;
-                        fascia = safeBody.fascia ? safeBody.fascia : oldPr.fascia;
-                        if (!(oldPr.data != safeBody.data || oldPr.fascia != safeBody.fascia)) return [3 /*break*/, 7];
-                        return [4 /*yield*/, this.checkAvailability(data, centro, fascia)];
+                        return [3 /*break*/, 6];
+                    case 5:
+                        safeBody.vaccinoid = oldPr.vaccinoid;
+                        _a.label = 6;
                     case 6:
+                        data = safeBody.data ? safeBody.data : oldPr.data;
+                        centro = safeBody.centro_vac_id ? safeBody.centro_vac_id : oldPr.centro_vac_id;
+                        fascia = safeBody.fascia ? safeBody.fascia : oldPr.fascia;
+                        if (!((typeof updateBody.slot !== 'undefined' && updateBody.slot !== oldPr.slot) || (typeof updateBody.data !== 'undefined' && updateBody.data !== oldPr.data) || (typeof updateBody.centro_vac !== 'undefined' && updateBody.centro_vac !== oldPr.centro_vac_id))) return [3 /*break*/, 8];
+                        return [4 /*yield*/, this.checkSlot(data, centro, safeBody.slot ? safeBody.slot : oldPr.slot)];
+                    case 7:
                         _a.sent();
-                        _a.label = 7;
-                    case 7: return [4 /*yield*/, this.checkSlot(data, centro, safeBody.slot ? safeBody.slot : oldPr.slot)];
+                        _a.label = 8;
                     case 8:
-                        _a.sent();
-                        return [4 /*yield*/, this.checkVaxValidity(data, safeBody.vaccino, updateBody.user, updateBody.id)];
+                        if (!(oldPr.data != safeBody.data || oldPr.fascia != safeBody.fascia || (typeof updateBody.centro_vac !== 'undefined' && updateBody.centro_vac !== oldPr.slot))) return [3 /*break*/, 10];
+                        return [4 /*yield*/, this.checkAvailability(data, centro, fascia)];
                     case 9:
                         _a.sent();
+                        _a.label = 10;
+                    case 10: return [4 /*yield*/, this.checkVaxValidity(data, safeBody.vaccinoid, updateBody.user, updateBody.id)];
+                    case 11:
+                        _a.sent();
                         return [4 /*yield*/, this.model.modifica(updateBody.id, safeBody)];
-                    case 10: return [2 /*return*/, _a.sent()];
+                    case 12: return [2 /*return*/, _a.sent()];
                 }
             });
         });
@@ -263,7 +276,7 @@ var proxyPr = /** @class */ (function () {
                         qrcode = new qrCode();
                         qrcode.callback = function (err, value) {
                             if (err) {
-                                console.error(err);
+                                throw new Error("qr code sconosciuto");
                             }
                             uuid = value.result;
                         };
@@ -279,22 +292,28 @@ var proxyPr = /** @class */ (function () {
             });
         });
     };
-    // Metodo usato per controllare l'id di una prenotazione
-    proxyPr.prototype.checkPreID = function (id, user) {
+    // Metodo usato per controllare l'appartenenza di una prenotazione
+    proxyPr.prototype.checkPreIDStato = function (id, user) {
         return __awaiter(this, void 0, void 0, function () {
             var result;
             return __generator(this, function (_a) {
-                if (typeof id !== 'number' || isNaN(id))
-                    throw new Error('Id non è valido');
-                result = this.model.getModel().count({
-                    where: {
-                        id: id,
-                        userid: user
-                    }
-                });
-                if (result < 1)
-                    throw Error("informazione non e' valido");
-                return [2 /*return*/];
+                switch (_a.label) {
+                    case 0:
+                        if (typeof id !== 'number' || isNaN(id))
+                            throw new Error('Id non è valido');
+                        return [4 /*yield*/, this.model.getModel().count({
+                                where: {
+                                    id: id,
+                                    userid: user,
+                                    stato: 0
+                                }
+                            })];
+                    case 1:
+                        result = _a.sent();
+                        if (result < 1)
+                            throw Error("informazione non e' valido");
+                        return [2 /*return*/];
+                }
             });
         });
     };
@@ -420,28 +439,33 @@ var proxyPr = /** @class */ (function () {
     // Metodo usato per controllare un codice uuid
     proxyPr.prototype.checkUUID = function (uuid) {
         return __awaiter(this, void 0, void 0, function () {
-            var sanitized, res;
+            var sanitized;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         sanitized = (0, stringsanitizer_1.stringSanitizer)(uuid);
                         if (typeof sanitized === 'undefined')
-                            throw Error("non hai inserito uuid");
+                            throw Error("codice sconosciuto");
+                        if (sanitized.length != 36)
+                            throw Error("codice sconosciuto");
                         return [4 /*yield*/, this.model.getModel().findOne({
                                 where: {
                                     uuid: sanitized
                                 }
                             })];
-                    case 1:
-                        res = _a.sent();
-                        if (res === null)
-                            throw Error("codice uuid non valido");
-                        if (res.stato == 1)
-                            throw Error("questo appuntamento e' gia confermato");
-                        return [2 /*return*/];
+                    case 1: return [2 /*return*/, _a.sent()];
                 }
             });
         });
+    };
+    // Metodo per effettuare controlli sulla data
+    proxyPr.prototype.TypeCheckDataListaPrenotazione = function (data) {
+        var sanitizeddata = (0, stringsanitizer_1.stringSanitizer)(data);
+        var dataIns = luxon_1.DateTime.fromISO(sanitizeddata);
+        var dataNow = luxon_1.DateTime.now();
+        if ((typeof sanitizeddata !== 'string' || !dataIns.isValid))
+            throw new Error('Questa data non è valida');
+        return true;
     };
     // Metodo per effettuare controlli sulla data
     proxyPr.prototype.TypeCheckData = function (data) {
@@ -668,15 +692,16 @@ var proxyPr = /** @class */ (function () {
     // Questo metodo ritorna il numero di prenotazioni che non sono andate a buon fine
     proxyPr.prototype.getCountBadPrenotation = function (data, id) {
         return __awaiter(this, void 0, void 0, function () {
-            var result;
+            var datasanitized, result;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
+                        datasanitized = (0, stringsanitizer_1.stringSanitizer)(data);
                         if (isNaN(id) || !isFinite(id) || typeof (id) !== 'number')
                             throw new Error('il centro vaccinale che hai inserito non è corretto');
-                        if (typeof (data) !== 'string' || !(luxon_1.DateTime.fromISO(data).isValid) || luxon_1.DateTime.now > luxon_1.DateTime.fromISO(data))
+                        if (typeof (datasanitized) !== 'string' || !(luxon_1.DateTime.fromISO(datasanitized).isValid) || luxon_1.DateTime.now > luxon_1.DateTime.fromISO(datasanitized))
                             throw new Error('La data che hai inserito non è corretta');
-                        return [4 /*yield*/, this.getBadPrenotation(data, false, id)];
+                        return [4 /*yield*/, this.getBadPrenotation(datasanitized, false, id)];
                     case 1:
                         result = _a.sent();
                         if (typeof result['count'][0] === 'undefined')

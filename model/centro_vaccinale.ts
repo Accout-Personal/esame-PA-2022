@@ -32,12 +32,7 @@ export class Centro_vaccinale implements proxyInterfaceCV {
 
   // Metodo per inserire un nuovo centro centro vaccinale
   public async insertNewCV(lati: number, longi: number, nome: string, maxf1: number, maxf2: number): Promise<Object> {
-    try {
-      await this.centro_vaccinale.create({ lati: lati, longi: longi, nome: nome, maxf1: maxf1, maxf2: maxf2 });
-      return true;
-    } catch (error) {
-      return error
-    }
+      return await this.centro_vaccinale.create({ lati: lati, longi: longi, nome: nome, maxf1: maxf1, maxf2: maxf2 });
   }
 
   // Metodo per ottenere il modello della tabella

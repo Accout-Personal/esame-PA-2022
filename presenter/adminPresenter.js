@@ -49,43 +49,59 @@ var adminPresenter = /** @class */ (function () {
     // Questo metodo permette di inserire un nuovo centro vaccinale
     adminPresenter.creaCentroVax = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var centrVax;
+            var centrVax, error_1;
             return __generator(this, function (_a) {
-                centrVax = new proxyCV_1.proxyCV();
-                centrVax.insertNewCV(req.body.lati, req.body.longi, req.body.nome, req.body.maxf1, req.body.maxf2).then(function (value) {
-                    if (value instanceof Error) {
-                        res.status(401).send(value.message);
-                    }
-                    else {
+                switch (_a.label) {
+                    case 0:
+                        centrVax = new proxyCV_1.proxyCV();
+                        _a.label = 1;
+                    case 1:
+                        _a.trys.push([1, 3, , 4]);
+                        return [4 /*yield*/, centrVax.insertNewCV(req.body.lati, req.body.longi, req.body.nome, req.body.maxf1, req.body.maxf2)];
+                    case 2:
+                        _a.sent();
                         res.send({ message: "inserimento andatato con successo." });
-                    }
-                });
-                return [2 /*return*/];
+                        return [3 /*break*/, 4];
+                    case 3:
+                        error_1 = _a.sent();
+                        console.log(error_1);
+                        res.status(400).send({ "message": error_1.message });
+                        return [3 /*break*/, 4];
+                    case 4: return [2 /*return*/];
+                }
             });
         });
     };
     // Questo metodo permette di inserire un nuovo vaccino
     adminPresenter.creaVaccino = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var Vaccini;
+            var Vaccini, error_2;
             return __generator(this, function (_a) {
-                Vaccini = new proxyVC_1.proxyVC();
-                Vaccini.insertNewVacc(req.body.name, req.body.validita).then(function (value) {
-                    if (value instanceof Error) {
-                        res.status(401).send(value.message);
-                    }
-                    else {
+                switch (_a.label) {
+                    case 0:
+                        Vaccini = new proxyVC_1.proxyVC();
+                        _a.label = 1;
+                    case 1:
+                        _a.trys.push([1, 3, , 4]);
+                        return [4 /*yield*/, Vaccini.insertNewVacc(req.body.nome, req.body.validita)];
+                    case 2:
+                        _a.sent();
                         res.send({ message: "inserimento andatato con successo." });
-                    }
-                });
-                return [2 /*return*/];
+                        return [3 /*break*/, 4];
+                    case 3:
+                        error_2 = _a.sent();
+                        console.log(error_2);
+                        res.status(400).send({ "message": error_2.message });
+                        return [3 /*break*/, 4];
+                    case 4: return [2 /*return*/];
+                }
             });
         });
     };
     // Metodo che permette di ricevere un QRcode
     adminPresenter.riceveQRCode = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var result, error_1;
+            var result, error_3;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -98,11 +114,12 @@ var adminPresenter = /** @class */ (function () {
                                 data: result.data,
                                 ora: (0, slotTotime_1.slotToTime)(result.slot),
                                 vaccino: result.vaccino.nome,
-                                stato: result.stato
+                                stato: result.stato,
+                                uuid: result.uuid
                             })];
                     case 2:
-                        error_1 = _a.sent();
-                        res.status(400).send({ "message": error_1.message });
+                        error_3 = _a.sent();
+                        res.status(400).send({ "message": error_3.message });
                         return [3 /*break*/, 3];
                     case 3: return [2 /*return*/];
                 }
@@ -112,7 +129,7 @@ var adminPresenter = /** @class */ (function () {
     // Metodo usato per validare l’utente in fase di accettazione 
     adminPresenter.confermaUUID = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var error_2;
+            var error_4;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -123,8 +140,8 @@ var adminPresenter = /** @class */ (function () {
                         res.status(200).send({ message: "confermato con successo" });
                         return [3 /*break*/, 3];
                     case 2:
-                        error_2 = _a.sent();
-                        res.status(400).send({ "message": error_2.message });
+                        error_4 = _a.sent();
+                        res.status(400).send({ "message": error_4.message });
                         return [3 /*break*/, 3];
                     case 3: return [2 /*return*/];
                 }
@@ -135,10 +152,11 @@ var adminPresenter = /** @class */ (function () {
     // Il risultato può essere restituito sotto forma di json o pdf.
     adminPresenter.getListaCentroData = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var body, proxy, result, centro, stream_1, doc_1;
+            var body, proxy, result, centro, stream_1, doc_1, error_5;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
+                        _a.trys.push([0, 3, , 4]);
                         body = req.body;
                         proxy = new proxyPR_1.proxyPr();
                         if (typeof body.formato === 'undefined')
@@ -173,7 +191,6 @@ var adminPresenter = /** @class */ (function () {
                                 doc_1.font('OpenSans', 25).text('Appuntamenti del centro: ' + centro.nome, 50, 10);
                                 doc_1.font('OpenSans', 20).text('Del giorno: ' + body.data);
                                 doc_1.font('OpenSans', 10);
-                                console.log(result);
                                 result.forEach(function (element) {
                                     doc_1.text(element.slot + "-----" + element.CF + "-----" + element.vaccino + "-----" + element.uuid);
                                 });
@@ -189,7 +206,12 @@ var adminPresenter = /** @class */ (function () {
                                 break;
                             }
                         }
-                        return [2 /*return*/];
+                        return [3 /*break*/, 4];
+                    case 3:
+                        error_5 = _a.sent();
+                        console.log(error_5);
+                        return [2 /*return*/, res.status(401).send({ message: error_5.message })];
+                    case 4: return [2 /*return*/];
                 }
             });
         });
@@ -197,7 +219,7 @@ var adminPresenter = /** @class */ (function () {
     // Metodo per ottenere le statistiche positive di tutti i centri vaccinali
     adminPresenter.getStatCentri = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var body, result, error_3;
+            var body, result, error_6;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -209,8 +231,8 @@ var adminPresenter = /** @class */ (function () {
                         res.send(result);
                         return [3 /*break*/, 3];
                     case 2:
-                        error_3 = _a.sent();
-                        res.status(400).send({ message: error_3.message });
+                        error_6 = _a.sent();
+                        res.status(400).send({ message: error_6.message });
                         return [3 /*break*/, 3];
                     case 3: return [2 /*return*/];
                 }
@@ -220,7 +242,7 @@ var adminPresenter = /** @class */ (function () {
     // Metodo per ottenere le statistiche negative di un centro vaccinale per un dato giorno
     adminPresenter.getBadStat = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var body, result, error_4;
+            var body, result, error_7;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -229,12 +251,12 @@ var adminPresenter = /** @class */ (function () {
                         return [4 /*yield*/, new proxyPR_1.proxyPr().getCountBadPrenotation(body.data, body.id)];
                     case 1:
                         result = _a.sent();
-                        res.send(result);
+                        res.send({ "assenze": result });
                         return [3 /*break*/, 3];
                     case 2:
-                        error_4 = _a.sent();
-                        console.log(error_4);
-                        res.status(400).send({ message: error_4.message });
+                        error_7 = _a.sent();
+                        console.log(error_7);
+                        res.status(400).send({ message: error_7.message });
                         return [3 /*break*/, 3];
                     case 3: return [2 /*return*/];
                 }

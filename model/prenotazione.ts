@@ -97,10 +97,13 @@ export class Prenotazione implements proxyinterfacePR {
   }
 
   // metodo per inserire una prenotazione
-  public async delete(id: number): Promise<Object> {
+  public async delete(id: number,user:number): Promise<Object> {
     return await this.prenotazione.destroy(
       {
-        where: { id: id }
+        where: { 
+          id: id,
+          userid:user
+        }
       });
   }
   // Metodo usato per prendere tutte le prenotazioni di un utente

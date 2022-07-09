@@ -1,13 +1,8 @@
 import * as dotenv from 'dotenv';
-import { app } from './Route';
-import { mediate } from './middleware/middlewareMediator'
-import * as schedule from 'node-schedule'
-import {DateTime} from 'luxon';
+import { mediate } from './middleware/middlewareMediator';
+import {startJob} from './job/dailyjob';
 
-dotenv.config()
+dotenv.config();
 mediate();
-const job = schedule.scheduleJob({hour:21,minutes:0,second:30}, function(){
-    console.log(DateTime.now().toISO());
-    console.log('timer run');
-  });
+startJob();
 console.log("Initialization complete");

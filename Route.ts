@@ -15,27 +15,24 @@ export function createRouting() {
     app.use('/user', UserRoute);
     app.use('/admin', AdminRoute);
 
-    app.get('/login', userPresenter.login); //tested
+    //rotte pubbliche
+    app.get('/login', userPresenter.login);
 
-    UserRoute.get('/getCentro', userPresenter.getCentro); //tested
-    UserRoute.get('/getSlotCentro', userPresenter.getSlotsCentro); //tested
-    
-    UserRoute.post('/prenota', userPresenter.prenota); // tested
+    //rotte di utente
+    UserRoute.get('/getCentro', userPresenter.getCentro);
+    UserRoute.get('/getSlotCentro', userPresenter.getSlotsCentro);
+    UserRoute.post('/prenota', userPresenter.prenota);
     UserRoute.post('/cancella', userPresenter.cancellaPre);
-
     UserRoute.post('/modifica', userPresenter.modificaPre);
     UserRoute.get('/myListPrenota', userPresenter.getMyPre);
 
+    //rotte di amministratore
     AdminRoute.post('/newCentro', adminPresenter.creaCentroVax);
     AdminRoute.post('/newVaccino', adminPresenter.creaVaccino);
-
-    AdminRoute.get('/listPrenota',adminPresenter.getListaCentroData);
-
-    AdminRoute.post('/confirmVax', adminPresenter.confermaUUID);
+    AdminRoute.get('/listPrenota', adminPresenter.getListaCentroData);
     AdminRoute.post('/verify', upload.single('qrcode_img'), adminPresenter.riceveQRCode);
-
+    AdminRoute.post('/confirmVax', upload.single('qrcode_img'), adminPresenter.confermaUUID);
     AdminRoute.get('/statCentro', adminPresenter.getStatCentri);
-
     AdminRoute.get('/getassenze', adminPresenter.getBadStat);
 
     console.log('routing initialized..');

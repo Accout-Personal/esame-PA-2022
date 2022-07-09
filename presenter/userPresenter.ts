@@ -21,6 +21,7 @@ export class userPresenter {
                 res.status(401).send({ message: "credenziale invalido" });
             return;
         }).catch(error=>{
+            console.log(error);
             res.status(401).send({ message: "credenziale invalido" });
         });
     };
@@ -66,6 +67,7 @@ export class userPresenter {
             res.status(200).send({ "message": "modificato con successo" });
         }
         catch (error) {
+            console.log(error);
             res.status(401).send({ "errore": error.message });
         }
     }
@@ -76,6 +78,7 @@ export class userPresenter {
         Proxy.cancellaPre(body.id, req.user.user.id).then(value => {
             res.status(200).send({ "message": "cancellato con successo" });
         }).catch(error => {
+            console.log(error);
             res.status(401).send({ "errore": error.message });
         });
 

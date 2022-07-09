@@ -48,22 +48,15 @@ var proxyVC = /** @class */ (function () {
     // Metodo per inserire un nuovo vaccino
     proxyVC.prototype.insertNewVacc = function (nome, validita) {
         return __awaiter(this, void 0, void 0, function () {
-            var error_1;
+            var nomesanitized;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        nome = (0, stringsanitizer_1.stringSanitizer)(nome);
-                        _a.label = 1;
-                    case 1:
-                        _a.trys.push([1, 4, , 5]);
-                        if (!(this.TypeCheckNome(nome) && this.TypeCheckValidita(validita))) return [3 /*break*/, 3];
-                        return [4 /*yield*/, this.model.insertNewVacc(nome, validita)];
-                    case 2: return [2 /*return*/, _a.sent()];
-                    case 3: return [3 /*break*/, 5];
-                    case 4:
-                        error_1 = _a.sent();
-                        return [2 /*return*/, error_1];
-                    case 5: return [2 /*return*/];
+                        nomesanitized = (0, stringsanitizer_1.stringSanitizer)(nome);
+                        this.TypeCheckNome(nomesanitized);
+                        this.TypeCheckValidita(validita);
+                        return [4 /*yield*/, this.model.insertNewVacc(nomesanitized, validita)];
+                    case 1: return [2 /*return*/, _a.sent()];
                 }
             });
         });
@@ -78,6 +71,8 @@ var proxyVC = /** @class */ (function () {
     proxyVC.prototype.TypeCheckValidita = function (validita) {
         if (typeof validita !== 'number' || isNaN(validita) || !isFinite(validita))
             throw new Error('Questo valore di validità non è un numero');
+        if (validita <= 0)
+            throw new Error('Questo valore di validità non è valido');
         return true;
     };
     return proxyVC;

@@ -50,43 +50,21 @@ var proxyCV = /** @class */ (function () {
     // Metodo per inserire un nuovo centro vaccinale
     proxyCV.prototype.insertNewCV = function (lati, longi, nome, maxf1, maxf2) {
         return __awaiter(this, void 0, void 0, function () {
-            var sanitizednome, result, error_1;
+            var sanitizednome, result;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         sanitizednome = (0, stringsanitizer_1.stringSanitizer)(nome);
-                        _a.label = 1;
-                    case 1:
-                        _a.trys.push([1, 4, , 5]);
-                        if (!
                         //Qui andiamo a sanificare i dati inseriti dall'utente
-                        (this.TypeCheckLati(lati) &&
-                            this.TypeCheckLati(longi) &&
-                            this.TypeCheckNome(sanitizednome) &&
-                            this.TypeCheckMaxf1(maxf1) &&
-                            this.TypeCheckMaxf2(maxf2))) 
-                        //Qui andiamo a sanificare i dati inseriti dall'utente
-                        return [3 /*break*/, 3];
+                        this.TypeCheckLati(lati);
+                        this.TypeCheckLongi(longi);
+                        this.TypeCheckNome(sanitizednome);
+                        this.TypeCheckMaxf1(maxf1);
+                        this.TypeCheckMaxf2(maxf2);
                         return [4 /*yield*/, this.model.insertNewCV(lati, longi, sanitizednome, maxf1, maxf2)];
-                    case 2:
+                    case 1:
                         result = _a.sent();
-                        if (result && !(result instanceof Error)) {
-                            return [2 /*return*/, true];
-                        }
-                        else {
-                            if (result instanceof Error)
-                                return [2 /*return*/, new Error(result.message)];
-                            else
-                                return [2 /*return*/, new Error("errore inserimento nel database")];
-                        }
-                        ;
-                        _a.label = 3;
-                    case 3: return [3 /*break*/, 5];
-                    case 4:
-                        error_1 = _a.sent();
-                        error_1.message("validazione fallita");
-                        return [2 /*return*/, error_1];
-                    case 5: return [2 /*return*/];
+                        return [2 /*return*/, result];
                 }
             });
         });
@@ -102,16 +80,20 @@ var proxyCV = /** @class */ (function () {
             });
         });
     };
-    // Metodo per sanificare la latitudine
+    // Metodo per sanificare la latitudine e longitudine
     proxyCV.prototype.TypeCheckLati = function (lati) {
         if (typeof lati !== 'number' || isNaN(lati) || !isFinite(lati))
             throw new Error('Questo valore di latitudine non è un numero');
+        if (lati > 90 || lati < -90)
+            throw new Error('Questo valore di latitudine non è valido');
         return true;
     };
-    // Metodo per sanificare la longitudine
-    proxyCV.prototype.TypeCheckLongi = function (longi) {
-        if (typeof longi !== 'number' || isNaN(longi) || !isFinite(longi))
+    // Metodo per sanificare la latitudine e longitudine
+    proxyCV.prototype.TypeCheckLongi = function (lati) {
+        if (typeof lati !== 'number' || isNaN(lati) || !isFinite(lati))
             throw new Error('Questo valore di longitudine non è un numero');
+        if (lati > 180 || lati < -180)
+            throw new Error('Questo valore di longitudine non è valido');
         return true;
     };
     // Metodo per sanificare il nome del centro vaccinale
@@ -124,12 +106,16 @@ var proxyCV = /** @class */ (function () {
     proxyCV.prototype.TypeCheckMaxf1 = function (maxf1) {
         if (typeof maxf1 !== 'number' || isNaN(maxf1) || !isFinite(maxf1))
             throw new Error('Il valore usato per maxf1 non è corretto');
+        if (maxf1 < 0)
+            throw new Error('Questo valore di maxf1 non è valido');
         return true;
     };
     // Metodo per sanificare il numero massimo di vaccinazioni che il centro puo' fare durante la seconda fascia oraria
     proxyCV.prototype.TypeCheckMaxf2 = function (maxf2) {
         if (typeof maxf2 !== 'number' || isNaN(maxf2) || !isFinite(maxf2))
             throw new Error('Il valore usato per maxf2 non è corretto');
+        if (maxf2 < 0)
+            throw new Error('Questo valore di maxf2 non è valido');
         return true;
     };
     proxyCV.prototype.makeRelationship = function () {
