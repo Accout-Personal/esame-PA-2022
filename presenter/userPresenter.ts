@@ -7,6 +7,7 @@ import { directorRes } from "./builder/directorRes";
 import { buildCV } from "./builder/buildCV";
 import { proxyCV } from "../model/Proxymodel/proxyCV";
 import { DateTime } from 'luxon';
+import { slotToTime } from "../util/slotTotime";
 // Qui abbiamo il presenter per lo User
 export class userPresenter {
 // Metodo per effettuare il login 
@@ -128,8 +129,16 @@ export class userPresenter {
             await builder.getSlotFull(body.centro, body.date, body.fascia);
             builder.setFascia(body.fascia);
             builder.filtroFascia(body.date);
-
-            let result = builder.getResult();
+            var result = builder.getResult();
+            if(body.formato === "ora"){
+                result = result.map(v=>{
+                    v.slotLiberi = v.slotLiberi.map(slot=>{
+                        return slotToTime(slot);
+                    })
+                    return v;
+                });
+            }
+            
             res.send(result);
         } catch (error) {
             console.log(error);
