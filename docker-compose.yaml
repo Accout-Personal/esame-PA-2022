@@ -1,27 +1,25 @@
 version: '3.7'
 services:
-    dbpg:
+    mysqldb:
         image: mysql
         restart: always
         environment:
-          - MYSQL_USER=sql_user
-          - MYSQL_PASSWORD=sqlpassword
-          - MYSQL_ALLOW_EMPTY_PASSWORD=true
+          - MYSQL_USER=centrovax
+          - MYSQL_PASSWORD=pa2022
+          - MYSQL_DATABASE=centrovax
           - MYSQL_ROOT_PASSWORD=rootpassword
         ports:
-          - 5432:5432
+          - '3306:3306'
         volumes: 
           # copy the sql script to create tables
           - ./seeder:/docker-entrypoint-initdb.d          
     node:
         build: .
         ports:
-          - 8080:8080
+          - 8080:3000
+        volumes:
+          - './:/usr/src/app'
         environment:
-          - PGUSER=postgres
-          - PGDATABASE=pa
-          - PGHOST=dbpg
-          - PGPASSWORD=postgres
-          - PGPORT=5432
+          - MYSQL_HOST=mysqldb
         depends_on:
-          - dbpg
+          - mysqldb
