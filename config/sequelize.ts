@@ -7,8 +7,8 @@ export class DBConnection{
     private constructor(){
         this.connection = new Sequelize(process.env.DATABASE_NAME as string,process.env.DATABASE_USER as string,process.env.DATABASE_PASSWORD as string,{
             dialect:'mysql',
-            host:process.env.DATABASE_HOST as string,
-            logging: false
+            host:process.env.MYSQL_HOST as string,
+            logging: true
         });
     }
 

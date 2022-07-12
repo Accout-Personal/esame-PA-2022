@@ -6,7 +6,6 @@
 -- Creato il: Giu 29, 2022 alle 13:20
 -- Versione del server: 10.4.22-MariaDB
 -- Versione PHP: 8.0.13
-CREATE Database centrovax;
 USE centrovax;
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
@@ -50,10 +49,11 @@ CREATE TABLE `prenotazione` (
   `data` date NOT NULL,
   `fascia` tinyint(4) NOT NULL,
   `slot` int(10) UNSIGNED NOT NULL,
-  `centro_vac` bigint(20) UNSIGNED NOT NULL,
-  `vaccino` bigint(20) UNSIGNED NOT NULL,
-  `user` bigint(20) UNSIGNED NOT NULL,
-  `stato` tinyint(3) UNSIGNED NOT NULL
+  `centro_vac_id` bigint(20) UNSIGNED NOT NULL,
+  `vaccinoid` bigint(20) UNSIGNED NOT NULL,
+  `userid` bigint(20) UNSIGNED NOT NULL,
+  `stato` tinyint(3) UNSIGNED NOT NULL,
+  `uuid` char(36) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
@@ -89,8 +89,6 @@ CREATE TABLE `vaccino` (
 --
 -- Indici per le tabelle scaricate
 --
-
---
 -- Indici per le tabelle `centro_vaccinale`
 --
 ALTER TABLE `centro_vaccinale`
@@ -101,9 +99,9 @@ ALTER TABLE `centro_vaccinale`
 --
 ALTER TABLE `prenotazione`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `centro_vac` (`centro_vac`),
-  ADD KEY `user` (`user`),
-  ADD KEY `vaccino` (`vaccino`);
+  ADD KEY `centro_vac_id` (`centro_vac_id`),
+  ADD KEY `userid` (`userid`),
+  ADD KEY `vaccinoid` (`vaccinoid`);
 
 --
 -- Indici per le tabelle `users`
@@ -127,25 +125,25 @@ ALTER TABLE `vaccino`
 -- AUTO_INCREMENT per la tabella `centro_vaccinale`
 --
 ALTER TABLE `centro_vaccinale`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- AUTO_INCREMENT per la tabella `prenotazione`
 --
 ALTER TABLE `prenotazione`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=145;
 
 --
 -- AUTO_INCREMENT per la tabella `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT per la tabella `vaccino`
 --
 ALTER TABLE `vaccino`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- Limiti per le tabelle scaricate
@@ -155,11 +153,9 @@ ALTER TABLE `vaccino`
 -- Limiti per la tabella `prenotazione`
 --
 ALTER TABLE `prenotazione`
-  ADD CONSTRAINT `prenotazione_ibfk_1` FOREIGN KEY (`centro_vac`) REFERENCES `centro_vaccinale` (`id`),
-  ADD CONSTRAINT `prenotazione_ibfk_2` FOREIGN KEY (`user`) REFERENCES `users` (`id`),
-  ADD CONSTRAINT `prenotazione_ibfk_3` FOREIGN KEY (`vaccino`) REFERENCES `vaccino` (`id`);
+  ADD CONSTRAINT `prenotazione_ibfk_1` FOREIGN KEY (`centro_vac_id`) REFERENCES `centro_vaccinale` (`id`),
+  ADD CONSTRAINT `prenotazione_ibfk_2` FOREIGN KEY (`userid`) REFERENCES `users` (`id`),
+  ADD CONSTRAINT `prenotazione_ibfk_3` FOREIGN KEY (`vaccinoid`) REFERENCES `vaccino` (`id`);
 COMMIT;
 
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
