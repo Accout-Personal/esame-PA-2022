@@ -1,7 +1,7 @@
 # Progetto di Programmazione Avanzata 2022 - Yihang Zhang, Scalella Simone.
 Esame di programmazione avanzata univpm 2022.
 ## Obiettivi del progetto
-Il servizio back-end realizzato permette a due tipi di utenti, che sono lo user generico e l'admin, di svolgere diverse operazioni che riguardano la prenotazione di un vaccino. Di seguito riportiamo una lista sintetica delle operazioni che sono state realizzate:
+Il servizio back-end realizzato permette di prenotare un vaccino, svolge anche altre operazioni correlate alla prenotazione. Il sistema ha due tipi di utenti che sono lo user generico e l'admin. Di seguito riportiamo una lista sintetica delle operazioni che sono state realizzate:
 
 - L'amministratore può aggiungere un centro di vaccinazione 
 - L'amministratore può aggiungere un vaccino specificando la data di validità della copertura 
@@ -33,3 +33,12 @@ Il servizio back-end realizzato permette a due tipi di utenti, che sono lo user 
  # Dettagli delle richieste
  
  # Progettazione - Pattern
+ In questa sezione riportiamo i pattern utilizzati con le motivazioni per cui sono stati scelti. Partiamo con i pattern architetturali, i quali definiscono la struttura del progetto e delle sue componenti, poi procediamo con i design pattern che descrivono le interazioni che ci sono tra le classi, il loro comportamento, e il modo in cui creano le istanze.
+ 
+ ## MVP
+Questo è il pattern architetturale scelto per implementare il progetto. Questo pattern ci permette di implementare un'importante principio di buona programmazione, che è quello della separazione delle componenti, e separazione dei ruoli. Questo pattern è una evoluzione del pattern MVC, nel quale abbiamo tre componenti principali, che sono il model, il controller e la view. Per questo progetto la view non viene considerata, in quanto abbiamo implementato solo il back-end dell'applicazione, senza front-end. Il pattern MVP differisce dal MVC perchè la componente view e model sono completamente separate, infatti, il model comunica solo con il presenter, la view comunica solo con il presenter, e il presenter comunica con entrambi.
+Utilizzando questo pattern abbiamo che solo la componente model interagisce con il database, infatti abbiamo un model per ogni tabella, in questo modo abbiamo evitato il problema del god object, cioè abbiamo evitato di avere una componente troppo grande e difficile da gestire.
+Il presenter chiama i metodi del model per ottenere i dati di interesse che saranno poi utilizzati per costruire il risultato che viene restituito al client.
+
+## DAO
+Questo è un pattern architetturale che abbiamo implementato indirettamente. Uno degli strumenti utilizzati è sequelize, il quale ci permette di collegarci al database mysql. Sequelize permette di ottenere i dati dalle tabelle tramite delle raw query. Questa non è una buona pratica di programmazione, in quanto si potrebbe incorrere nel problema dell' SQL injection, nel momento in cui si completa la query con dei dati inseriti dall'utente. Per evitare questo problema sequelize mette a disposizione i model, con i model è possibile definire un oggetto che rappresenta una tabella del database. Questo oggetto possiede già dei metodi che possono essere utilizzati per fare delle query sulla tabella stessa. In questo modo abbiamo stratificato e isolato l'accesso alla tabella, creando un maggior livello di astrazione ed una più facile manutenibilità del codice.
