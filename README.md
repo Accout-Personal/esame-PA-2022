@@ -41,4 +41,14 @@ Utilizzando questo pattern abbiamo che solo la componente model interagisce con 
 Il presenter chiama i metodi del model per ottenere i dati di interesse che saranno poi utilizzati per costruire il risultato che viene restituito al client.
 
 ## DAO
-Questo è un pattern architetturale che abbiamo implementato indirettamente. Uno degli strumenti utilizzati è sequelize, il quale ci permette di collegarci al database mysql. Sequelize permette di ottenere i dati dalle tabelle tramite delle raw query. Questa non è una buona pratica di programmazione, in quanto si potrebbe incorrere nel problema dell' SQL injection, nel momento in cui si completa la query con dei dati inseriti dall'utente. Per evitare questo problema sequelize mette a disposizione i model, con i model è possibile definire un oggetto che rappresenta una tabella del database. Questo oggetto possiede già dei metodi che possono essere utilizzati per fare delle query sulla tabella stessa. In questo modo abbiamo stratificato e isolato l'accesso alla tabella, creando un maggior livello di astrazione ed una più facile manutenibilità del codice.
+Questo è un pattern architetturale che abbiamo implementato indirettamente, serve per stratificare e isolare l'accesso alle tabelle, creando un maggior livello di astrazione ed una più facile manutenibilità del codice. Uno degli strumenti utilizzati è sequelize, il quale ci permette di collegarci al database mysql. Sequelize permette di ottenere i dati dalle tabelle tramite delle raw query. Questa non è una buona pratica di programmazione, in quanto si potrebbe incorrere nel problema dell' SQL injection, nel momento in cui si completa la query con dei dati inseriti dall'utente. Per evitare questo problema sequelize mette a disposizione i model, con i model è possibile definire un oggetto che rappresenta una tabella del database. Questo oggetto possiede già dei metodi che possono essere utilizzati per fare delle query sulla tabella stessa.
+
+## Singleton
+Questo è un Creational Design Pattern, esso serve per assicurarsi che di una classe si abbia una sola istanza accessibile globalmente. Abbiamo utilizzato questo pattern per instaurare una connessione al database, in questo modo siamo sicuri di lavorare sempre con la stessa istanza di connessione.
+
+## Proxy
+Questo è uno Structural design pattern che fornisce un oggetto utilizzato per controllare l'accesso ad un altro oggetto, il proxy e l'oggetto controllato implementano la stessa interfaccia, in maniera tale da essere intercambiabili in modo trasparente.
+Abbiamo utilizzato questo pattern all'interno del progetto per controllare le chiamate fatte ai metodi dei model. Abbiamo definito un proxy per ogni model, esso serve per implementare il controllo e la sanificazione dei dati di input inseriti dall'utente. Vengono effettuati diversi controlli relativi ai tipi di dato, al valore che tali dati assumono, abbiamo effettuato controlli relativi alla validità dei dati, ad esempio non si può cancellare una prenotazione che non esiste, e altri ancora di questo tipo. Il presenter comunica con i model solo attraverso i proxy.
+
+## COR
+
