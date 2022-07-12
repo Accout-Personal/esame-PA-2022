@@ -211,28 +211,40 @@ export class proxyPr implements proxyInterfacePr {
         let queryBody = {
             userid: user,
             vaccinoid: vaccino,
-            stato: [0, 1]
+            stato: [0, 1],
+            
         };
-        var LastVax = await this.model.getModel().findAll({
+        var AllVax = await this.model.getModel().findAll({
             where: queryBody,
             order: [['data', 'DESC']]
         });
         // Devo escludere la prenotazione attuale, durante la modifica, per escludere il controllo sul periodo di validità del vaccino
         if (typeof excludeid !== 'undefined') {
-            LastVax = LastVax.filter((element) => {
+            AllVax = AllVax.filter((element) => {
                 return element.id != excludeid;
             });
         }
 
         //mai vaccinato
-        if (JSON.parse(JSON.stringify(LastVax)).length == 0) {
+        if (JSON.parse(JSON.stringify(AllVax)).length == 0) {
             return;
         }
-        let LastVaxTime = DateTime.fromISO(LastVax[0].data);
-        let Vaccino = await this.modelV.getModel().findOne({ where: { id: vaccino }, query: { raw: true } });
 
-        //il vaccino e' ancora effettivo.
-        if (DataPre < LastVaxTime.plus({ day: Vaccino.validita })) throw Error("il vaccino ancora e' effettivo");
+        let Vaccino = await this.modelV.getModel().findOne({ where: { id: vaccino }, query: { raw: true } });
+        let LowerBound = DataPre.plus({ day: Vaccino.validita });
+        let UpperBound = DataPre.minus({ day: Vaccino.validita });
+
+        //controlla se prima e dopo la validita esiste un altro vaccinazione.
+        let InRangeVax = AllVax.filter(Prenotazione=>{
+            let date = DateTime.fromISO(Prenotazione.data);
+            return LowerBound < date && date < UpperBound;
+        });
+        
+        if (JSON.parse(JSON.stringify(InRangeVax)).length > 0) {
+            throw new Error("il vaccino è ancora effettivo");
+        }
+
+        
 
     }
     // Metodo per controllare se lo slot è occupato
