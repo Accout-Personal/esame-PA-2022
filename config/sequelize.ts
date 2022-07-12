@@ -5,10 +5,15 @@ export class DBConnection{
     private connection;
     
     private constructor(){
+        console.log("database name: " +process.env.DATABASE_NAME);
+        console.log("database user: " +process.env.DATABASE_USER);
+        console.log("database password: " +process.env.DATABASE_PASSWORD);
+        console.log("databse host: "+process.env.MYSQL_HOST);
+
         this.connection = new Sequelize(process.env.DATABASE_NAME as string,process.env.DATABASE_USER as string,process.env.DATABASE_PASSWORD as string,{
             dialect:'mysql',
-            host:process.env.DATABASE_HOST as string,
-            logging: false
+            host:process.env.MYSQL_HOST as string,
+            logging: true
         });
     }
 
