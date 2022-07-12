@@ -1,10 +1,10 @@
 import { Sequelize, Model, DataTypes } from 'sequelize';
 import { Prenotazione } from './prenotazione';
-import { proxyInterfaceUsers } from './ProxyInterface/proxyinterfaceUsers';
+import { proxyInterface } from './ProxyInterface/proxyInterface';
 /**
  *  Classe model che rappresenta la tabella 'users' nel database 
  */
-export class Users implements proxyInterfaceUsers {
+export class Users implements proxyInterface {
   private user: any;
   private prenotazione:any
   constructor(sequelize: any) {
@@ -29,26 +29,26 @@ export class Users implements proxyInterfaceUsers {
     });
     
   }
-
-  // Metodo per inserire un nuovo user
-  async insertNewUsers(cf: string, username: string, password: string, tipo: number): Promise<Object> {
+// Questo metodo serve per inserire un nuovo elemento
+  public async insertNewElement(Input: {cf: string, username: string, password: string, tipo: number}): Promise<Object> {
     try {
-      await this.user.create({ cf: cf, username: username, password: password, tipo: tipo.toString() });
+      await this.user.create({ cf: Input.cf, username: Input.username, password: Input.password, tipo: Input.tipo.toString() });
       return true;
     } catch {
       return false;
     }
   }
+
 // Metodo per prendere tutti gli elementi della tabella
   public async trovaTutto(connessione: object) {
     return await this.user.findAll();
   }
 // Metodo per prendere solo un risultato, infatti l'id è la Primary key della tabella
-  public async getUser(id: number) {
+  public async findOne(id: number) {
     return await this.user.findOne({ where: { id: id } });
   }
 
-  // Metodo per ottenere il modello
+  // Metodo per ottenere il modello della tabella
   public getModel(): any {
     return this.user;
   }

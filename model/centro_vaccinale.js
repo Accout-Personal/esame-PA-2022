@@ -62,11 +62,11 @@ var Centro_vaccinale = /** @class */ (function () {
         });
     }
     // Metodo per inserire un nuovo centro centro vaccinale
-    Centro_vaccinale.prototype.insertNewCV = function (lati, longi, nome, maxf1, maxf2) {
+    Centro_vaccinale.prototype.insertNewElement = function (Input) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.centro_vaccinale.create({ lati: lati, longi: longi, nome: nome, maxf1: maxf1, maxf2: maxf2 })];
+                    case 0: return [4 /*yield*/, this.centro_vaccinale.create({ lati: Input.lati, longi: Input.longi, nome: Input.nome, maxf1: Input.maxf1, maxf2: Input.maxf2 })];
                     case 1: return [2 /*return*/, _a.sent()];
                 }
             });
@@ -77,20 +77,15 @@ var Centro_vaccinale = /** @class */ (function () {
         return this.centro_vaccinale;
     };
     //Metodo per ottenere determinati centri vaccinali 
-    Centro_vaccinale.prototype.getSpecificCV = function (id) {
-        return __awaiter(this, void 0, void 0, function () {
-            var query;
-            return __generator(this, function (_a) {
-                query = this.centro_vaccinale.findAll({
-                    attributes: ['id', 'maxf1', 'maxf2'],
-                    where: {
-                        id: id
-                    }
-                });
-                return [2 /*return*/, query];
-            });
-        });
-    };
+    /* async getSpecificCV(id: number): Promise<Object> {
+       let query = this.centro_vaccinale.findAll({
+         attributes: ['id', 'maxf1', 'maxf2'],
+         where: {
+           id: id
+         }
+       });
+       return query;
+     }*/
     // Metodo per eseguire una query sulla tabella passando l'id del centro vaccinale
     Centro_vaccinale.prototype.findOne = function (id) {
         return __awaiter(this, void 0, void 0, function () {

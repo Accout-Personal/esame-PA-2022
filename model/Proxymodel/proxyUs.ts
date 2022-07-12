@@ -1,16 +1,34 @@
-import { proxyInterfaceUsers } from "../ProxyInterface/proxyinterfaceUsers";
 import { Users } from "../users";
 import { stringSanitizer } from "../../util/stringsanitizer";
 import * as crypto from 'node:crypto';
 import { DBConnection } from "../../config/sequelize";
+import { proxyInterface } from "../ProxyInterface/proxyInterface";
 
 // Questo è il proxy per la componente nel model users
-export class proxyUs implements proxyInterfaceUsers {
+export class proxyUs implements proxyInterface {
 
     private model: Users;
 
     constructor() {
         this.model = new Users(DBConnection.getInstance().getConnection())
+    }
+
+// Questo metodo serve per inserire un nuovo utente
+    public async insertNewElement(Input:{cf: string, username: string, password: string, tipo: number}): Promise<Object> {
+        Input.cf = stringSanitizer(Input.cf);
+        Input.username = stringSanitizer(Input.username);
+        Input.password = stringSanitizer(Input.password);
+        try {
+            if (
+            // Qui vengono sanificati i parametri di input inseriti dall'utente
+                this.TypeCheckCF(Input.cf) &&
+                this.TypeCheckUsername(Input.username) &&
+                this.TypeCheckPassword(Input.password) &&
+                this.TypeCheckTipo(Input.tipo)
+            ) {
+                return await this.model.insertNewElement({cf: Input.cf, username: Input.username,password: crypto.createHash('sha256').update(Input.password).digest('hex'), tipo: Input.tipo});
+            }
+        } catch (error) { return error; }
     }
 // Questo metodo fa una query sulla tabella users del DB, passando come parametro uno username che è chiave
     public async getUser(username: string) {
@@ -30,26 +48,9 @@ export class proxyUs implements proxyInterfaceUsers {
             }
         });
     }
-// Questo metodo serve per inserire un nuovo utente
-    public async insertNewUsers(cf: string, username: string, password: string, tipo: number): Promise<Object> {
-        cf = stringSanitizer(cf);
-        username = stringSanitizer(username);
-        password = stringSanitizer(password);
-        try {
-            if (
-            // Qui vengono sanificati i parametri di input inseriti dall'utente
-                this.TypeCheckCF(cf) &&
-                this.TypeCheckUsername(username) &&
-                this.TypeCheckPassword(password) &&
-                this.TypeCheckTipo(tipo)
-            ) {
-                return await this.model.insertNewUsers(cf, username, crypto.createHash('sha256').update(password).digest('hex'), tipo);
-            }
-        } catch (error) { return error; }
-    }
-
-    public async getPreUser(user:number){
-        
+// Metodo che ritorna un riferimento al modello
+    public getModel() {
+        return this.model;
     }
 // Questo metodo fa un controllo sul codice fiscale inserito dall'utente
     TypeCheckCF(cf: string): Boolean {
@@ -71,4 +72,9 @@ export class proxyUs implements proxyInterfaceUsers {
         if (typeof tipo !== 'number' || isNaN(tipo) || !isFinite(tipo)) throw new Error('Questo valore non è un numero');
         return true;
     }
+
+// Questo metodo serve ottenere uno users specifico
+public async findOne(id: number): Promise<any> {
+    return await this.model.findOne(id);
+}
 }

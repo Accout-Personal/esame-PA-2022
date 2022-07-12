@@ -1,6 +1,3 @@
-import { proxyUs } from "../model/Proxymodel/proxyUs";
-import * as crypto from 'node:crypto';
-import * as jwt from 'jsonwebtoken';
 import { proxyCV } from "../model/Proxymodel/proxyCV";
 import { proxyVC } from "../model/Proxymodel/proxyVC";
 import { proxyPr } from "../model/Proxymodel/proxyPR";
@@ -13,7 +10,7 @@ export class adminPresenter {
 
         const centrVax = new proxyCV();
         try {
-            await centrVax.insertNewCV(req.body.lati, req.body.longi, req.body.nome, req.body.maxf1, req.body.maxf2);
+            await centrVax.insertNewElement({lati:req.body.lati, longi:req.body.longi, nome:req.body.nome, maxf1:req.body.maxf1, maxf2:req.body.maxf2});
             res.send({ message: "inserimento andatato con successo." });
         } catch (error) {
             console.log(error);
@@ -25,7 +22,7 @@ export class adminPresenter {
     public static async creaVaccino(req, res) {
         const Vaccini = new proxyVC();
         try {
-            await Vaccini.insertNewVacc(req.body.nome, req.body.validita)
+            await Vaccini.insertNewElement({nome: req.body.nome, validita:req.body.validita})
             res.send({ message: "inserimento andatato con successo." });
         } catch (error) {
             console.log(error);
@@ -76,7 +73,7 @@ export class adminPresenter {
                     uuid: value.uuid
                 }
             });
-            let centro = await new proxyCV().getCentro(body.centro);
+            let centro = await new proxyCV().findOne(body.centro);
 
             switch (body.formato.toLowerCase()) {
                 case "pdf": {

@@ -15,7 +15,7 @@ export class buildRes implements builderInterfaceRes {
     public async ProduceInfo(Values: any): Promise<void> {
 
         let user: any = await new proxyUs().getUserByID(Values.userid);
-        let centro: any = await new proxyCV().getCentro(Values.centro_vac_id);
+        let centro: any = await new proxyCV().findOne(Values.centro_vac_id);
         this.Info = { uuid: Values.uuid, data: Values.data, ora: slotToTime(Values.slot), presso: centro.nome, cf: user.cf }
     };
 // Questo metodo produce il QRcode che viene restituito all'utente

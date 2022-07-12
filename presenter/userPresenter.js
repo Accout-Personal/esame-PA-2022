@@ -78,7 +78,10 @@ var userPresenter = /** @class */ (function () {
             var proxy;
             return __generator(this, function (_a) {
                 proxy = new proxyUs_1.proxyUs();
-                proxy.insertNewUsers(req.body.cf, req.body.username, req.body.password, 0).then(function (value) {
+                proxy.insertNewElement({ cf: req.body.cf,
+                    username: req.body.username,
+                    password: req.body.password,
+                    tipo: 0 }).then(function (value) {
                     if (value) {
                         res.send({ message: "successo." });
                     }
@@ -103,7 +106,7 @@ var userPresenter = /** @class */ (function () {
                         _a.label = 1;
                     case 1:
                         _a.trys.push([1, 4, , 5]);
-                        return [4 /*yield*/, Proxy.insertNewPr(body.data, body.slot, body.centro_vac, body.vaccino, req.user.user.id)];
+                        return [4 /*yield*/, Proxy.insertNewElement({ data: body.data, slot: body.slot, centro_vaccino: body.centro_vac, vaccino: body.vaccino, user: req.user.user.id })];
                     case 2:
                         value = _a.sent();
                         return [4 /*yield*/, directorRes_1.directorRes.respose(res, value, body.formato)["catch"](function (err) {
@@ -236,10 +239,8 @@ var userPresenter = /** @class */ (function () {
                         user = req.user.user.id;
                         proxy = new proxyCV_1.proxyCV();
                         builder = new buildCV_1.buildCV(proxy);
-                        //await builder.getSlotFree(body.centro, body.data, body.fascie);
                         return [4 /*yield*/, builder.getSlotFull(body.centro, body.date, body.fascia)];
                     case 1:
-                        //await builder.getSlotFree(body.centro, body.data, body.fascie);
                         _a.sent();
                         builder.setFascia(body.fascia);
                         builder.filtroFascia(body.date);

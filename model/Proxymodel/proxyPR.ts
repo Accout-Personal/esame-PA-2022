@@ -1,6 +1,4 @@
 import { Prenotazione } from "../prenotazione";
-import { proxyinterfacePR } from "../ProxyInterface/proxyinterfacePren";
-import { Sequelize, Model, DataTypes, Op } from 'sequelize';
 import { Vaccini } from "../vaccino";
 import { Users } from "../users";
 import { Centro_vaccinale } from "../centro_vaccinale";
@@ -9,13 +7,16 @@ import { DateTime } from "luxon";
 import { stringSanitizer } from "../../util/stringsanitizer";
 import * as qrCode from 'qrcode-reader';
 import * as Jimp from 'jimp';
+import { proxyInterfacePr } from "../ProxyInterface/proxyInterfacePr";
+
 // Classe che implementa il proxy per la componente prenotazione nel model
-export class proxyPr implements proxyinterfacePR {
+export class proxyPr implements proxyInterfacePr {
 
     private model: Prenotazione;
     private modelV: Vaccini;
     private modelU: Users;
     private modelCV: Centro_vaccinale;
+
     // Nel costruttore andiamo a inizializzare tutti i model necessari per lavorare con le prenotazioni
     constructor() {
         this.model = new Prenotazione(DBConnection.getInstance().getConnection());
@@ -24,31 +25,32 @@ export class proxyPr implements proxyinterfacePR {
         this.modelCV = new Centro_vaccinale(DBConnection.getInstance().getConnection());
     }
     //Metodo per inserire una nuova prenotazione
-    public async insertNewPr(data: string, slot: number, centro_vaccino: number, vaccino: number, user: number): Promise<Object> {
-        let sanitizeddata = stringSanitizer(data);
+    public async insertNewElement(Input: {data: string, slot: number, centro_vaccino: number, vaccino: number, user: number}): Promise<Object> {
+
+        Input.data = stringSanitizer(Input.data);
         //controllo il tipo di dato sia valido
-        this.TypeCheckData(sanitizeddata);
-        this.TypeCheckSlot(slot);
-        await this.TypeCheckCV(centro_vaccino);
-        await this.TypeCheckVaccino(vaccino);
-        await this.TypeCheckUser(user);
-        //this.TypeCheckStato(stato);
+        this.TypeCheckData(Input.data);
+        this.TypeCheckSlot(Input.slot);
+        await this.TypeCheckCV(Input.centro_vaccino);
+        await this.TypeCheckVaccino(Input.vaccino);
+        await this.TypeCheckUser(Input.user);
 
         //fascia 1 da 1-16, fascia 2 da 17-27;
         var fascia: number;
-        if (slot > 16 && fascia == 1) {
+        if (Input.slot > 16 && fascia == 1) {
             fascia = 2;
         } else {
             fascia = 1;
         }
 
-        await this.checkAvailability(sanitizeddata, centro_vaccino, fascia);
-        await this.checkSlot(sanitizeddata, centro_vaccino, slot)
-        await this.checkVaxValidity(sanitizeddata, vaccino, user);
+        await this.checkAvailability(Input.data, Input.centro_vaccino, fascia);
+        await this.checkSlot(Input.data, Input.centro_vaccino, Input.slot)
+        await this.checkVaxValidity(Input.data, Input.vaccino, Input.user);
 
 
-        return await this.model.insertNewPr(sanitizeddata, fascia, slot, centro_vaccino, vaccino, user);
+        return await this.model.insertNewElement({data: Input.data, fascia: fascia, slot: Input.slot, centro_vaccino: Input.centro_vaccino, vaccino: Input.vaccino, user: Input.user});
     }
+    
     // Metodo usato per recuperare informazioni relative ad una prenotazione, utilizzando il codice uuid
     public async getPrInfo(req) {
         let uuid = await this.decodeUUID(req)
@@ -61,6 +63,7 @@ export class proxyPr implements proxyinterfacePR {
     public async confermatUUID(req) {
 
         let uuid = await this.decodeUUID(req);
+        this.makeRelationship();
         let res = await this.checkUUID(uuid);
         if (res === null)
             throw Error("codice uuid non valido");
@@ -107,7 +110,7 @@ export class proxyPr implements proxyinterfacePR {
     // Metodo usato per cancellare una prenotazione
     public async cancellaPre(id: number, user: number) {
         await this.checkPreIDStato(id, user);
-        return await this.model.delete(id, user);
+        return await this.model.cancellaPre(id, user);
     }
     // Metodo per effettuare una modifica ad una prenotazione
     public async modifica(updateBody: { id: number, user: number, data?: string, slot?: number, centro_vac?: number, vaccino?: number }) {
@@ -117,7 +120,7 @@ export class proxyPr implements proxyinterfacePR {
         await this.checkPreIDStato(updateBody.id, updateBody.user);
 
         // Qui vengono effettuate tutta una serie di operazioni di sanificazione degli input inseriti dall'utente
-        let oldPr = await this.model.getModel().findOne({ where: { id: updateBody.id } });
+        let oldPr = await this.findOne(updateBody.id);
         if (typeof oldPr === "undefined" || oldPr === null) {
             throw Error("Questo appuntamento e' inesistente");
         }
@@ -159,7 +162,7 @@ export class proxyPr implements proxyinterfacePR {
             await this.checkAvailability(data, centro, fascia);
 
         await this.checkVaxValidity(data, safeBody.vaccinoid, updateBody.user, updateBody.id);
-        return await this.model.modifica(updateBody.id, safeBody);
+        return await this.model.modifica({id: updateBody.id, updatebody:safeBody});
     }
     // Metodo usato per decodificare il codice uuid quando viene passato sotto forma di QRcode. Questo codice può essere inviato anche tramite json
     private async decodeUUID(req) {
@@ -289,7 +292,8 @@ export class proxyPr implements proxyinterfacePR {
         return await this.model.getModel().findOne({
             where: {
                 uuid: sanitized
-            }
+            },
+            include: ["user","vaccino"]
         });
         
     }
@@ -298,7 +302,6 @@ export class proxyPr implements proxyinterfacePR {
     private TypeCheckDataListaPrenotazione(data: string): Boolean {
         let sanitizeddata = stringSanitizer(data);
         let dataIns = DateTime.fromISO(sanitizeddata);
-        let dataNow = DateTime.now();
         if ((typeof sanitizeddata !== 'string' || !dataIns.isValid)) throw new Error('Questa data non è valida');
         return true;
     }
@@ -352,94 +355,28 @@ export class proxyPr implements proxyinterfacePR {
         return true;
     }
     // Metodo che restituisce, per ogni centro vaccinale, per ogni fascia, e, per ogni data, il numero di prenotazioni, più gli altri attributi
-    async takeNumberOfPrenotation(fascia: Boolean): Promise<Array<any>> {
+    public async takeNumberOfPrenotation(fascia: Boolean): Promise<Array<any>> {
         if (typeof fascia !== 'boolean') throw new Error('L\' opzione inserita non è valida')
-        if (fascia) {
-            let result = await this.model.getModel().findAndCountAll({
-                attributes: ['centro_vac_id', 'data', 'fascia'],
-                group: ['centro_vac_id', 'data', 'fascia']
-            })
-            return result.count
+        return await this.model.takeNumberOfPrenotation(fascia);
         }
-        else {
-            let result = await this.model.getModel().findAndCountAll({
-                attributes: ['centro_vac_id', 'data'],
-                group: ['centro_vac_id', 'data']
-            })
-            return result.count
-        }
-    }
 
     // Metodo che ritorna tutte le prenotazioni effettuate per una certa data, in un certo centro vaccinale e per una certa fascia
     async getSlotFull(id: number, data: Array<string>, fascia?: number): Promise<any> {
         await this.TypeCheckCV(id);
-        if (typeof fascia === 'undefined') {
-            let query = await this.model.getModel().findAll({
-                attributes: ['data', 'slot'],
-                where: {
-                    centro_vac_id: id,
-                    data: data
-                }
-            });
-            return query;
-        }
-        else {
-            let query = await this.model.getModel().findAll({
-                attributes: ['data', 'slot'],
-                where: {
-                    centro_vac_id: id,
-                    data: data,
-                    fascia: fascia
-                }
-            });
-            return query;
-        }
+        return await this.model.getSlotFull(id,data,fascia);
     }
 
     // Metodo per ottenere le statistiche sui centri vaccinali e sulle prenotazioni che hanno avuto esito positivo
     public async getStatisticPositive(order: Boolean = true): Promise<Array<Object>> {
 
         let asc = typeof order === 'undefined' ? true : order;
-
-        let positiveResult = await this.model.getModel().findAndCountAll({
-            attributes: ['centro_vac_id', 'stato'],
-            where: { stato: 1 },
-            group: ['centro_vac_id', 'stato']
-        });
-        let allResult = await this.model.getModel().findAndCountAll({
-            attributes: ['centro_vac_id'],
-            group: ['centro_vac_id']
-        });
-        let statistic = positiveResult.count.map((value) => {
-            allResult.count.map((val) => {
-                if (value.centro_vac_id == val.centro_vac_id) {
-                    value.media = (value.count / val.count).toFixed(2);
-                }
-            });
-            return value;
-        });
-        // Qui andiamo ad effettuare l'ordinamento del risultato finale
-        if (asc) statistic.sort((a, b) => {
-            return a.media - b.media;
-        });
-        else statistic.sort((a, b) => {
-            return b.media - a.media;
-        });
-        return statistic;
+        return await this.model.getStatisticPositive(asc);
     }
 
     // Metodo per impostare le prenotazioni come 'non andate a buon fine'
     public async setBadPrenotations(data: string): Promise<void> {
         if (typeof (data) !== 'string' || !(DateTime.fromISO(data).isValid)) throw new Error('La data inserita non è valida')
-        let list = await this.getBadPrenotation(data);
-        list = list.map((value) => {
-            return value.dataValues.id
-        })
-        await this.model.getModel().update({ stato: 2 }, {
-            where: {
-                id: list
-            }
-        })
+        await this.model.setBadPrenotations(data);
     }
 
     // Questo metodo ritorna il numero di prenotazioni che non sono andate a buon fine
@@ -452,31 +389,21 @@ export class proxyPr implements proxyinterfacePR {
         if (typeof result['count'][0] === 'undefined') throw new Error('La data inserita non ha prodotto risultati')
         return result['count'][0].count
     }
-    // Metodo che restituisce tutte le prenotazioni che non sono andate a buon fine, prende in input una data, un booleano, che modifica la query.
-    // Infine, viene passato un centro vaccinale.
-    private async getBadPrenotation(data: string, option: Boolean = true, id?: number): Promise<Array<any>> {
-        let list;
-        if (option) {
-            list = await this.model.getModel().findAll({
-                attributes: ['id', 'data'],
-                where: {
-                    data: data,
-                    stato: 0
-                }
-            });
-        }
+    // Metodo che restituisce tutte le prenotazioni che non sono andate a buon fine, prende in input una data, un booleano, che modifica la query e un centro vaccinale.
+    public async getBadPrenotation(data: string, option: Boolean = true, id?: number): Promise<Array<any>> {
+        if(option) return await this.model.getBadPrenotation(data);
         else {
             await this.TypeCheckCV(id);
-            list = await this.model.getModel().findAndCountAll({
-                attributes: ['centro_vac_id', 'data'],
-                where: {
-                    centro_vac_id: id,
-                    data: data,
-                    stato: 2
-                },
-                group: ['centro_vac_id', 'data']
-            });
+            return await this.model.getBadPrenotation(data,option,id);
         }
-        return list;
+    }
+    // Metodo che ritorna un riferimento al model
+    public getModel() {
+        return this.model;
+    }
+
+    // Metodo che ritorna una prenotazione specifica
+    public async findOne(id: number): Promise<any> {
+        return await this.model.findOne(id);
     }
 }

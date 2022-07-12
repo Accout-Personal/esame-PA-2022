@@ -56,7 +56,7 @@ var buildRes = /** @class */ (function () {
                     case 0: return [4 /*yield*/, new proxyUs_1.proxyUs().getUserByID(Values.userid)];
                     case 1:
                         user = _a.sent();
-                        return [4 /*yield*/, new proxyCV_1.proxyCV().getCentro(Values.centro_vac_id)];
+                        return [4 /*yield*/, new proxyCV_1.proxyCV().findOne(Values.centro_vac_id)];
                     case 2:
                         centro = _a.sent();
                         this.Info = { uuid: Values.uuid, data: Values.data, ora: (0, slotTotime_1.slotToTime)(Values.slot), presso: centro.nome, cf: user.cf };

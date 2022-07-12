@@ -89,6 +89,24 @@ var Prenotazione = /** @class */ (function () {
             timestamps: false
         });
     }
+    // metodo per inserire una prenotazione
+    Prenotazione.prototype.insertNewElement = function (Input) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.prenotazione.create({
+                            data: luxon_1.DateTime.fromISO(Input.data).toISODate(),
+                            fascia: Input.fascia,
+                            slot: Input.slot,
+                            centro_vac_id: Input.centro_vaccino,
+                            vaccinoid: Input.vaccino,
+                            userid: Input.user
+                        })];
+                    case 1: return [2 /*return*/, _a.sent()];
+                }
+            });
+        });
+    };
     // Metodo usato per cambiare lo stato della prenotazione in accettato
     Prenotazione.prototype.confirmUUID = function (uuid) {
         return __awaiter(this, void 0, void 0, function () {
@@ -104,32 +122,14 @@ var Prenotazione = /** @class */ (function () {
             });
         });
     };
-    // metodo per inserire una prenotazione
-    Prenotazione.prototype.insertNewPr = function (data, fascia, slot, centro_vaccino, vaccino, user) {
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.prenotazione.create({
-                            data: luxon_1.DateTime.fromISO(data).toISODate(),
-                            fascia: fascia,
-                            slot: slot,
-                            centro_vac_id: centro_vaccino,
-                            vaccinoid: vaccino,
-                            userid: user
-                        })];
-                    case 1: return [2 /*return*/, _a.sent()];
-                }
-            });
-        });
-    };
     // Metodo usato per effettuare una modifica di una prenotazione
-    Prenotazione.prototype.modifica = function (id, updatebody) {
+    Prenotazione.prototype.modifica = function (value) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.prenotazione.update(updatebody, {
+                    case 0: return [4 /*yield*/, this.prenotazione.update(value.updatebody, {
                             where: {
-                                id: id
+                                id: value.id
                             }
                         })];
                     case 1: return [2 /*return*/, _a.sent()];
@@ -138,7 +138,7 @@ var Prenotazione = /** @class */ (function () {
         });
     };
     // metodo per inserire una prenotazione
-    Prenotazione.prototype["delete"] = function (id, user) {
+    Prenotazione.prototype.cancellaPre = function (id, user) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
@@ -204,6 +204,177 @@ var Prenotazione = /** @class */ (function () {
     // Metodo per ottenere il modello
     Prenotazione.prototype.getModel = function () {
         return this.prenotazione;
+    };
+    // Metodo per ottenere una prenotazione specifica
+    Prenotazione.prototype.findOne = function (id) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.prenotazione.findOne({ where: { id: id } })];
+                    case 1: return [2 /*return*/, _a.sent()];
+                }
+            });
+        });
+    };
+    // Metodo per impostare le prenotazioni come 'non andate a buon fine'
+    Prenotazione.prototype.setBadPrenotations = function (data) {
+        return __awaiter(this, void 0, void 0, function () {
+            var list;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.getBadPrenotation(data)];
+                    case 1:
+                        list = _a.sent();
+                        list = list.map(function (value) {
+                            return value.dataValues.id;
+                        });
+                        return [4 /*yield*/, this.prenotazione.update({ stato: 2 }, {
+                                where: {
+                                    id: list
+                                }
+                            })];
+                    case 2:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    // Metodo che restituisce tutte le prenotazioni che non sono andate a buon fine, prende in input una data, un booleano, che modifica la query e un centro vaccinale.
+    Prenotazione.prototype.getBadPrenotation = function (data, option, id) {
+        if (option === void 0) { option = true; }
+        return __awaiter(this, void 0, void 0, function () {
+            var list;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!option) return [3 /*break*/, 2];
+                        return [4 /*yield*/, this.prenotazione.findAll({
+                                attributes: ['id', 'data'],
+                                where: {
+                                    data: data,
+                                    stato: 0
+                                }
+                            })];
+                    case 1:
+                        list = _a.sent();
+                        return [3 /*break*/, 4];
+                    case 2: return [4 /*yield*/, this.prenotazione.findAndCountAll({
+                            attributes: ['centro_vac_id', 'data'],
+                            where: {
+                                centro_vac_id: id,
+                                data: data,
+                                stato: 2
+                            },
+                            group: ['centro_vac_id', 'data']
+                        })];
+                    case 3:
+                        list = _a.sent();
+                        _a.label = 4;
+                    case 4: return [2 /*return*/, list];
+                }
+            });
+        });
+    };
+    // Metodo per ottenere le statistiche sui centri vaccinali e sulle prenotazioni che hanno avuto esito positivo
+    Prenotazione.prototype.getStatisticPositive = function (asc) {
+        return __awaiter(this, void 0, void 0, function () {
+            var positiveResult, allResult, statistic;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.prenotazione.findAndCountAll({
+                            attributes: ['centro_vac_id', 'stato'],
+                            where: { stato: 1 },
+                            group: ['centro_vac_id', 'stato']
+                        })];
+                    case 1:
+                        positiveResult = _a.sent();
+                        return [4 /*yield*/, this.prenotazione.findAndCountAll({
+                                attributes: ['centro_vac_id'],
+                                group: ['centro_vac_id']
+                            })];
+                    case 2:
+                        allResult = _a.sent();
+                        statistic = positiveResult.count.map(function (value) {
+                            allResult.count.map(function (val) {
+                                if (value.centro_vac_id == val.centro_vac_id) {
+                                    value.media = (value.count / val.count).toFixed(2);
+                                }
+                            });
+                            return value;
+                        });
+                        // Qui andiamo ad effettuare l'ordinamento del risultato finale
+                        if (asc)
+                            statistic.sort(function (a, b) {
+                                return a.media - b.media;
+                            });
+                        else
+                            statistic.sort(function (a, b) {
+                                return b.media - a.media;
+                            });
+                        return [2 /*return*/, statistic];
+                }
+            });
+        });
+    };
+    // Metodo che restituisce, per ogni centro vaccinale, per ogni fascia, e, per ogni data, il numero di prenotazioni, più gli altri attributi
+    Prenotazione.prototype.takeNumberOfPrenotation = function (fascia) {
+        return __awaiter(this, void 0, void 0, function () {
+            var result, result;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!fascia) return [3 /*break*/, 2];
+                        return [4 /*yield*/, this.prenotazione.findAndCountAll({
+                                attributes: ['centro_vac_id', 'data', 'fascia'],
+                                group: ['centro_vac_id', 'data', 'fascia']
+                            })];
+                    case 1:
+                        result = _a.sent();
+                        return [2 /*return*/, result.count];
+                    case 2: return [4 /*yield*/, this.prenotazione.findAndCountAll({
+                            attributes: ['centro_vac_id', 'data'],
+                            group: ['centro_vac_id', 'data']
+                        })];
+                    case 3:
+                        result = _a.sent();
+                        return [2 /*return*/, result.count];
+                }
+            });
+        });
+    };
+    // Metodo che ritorna tutte le prenotazioni effettuate per una certa data, in un certo centro vaccinale e per una certa fascia
+    Prenotazione.prototype.getSlotFull = function (id, data, fascia) {
+        return __awaiter(this, void 0, void 0, function () {
+            var query, query;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!(typeof fascia === 'undefined')) return [3 /*break*/, 2];
+                        return [4 /*yield*/, this.prenotazione.findAll({
+                                attributes: ['data', 'slot'],
+                                where: {
+                                    centro_vac_id: id,
+                                    data: data
+                                }
+                            })];
+                    case 1:
+                        query = _a.sent();
+                        return [2 /*return*/, query];
+                    case 2: return [4 /*yield*/, this.prenotazione.findAll({
+                            attributes: ['data', 'slot'],
+                            where: {
+                                centro_vac_id: id,
+                                data: data,
+                                fascia: fascia
+                            }
+                        })];
+                    case 3:
+                        query = _a.sent();
+                        return [2 /*return*/, query];
+                }
+            });
+        });
     };
     return Prenotazione;
 }());

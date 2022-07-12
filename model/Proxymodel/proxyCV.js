@@ -48,20 +48,20 @@ var proxyCV = /** @class */ (function () {
         this.modelPR = new prenotazione_1.Prenotazione(sequelize_1.DBConnection.getInstance().getConnection());
     }
     // Metodo per inserire un nuovo centro vaccinale
-    proxyCV.prototype.insertNewCV = function (lati, longi, nome, maxf1, maxf2) {
+    proxyCV.prototype.insertNewElement = function (Input) {
         return __awaiter(this, void 0, void 0, function () {
-            var sanitizednome, result;
+            var result;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        sanitizednome = (0, stringsanitizer_1.stringSanitizer)(nome);
+                        Input.nome = (0, stringsanitizer_1.stringSanitizer)(Input.nome);
                         //Qui andiamo a sanificare i dati inseriti dall'utente
-                        this.TypeCheckLati(lati);
-                        this.TypeCheckLongi(longi);
-                        this.TypeCheckNome(sanitizednome);
-                        this.TypeCheckMaxf1(maxf1);
-                        this.TypeCheckMaxf2(maxf2);
-                        return [4 /*yield*/, this.model.insertNewCV(lati, longi, sanitizednome, maxf1, maxf2)];
+                        this.TypeCheckLati(Input.lati);
+                        this.TypeCheckLongi(Input.longi);
+                        this.TypeCheckNome(Input.nome);
+                        this.TypeCheckMaxf1(Input.maxf1);
+                        this.TypeCheckMaxf2(Input.maxf2);
+                        return [4 /*yield*/, this.model.insertNewElement({ lati: Input.lati, longi: Input.longi, nome: Input.nome, maxf1: Input.maxf1, maxf2: Input.maxf2 })];
                     case 1:
                         result = _a.sent();
                         return [2 /*return*/, result];
@@ -70,7 +70,7 @@ var proxyCV = /** @class */ (function () {
         });
     };
     // Metodo per ottenere un centro vaccinale passando l'id
-    proxyCV.prototype.getCentro = function (id) {
+    proxyCV.prototype.findOne = function (id) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
@@ -123,7 +123,7 @@ var proxyCV = /** @class */ (function () {
         this.modelPR.getModel().belongsTo(this.model.getModel(), { foreignKey: 'centro_vac_id' });
     };
     // Metodo per ottenere il riferimento al model
-    proxyCV.prototype.getProxyModel = function () {
+    proxyCV.prototype.getModel = function () {
         return this.model;
     };
     return proxyCV;

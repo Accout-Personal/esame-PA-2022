@@ -1,11 +1,11 @@
 import { Centro_vaccinale } from "../centro_vaccinale";
-import { proxyInterfaceCV } from "../ProxyInterface/proxyinterfaceCV";
 import { DBConnection } from "../../config/sequelize";
 import { stringSanitizer } from "../../util/stringsanitizer";
 import { Prenotazione } from "../prenotazione";
+import { proxyInterface } from "../ProxyInterface/proxyInterface";
 // Nel proxy andiamo a implementare tutti i controlli e le sanificazioni sui dati di input per evitare problemi e crash del sistema
 
-export class proxyCV implements proxyInterfaceCV {
+export class proxyCV implements proxyInterface {
     // Definiamo diversi model utili per implementare le varie funzionalità
     private model: Centro_vaccinale;
     private modelPR: Prenotazione;
@@ -13,20 +13,22 @@ export class proxyCV implements proxyInterfaceCV {
         this.model = new Centro_vaccinale(DBConnection.getInstance().getConnection())
         this.modelPR = new Prenotazione(DBConnection.getInstance().getConnection());
     }
+
     // Metodo per inserire un nuovo centro vaccinale
-    public async insertNewCV(lati: number, longi: number, nome: string, maxf1: number, maxf2: number): Promise<Object> {
-        let sanitizednome = stringSanitizer(nome);
+    public async insertNewElement(Input:{lati: number, longi: number, nome: string, maxf1: number, maxf2: number}): Promise<Object> {
+        Input.nome = stringSanitizer(Input.nome);
         //Qui andiamo a sanificare i dati inseriti dall'utente
-        this.TypeCheckLati(lati);
-        this.TypeCheckLongi(longi);
-        this.TypeCheckNome(sanitizednome);
-        this.TypeCheckMaxf1(maxf1);
-        this.TypeCheckMaxf2(maxf2);
-        let result = await this.model.insertNewCV(lati, longi, sanitizednome, maxf1, maxf2);
+        this.TypeCheckLati(Input.lati);
+        this.TypeCheckLongi(Input.longi);
+        this.TypeCheckNome(Input.nome);
+        this.TypeCheckMaxf1(Input.maxf1);
+        this.TypeCheckMaxf2(Input.maxf2);
+        let result = await this.model.insertNewElement({lati: Input.lati, longi: Input.longi, nome: Input.nome, maxf1: Input.maxf1, maxf2: Input.maxf2});
         return result;
     }
+    
     // Metodo per ottenere un centro vaccinale passando l'id
-    public async getCentro(id: number) {
+    public async findOne(id: number): Promise<any> {
         return await this.model.findOne(id);
     }
     // Metodo per sanificare la latitudine e longitudine
@@ -67,10 +69,8 @@ export class proxyCV implements proxyInterfaceCV {
     }
 
     // Metodo per ottenere il riferimento al model
-    public getProxyModel() {
+    public getModel() {
         return this.model;
     }
-
-
 
 }

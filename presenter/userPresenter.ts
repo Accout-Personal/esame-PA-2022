@@ -29,10 +29,10 @@ export class userPresenter {
     // Metodo per registrare un nuovo utente
     public static async register(req, res) {
         const proxy = new proxyUs();
-        proxy.insertNewUsers(req.body.cf,
-            req.body.username,
-            req.body.password,
-            0).then((value) => {
+        proxy.insertNewElement({cf: req.body.cf,
+            username: req.body.username,
+            password: req.body.password,
+            tipo: 0}).then((value) => {
                 if (value) {
                     res.send({ message: "successo." });
                 }
@@ -47,7 +47,7 @@ export class userPresenter {
         const Proxy = new proxyPr();
         const body = req.body;
         try {
-            let value = await Proxy.insertNewPr(body.data, body.slot, body.centro_vac, body.vaccino, req.user.user.id);
+            let value = await Proxy.insertNewElement({data: body.data, slot: body.slot, centro_vaccino: body.centro_vac, vaccino: body.vaccino, user: req.user.user.id});
             await directorRes.respose(res, value, body.formato).catch(err => {
                 console.log(err);
                 res.status(400).send({ "errore": err.message });
@@ -130,7 +130,6 @@ export class userPresenter {
 
     //filtro centro per i max 5 giorni
     public static async getSlotsCentro(req, res) {
-        //{centro:number,date:[...],fascie:number}
         try {
 
             let body = req.body;
@@ -138,7 +137,6 @@ export class userPresenter {
             // Metodo per ottenere gli slot temporali disponibili
             let proxy = new proxyCV();
             let builder = new buildCV(proxy);
-            //await builder.getSlotFree(body.centro, body.data, body.fascie);
             await builder.getSlotFull(body.centro, body.date, body.fascia);
             builder.setFascia(body.fascia);
             builder.filtroFascia(body.date);

@@ -56,41 +56,41 @@ var proxyPr = /** @class */ (function () {
         this.modelCV = new centro_vaccinale_1.Centro_vaccinale(sequelize_1.DBConnection.getInstance().getConnection());
     }
     //Metodo per inserire una nuova prenotazione
-    proxyPr.prototype.insertNewPr = function (data, slot, centro_vaccino, vaccino, user) {
+    proxyPr.prototype.insertNewElement = function (Input) {
         return __awaiter(this, void 0, void 0, function () {
-            var sanitizeddata, fascia;
+            var fascia;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        sanitizeddata = (0, stringsanitizer_1.stringSanitizer)(data);
+                        Input.data = (0, stringsanitizer_1.stringSanitizer)(Input.data);
                         //controllo il tipo di dato sia valido
-                        this.TypeCheckData(sanitizeddata);
-                        this.TypeCheckSlot(slot);
-                        return [4 /*yield*/, this.TypeCheckCV(centro_vaccino)];
+                        this.TypeCheckData(Input.data);
+                        this.TypeCheckSlot(Input.slot);
+                        return [4 /*yield*/, this.TypeCheckCV(Input.centro_vaccino)];
                     case 1:
                         _a.sent();
-                        return [4 /*yield*/, this.TypeCheckVaccino(vaccino)];
+                        return [4 /*yield*/, this.TypeCheckVaccino(Input.vaccino)];
                     case 2:
                         _a.sent();
-                        return [4 /*yield*/, this.TypeCheckUser(user)];
+                        return [4 /*yield*/, this.TypeCheckUser(Input.user)];
                     case 3:
                         _a.sent();
-                        if (slot > 16 && fascia == 1) {
+                        if (Input.slot > 16 && fascia == 1) {
                             fascia = 2;
                         }
                         else {
                             fascia = 1;
                         }
-                        return [4 /*yield*/, this.checkAvailability(sanitizeddata, centro_vaccino, fascia)];
+                        return [4 /*yield*/, this.checkAvailability(Input.data, Input.centro_vaccino, fascia)];
                     case 4:
                         _a.sent();
-                        return [4 /*yield*/, this.checkSlot(sanitizeddata, centro_vaccino, slot)];
+                        return [4 /*yield*/, this.checkSlot(Input.data, Input.centro_vaccino, Input.slot)];
                     case 5:
                         _a.sent();
-                        return [4 /*yield*/, this.checkVaxValidity(sanitizeddata, vaccino, user)];
+                        return [4 /*yield*/, this.checkVaxValidity(Input.data, Input.vaccino, Input.user)];
                     case 6:
                         _a.sent();
-                        return [4 /*yield*/, this.model.insertNewPr(sanitizeddata, fascia, slot, centro_vaccino, vaccino, user)];
+                        return [4 /*yield*/, this.model.insertNewElement({ data: Input.data, fascia: fascia, slot: Input.slot, centro_vaccino: Input.centro_vaccino, vaccino: Input.vaccino, user: Input.user })];
                     case 7: return [2 /*return*/, _a.sent()];
                 }
             });
@@ -125,6 +125,7 @@ var proxyPr = /** @class */ (function () {
                     case 0: return [4 /*yield*/, this.decodeUUID(req)];
                     case 1:
                         uuid = _a.sent();
+                        this.makeRelationship();
                         return [4 /*yield*/, this.checkUUID(uuid)];
                     case 2:
                         res = _a.sent();
@@ -189,7 +190,7 @@ var proxyPr = /** @class */ (function () {
                     case 0: return [4 /*yield*/, this.checkPreIDStato(id, user)];
                     case 1:
                         _a.sent();
-                        return [4 /*yield*/, this.model["delete"](id, user)];
+                        return [4 /*yield*/, this.model.cancellaPre(id, user)];
                     case 2: return [2 /*return*/, _a.sent()];
                 }
             });
@@ -207,7 +208,7 @@ var proxyPr = /** @class */ (function () {
                         return [4 /*yield*/, this.checkPreIDStato(updateBody.id, updateBody.user)];
                     case 2:
                         _a.sent();
-                        return [4 /*yield*/, this.model.getModel().findOne({ where: { id: updateBody.id } })];
+                        return [4 /*yield*/, this.findOne(updateBody.id)];
                     case 3:
                         oldPr = _a.sent();
                         if (typeof oldPr === "undefined" || oldPr === null) {
@@ -255,7 +256,7 @@ var proxyPr = /** @class */ (function () {
                     case 10: return [4 /*yield*/, this.checkVaxValidity(data, safeBody.vaccinoid, updateBody.user, updateBody.id)];
                     case 11:
                         _a.sent();
-                        return [4 /*yield*/, this.model.modifica(updateBody.id, safeBody)];
+                        return [4 /*yield*/, this.model.modifica({ id: updateBody.id, updatebody: safeBody })];
                     case 12: return [2 /*return*/, _a.sent()];
                 }
             });
@@ -451,7 +452,8 @@ var proxyPr = /** @class */ (function () {
                         return [4 /*yield*/, this.model.getModel().findOne({
                                 where: {
                                     uuid: sanitized
-                                }
+                                },
+                                include: ["user", "vaccino"]
                             })];
                     case 1: return [2 /*return*/, _a.sent()];
                 }
@@ -462,7 +464,6 @@ var proxyPr = /** @class */ (function () {
     proxyPr.prototype.TypeCheckDataListaPrenotazione = function (data) {
         var sanitizeddata = (0, stringsanitizer_1.stringSanitizer)(data);
         var dataIns = luxon_1.DateTime.fromISO(sanitizeddata);
-        var dataNow = luxon_1.DateTime.now();
         if ((typeof sanitizeddata !== 'string' || !dataIns.isValid))
             throw new Error('Questa data non è valida');
         return true;
@@ -558,27 +559,13 @@ var proxyPr = /** @class */ (function () {
     // Metodo che restituisce, per ogni centro vaccinale, per ogni fascia, e, per ogni data, il numero di prenotazioni, più gli altri attributi
     proxyPr.prototype.takeNumberOfPrenotation = function (fascia) {
         return __awaiter(this, void 0, void 0, function () {
-            var result, result;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         if (typeof fascia !== 'boolean')
                             throw new Error('L\' opzione inserita non è valida');
-                        if (!fascia) return [3 /*break*/, 2];
-                        return [4 /*yield*/, this.model.getModel().findAndCountAll({
-                                attributes: ['centro_vac_id', 'data', 'fascia'],
-                                group: ['centro_vac_id', 'data', 'fascia']
-                            })];
-                    case 1:
-                        result = _a.sent();
-                        return [2 /*return*/, result.count];
-                    case 2: return [4 /*yield*/, this.model.getModel().findAndCountAll({
-                            attributes: ['centro_vac_id', 'data'],
-                            group: ['centro_vac_id', 'data']
-                        })];
-                    case 3:
-                        result = _a.sent();
-                        return [2 /*return*/, result.count];
+                        return [4 /*yield*/, this.model.takeNumberOfPrenotation(fascia)];
+                    case 1: return [2 /*return*/, _a.sent()];
                 }
             });
         });
@@ -586,34 +573,13 @@ var proxyPr = /** @class */ (function () {
     // Metodo che ritorna tutte le prenotazioni effettuate per una certa data, in un certo centro vaccinale e per una certa fascia
     proxyPr.prototype.getSlotFull = function (id, data, fascia) {
         return __awaiter(this, void 0, void 0, function () {
-            var query, query;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, this.TypeCheckCV(id)];
                     case 1:
                         _a.sent();
-                        if (!(typeof fascia === 'undefined')) return [3 /*break*/, 3];
-                        return [4 /*yield*/, this.model.getModel().findAll({
-                                attributes: ['data', 'slot'],
-                                where: {
-                                    centro_vac_id: id,
-                                    data: data
-                                }
-                            })];
-                    case 2:
-                        query = _a.sent();
-                        return [2 /*return*/, query];
-                    case 3: return [4 /*yield*/, this.model.getModel().findAll({
-                            attributes: ['data', 'slot'],
-                            where: {
-                                centro_vac_id: id,
-                                data: data,
-                                fascia: fascia
-                            }
-                        })];
-                    case 4:
-                        query = _a.sent();
-                        return [2 /*return*/, query];
+                        return [4 /*yield*/, this.model.getSlotFull(id, data, fascia)];
+                    case 2: return [2 /*return*/, _a.sent()];
                 }
             });
         });
@@ -622,42 +588,13 @@ var proxyPr = /** @class */ (function () {
     proxyPr.prototype.getStatisticPositive = function (order) {
         if (order === void 0) { order = true; }
         return __awaiter(this, void 0, void 0, function () {
-            var asc, positiveResult, allResult, statistic;
+            var asc;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         asc = typeof order === 'undefined' ? true : order;
-                        return [4 /*yield*/, this.model.getModel().findAndCountAll({
-                                attributes: ['centro_vac_id', 'stato'],
-                                where: { stato: 1 },
-                                group: ['centro_vac_id', 'stato']
-                            })];
-                    case 1:
-                        positiveResult = _a.sent();
-                        return [4 /*yield*/, this.model.getModel().findAndCountAll({
-                                attributes: ['centro_vac_id'],
-                                group: ['centro_vac_id']
-                            })];
-                    case 2:
-                        allResult = _a.sent();
-                        statistic = positiveResult.count.map(function (value) {
-                            allResult.count.map(function (val) {
-                                if (value.centro_vac_id == val.centro_vac_id) {
-                                    value.media = (value.count / val.count).toFixed(2);
-                                }
-                            });
-                            return value;
-                        });
-                        // Qui andiamo ad effettuare l'ordinamento del risultato finale
-                        if (asc)
-                            statistic.sort(function (a, b) {
-                                return a.media - b.media;
-                            });
-                        else
-                            statistic.sort(function (a, b) {
-                                return b.media - a.media;
-                            });
-                        return [2 /*return*/, statistic];
+                        return [4 /*yield*/, this.model.getStatisticPositive(asc)];
+                    case 1: return [2 /*return*/, _a.sent()];
                 }
             });
         });
@@ -665,24 +602,13 @@ var proxyPr = /** @class */ (function () {
     // Metodo per impostare le prenotazioni come 'non andate a buon fine'
     proxyPr.prototype.setBadPrenotations = function (data) {
         return __awaiter(this, void 0, void 0, function () {
-            var list;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         if (typeof (data) !== 'string' || !(luxon_1.DateTime.fromISO(data).isValid))
                             throw new Error('La data inserita non è valida');
-                        return [4 /*yield*/, this.getBadPrenotation(data)];
+                        return [4 /*yield*/, this.model.setBadPrenotations(data)];
                     case 1:
-                        list = _a.sent();
-                        list = list.map(function (value) {
-                            return value.dataValues.id;
-                        });
-                        return [4 /*yield*/, this.model.getModel().update({ stato: 2 }, {
-                                where: {
-                                    id: list
-                                }
-                            })];
-                    case 2:
                         _a.sent();
                         return [2 /*return*/];
                 }
@@ -711,42 +637,36 @@ var proxyPr = /** @class */ (function () {
             });
         });
     };
-    // Metodo che restituisce tutte le prenotazioni che non sono andate a buon fine, prende in input una data, un booleano, che modifica la query.
-    // Infine, viene passato un centro vaccinale.
+    // Metodo che restituisce tutte le prenotazioni che non sono andate a buon fine, prende in input una data, un booleano, che modifica la query e un centro vaccinale.
     proxyPr.prototype.getBadPrenotation = function (data, option, id) {
         if (option === void 0) { option = true; }
         return __awaiter(this, void 0, void 0, function () {
-            var list;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         if (!option) return [3 /*break*/, 2];
-                        return [4 /*yield*/, this.model.getModel().findAll({
-                                attributes: ['id', 'data'],
-                                where: {
-                                    data: data,
-                                    stato: 0
-                                }
-                            })];
-                    case 1:
-                        list = _a.sent();
-                        return [3 /*break*/, 5];
+                        return [4 /*yield*/, this.model.getBadPrenotation(data)];
+                    case 1: return [2 /*return*/, _a.sent()];
                     case 2: return [4 /*yield*/, this.TypeCheckCV(id)];
                     case 3:
                         _a.sent();
-                        return [4 /*yield*/, this.model.getModel().findAndCountAll({
-                                attributes: ['centro_vac_id', 'data'],
-                                where: {
-                                    centro_vac_id: id,
-                                    data: data,
-                                    stato: 2
-                                },
-                                group: ['centro_vac_id', 'data']
-                            })];
-                    case 4:
-                        list = _a.sent();
-                        _a.label = 5;
-                    case 5: return [2 /*return*/, list];
+                        return [4 /*yield*/, this.model.getBadPrenotation(data, option, id)];
+                    case 4: return [2 /*return*/, _a.sent()];
+                }
+            });
+        });
+    };
+    // Metodo che ritorna un riferimento al model
+    proxyPr.prototype.getModel = function () {
+        return this.model;
+    };
+    // Metodo che ritorna una prenotazione specifica
+    proxyPr.prototype.findOne = function (id) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.model.findOne(id)];
+                    case 1: return [2 /*return*/, _a.sent()];
                 }
             });
         });

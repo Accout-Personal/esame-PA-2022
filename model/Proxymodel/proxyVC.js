@@ -45,17 +45,17 @@ var proxyVC = /** @class */ (function () {
     function proxyVC() {
         this.model = new vaccino_1.Vaccini(sequelize_1.DBConnection.getInstance().getConnection());
     }
-    // Metodo per inserire un nuovo vaccino
-    proxyVC.prototype.insertNewVacc = function (nome, validita) {
+    // Questo metodo serve per inserire un nuovo elemento
+    proxyVC.prototype.insertNewElement = function (Input) {
         return __awaiter(this, void 0, void 0, function () {
             var nomesanitized;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        nomesanitized = (0, stringsanitizer_1.stringSanitizer)(nome);
+                        nomesanitized = (0, stringsanitizer_1.stringSanitizer)(Input.nome);
                         this.TypeCheckNome(nomesanitized);
-                        this.TypeCheckValidita(validita);
-                        return [4 /*yield*/, this.model.insertNewVacc(nomesanitized, validita)];
+                        this.TypeCheckValidita(Input.validita);
+                        return [4 /*yield*/, this.model.insertNewElement({ nome: nomesanitized, validita: Input.validita })];
                     case 1: return [2 /*return*/, _a.sent()];
                 }
             });
@@ -74,6 +74,21 @@ var proxyVC = /** @class */ (function () {
         if (validita <= 0)
             throw new Error('Questo valore di validità non è valido');
         return true;
+    };
+    // Metodo che ritorna un vaccino specifico
+    proxyVC.prototype.findOne = function (id) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.model.findOne(id)];
+                    case 1: return [2 /*return*/, _a.sent()];
+                }
+            });
+        });
+    };
+    // Metodo che ritorna un riferimento al model
+    proxyVC.prototype.getModel = function () {
+        return this.model;
     };
     return proxyVC;
 }());

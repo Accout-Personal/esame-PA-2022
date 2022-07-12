@@ -60,7 +60,7 @@ var buildCV = /** @class */ (function () {
                         this.proxy.makeRelationship();
                         if (!!disp) return [3 /*break*/, 2];
                         _a = this;
-                        return [4 /*yield*/, this.proxy.getProxyModel().getModel().findAll({
+                        return [4 /*yield*/, this.proxy.getModel().getModel().findAll({
                                 attributes: ['id', 'lati', 'longi']
                             })];
                     case 1:
@@ -68,7 +68,7 @@ var buildCV = /** @class */ (function () {
                         return [3 /*break*/, 4];
                     case 2:
                         _b = this;
-                        return [4 /*yield*/, this.proxy.getProxyModel().getModel().findAll({
+                        return [4 /*yield*/, this.proxy.getModel().getModel().findAll({
                                 attributes: ['id', 'lati', 'longi', 'maxf1', 'maxf2'],
                                 include: 'prenotaziones'
                             })];

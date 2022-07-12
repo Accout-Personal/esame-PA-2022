@@ -58,15 +58,30 @@ var Vaccini = /** @class */ (function () {
             timestamps: false
         });
     }
-    // metodo per inserire un nuovo vaccino
-    Vaccini.prototype.insertNewVacc = function (nome, validita) {
+    // Metodo per trovare un vaccino specifico
+    Vaccini.prototype.findOne = function (id) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.vaccino.findOne({
+                            where: {
+                                id: id
+                            }
+                        })];
+                    case 1: return [2 /*return*/, _a.sent()];
+                }
+            });
+        });
+    };
+    // Questo metodo serve per inserire un nuovo elemento
+    Vaccini.prototype.insertNewElement = function (Input) {
         return __awaiter(this, void 0, void 0, function () {
             var _a;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
                         _b.trys.push([0, 2, , 3]);
-                        return [4 /*yield*/, this.vaccino.create({ nome: nome, validita: validita })];
+                        return [4 /*yield*/, this.vaccino.create({ nome: Input.nome, validita: Input.validita })];
                     case 1:
                         _b.sent();
                         return [2 /*return*/, true];
@@ -78,7 +93,7 @@ var Vaccini = /** @class */ (function () {
             });
         });
     };
-    // Metodo per ottenere il modello
+    // Metodo per ottenere il modello della tabella
     Vaccini.prototype.getModel = function () {
         return this.vaccino;
     };

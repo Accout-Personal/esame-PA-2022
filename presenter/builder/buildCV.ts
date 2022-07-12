@@ -1,9 +1,9 @@
-import { proxyInterfaceCV } from "../../model/ProxyInterface/proxyinterfaceCV";
 import { builderInterfaceCV } from "./builderInterface/builderInterfaceCV";
 import * as haversine from 'haversine'
 import { proxyPr } from "../../model/Proxymodel/proxyPR";
 import { DateTime } from "luxon";
 import { mapValueFieldNames } from "sequelize/types/utils";
+import { proxyInterface } from "../../model/ProxyInterface/proxyInterface";
 // Questa è la classe builder con la quale andremo a costruire il nostro risultato che verrà restituito all'utente
 export class buildCV implements builderInterfaceCV {
 
@@ -14,7 +14,7 @@ export class buildCV implements builderInterfaceCV {
     private fasciaSlot: Array<number>;
     private prenotazioni
 
-    constructor(proxy: proxyInterfaceCV) {
+    constructor(proxy: proxyInterface) {
         this.proxy = proxy;
     }
 
@@ -27,12 +27,12 @@ export class buildCV implements builderInterfaceCV {
         //Qui andiamo a prendere tutti i dati di interesse dal DB
         this.proxy.makeRelationship();
         if (!disp) {
-            this.result = await this.proxy.getProxyModel().getModel().findAll({
+            this.result = await this.proxy.getModel().getModel().findAll({
                 attributes: ['id', 'lati', 'longi']
             });
         }
         else {
-            this.result = await this.proxy.getProxyModel().getModel().findAll({
+            this.result = await this.proxy.getModel().getModel().findAll({
                 attributes: ['id', 'lati', 'longi', 'maxf1', 'maxf2'],
                 include: 'prenotaziones'
             });

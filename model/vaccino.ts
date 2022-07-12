@@ -1,10 +1,10 @@
-import { proxyInterfaceVac } from "./ProxyInterface/proxyinterfaceVacc";
+import { proxyInterface } from "./ProxyInterface/proxyInterface";
 
 var { Sequelize, Model, DataTypes } = require('sequelize');
 /**
  *  Classe model che rappresenta la tabella 'vaccino' nel database 
  */
-export class Vaccini implements proxyInterfaceVac {
+export class Vaccini implements proxyInterface {
 
     private vaccino: any;
 
@@ -26,17 +26,25 @@ export class Vaccini implements proxyInterfaceVac {
             timestamps: false
           } );
     }
-    // metodo per inserire un nuovo vaccino
-    async insertNewVacc(nome:string, validita:number): Promise<Object>{
-        try{
-            await this.vaccino.create({nome: nome, validita: validita});
-            return true;
-        } catch{
-            return false;
-        }
+  // Metodo per trovare un vaccino specifico
+  public async findOne(id: number): Promise<any> {
+    return await this.vaccino.findOne({
+      where:{
+        id:id
       }
+    });
+  }
+  // Questo metodo serve per inserire un nuovo elemento
+  public async insertNewElement(Input:{nome:string, validita:number}): Promise<Object> {
+      try{
+        await this.vaccino.create({nome: Input.nome, validita: Input.validita});
+        return true;
+    } catch{
+        return false;
+    }
+  }
 
-      // Metodo per ottenere il modello
+      // Metodo per ottenere il modello della tabella
       public getModel(): any {
         return this.vaccino;
       }

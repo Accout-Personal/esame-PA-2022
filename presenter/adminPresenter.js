@@ -57,7 +57,7 @@ var adminPresenter = /** @class */ (function () {
                         _a.label = 1;
                     case 1:
                         _a.trys.push([1, 3, , 4]);
-                        return [4 /*yield*/, centrVax.insertNewCV(req.body.lati, req.body.longi, req.body.nome, req.body.maxf1, req.body.maxf2)];
+                        return [4 /*yield*/, centrVax.insertNewElement({ lati: req.body.lati, longi: req.body.longi, nome: req.body.nome, maxf1: req.body.maxf1, maxf2: req.body.maxf2 })];
                     case 2:
                         _a.sent();
                         res.send({ message: "inserimento andatato con successo." });
@@ -83,7 +83,7 @@ var adminPresenter = /** @class */ (function () {
                         _a.label = 1;
                     case 1:
                         _a.trys.push([1, 3, , 4]);
-                        return [4 /*yield*/, Vaccini.insertNewVacc(req.body.nome, req.body.validita)];
+                        return [4 /*yield*/, Vaccini.insertNewElement({ nome: req.body.nome, validita: req.body.validita })];
                     case 2:
                         _a.sent();
                         res.send({ message: "inserimento andatato con successo." });
@@ -174,7 +174,7 @@ var adminPresenter = /** @class */ (function () {
                                 uuid: value.uuid
                             };
                         });
-                        return [4 /*yield*/, new proxyCV_1.proxyCV().getCentro(body.centro)];
+                        return [4 /*yield*/, new proxyCV_1.proxyCV().findOne(body.centro)];
                     case 2:
                         centro = _a.sent();
                         switch (body.formato.toLowerCase()) {

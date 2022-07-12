@@ -46,6 +46,38 @@ var proxyUs = /** @class */ (function () {
     function proxyUs() {
         this.model = new users_1.Users(sequelize_1.DBConnection.getInstance().getConnection());
     }
+    // Questo metodo serve per inserire un nuovo utente
+    proxyUs.prototype.insertNewElement = function (Input) {
+        return __awaiter(this, void 0, void 0, function () {
+            var error_1;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        Input.cf = (0, stringsanitizer_1.stringSanitizer)(Input.cf);
+                        Input.username = (0, stringsanitizer_1.stringSanitizer)(Input.username);
+                        Input.password = (0, stringsanitizer_1.stringSanitizer)(Input.password);
+                        _a.label = 1;
+                    case 1:
+                        _a.trys.push([1, 4, , 5]);
+                        if (!
+                        // Qui vengono sanificati i parametri di input inseriti dall'utente
+                        (this.TypeCheckCF(Input.cf) &&
+                            this.TypeCheckUsername(Input.username) &&
+                            this.TypeCheckPassword(Input.password) &&
+                            this.TypeCheckTipo(Input.tipo))) 
+                        // Qui vengono sanificati i parametri di input inseriti dall'utente
+                        return [3 /*break*/, 3];
+                        return [4 /*yield*/, this.model.insertNewElement({ cf: Input.cf, username: Input.username, password: crypto.createHash('sha256').update(Input.password).digest('hex'), tipo: Input.tipo })];
+                    case 2: return [2 /*return*/, _a.sent()];
+                    case 3: return [3 /*break*/, 5];
+                    case 4:
+                        error_1 = _a.sent();
+                        return [2 /*return*/, error_1];
+                    case 5: return [2 /*return*/];
+                }
+            });
+        });
+    };
     // Questo metodo fa una query sulla tabella users del DB, passando come parametro uno username che è chiave
     proxyUs.prototype.getUser = function (username) {
         return __awaiter(this, void 0, void 0, function () {
@@ -80,44 +112,9 @@ var proxyUs = /** @class */ (function () {
             });
         });
     };
-    // Questo metodo serve per inserire un nuovo utente
-    proxyUs.prototype.insertNewUsers = function (cf, username, password, tipo) {
-        return __awaiter(this, void 0, void 0, function () {
-            var error_1;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        cf = (0, stringsanitizer_1.stringSanitizer)(cf);
-                        username = (0, stringsanitizer_1.stringSanitizer)(username);
-                        password = (0, stringsanitizer_1.stringSanitizer)(password);
-                        _a.label = 1;
-                    case 1:
-                        _a.trys.push([1, 4, , 5]);
-                        if (!
-                        // Qui vengono sanificati i parametri di input inseriti dall'utente
-                        (this.TypeCheckCF(cf) &&
-                            this.TypeCheckUsername(username) &&
-                            this.TypeCheckPassword(password) &&
-                            this.TypeCheckTipo(tipo))) 
-                        // Qui vengono sanificati i parametri di input inseriti dall'utente
-                        return [3 /*break*/, 3];
-                        return [4 /*yield*/, this.model.insertNewUsers(cf, username, crypto.createHash('sha256').update(password).digest('hex'), tipo)];
-                    case 2: return [2 /*return*/, _a.sent()];
-                    case 3: return [3 /*break*/, 5];
-                    case 4:
-                        error_1 = _a.sent();
-                        return [2 /*return*/, error_1];
-                    case 5: return [2 /*return*/];
-                }
-            });
-        });
-    };
-    proxyUs.prototype.getPreUser = function (user) {
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                return [2 /*return*/];
-            });
-        });
+    // Metodo che ritorna un riferimento al modello
+    proxyUs.prototype.getModel = function () {
+        return this.model;
     };
     // Questo metodo fa un controllo sul codice fiscale inserito dall'utente
     proxyUs.prototype.TypeCheckCF = function (cf) {
@@ -142,6 +139,17 @@ var proxyUs = /** @class */ (function () {
         if (typeof tipo !== 'number' || isNaN(tipo) || !isFinite(tipo))
             throw new Error('Questo valore non è un numero');
         return true;
+    };
+    // Questo metodo serve ottenere uno users specifico
+    proxyUs.prototype.findOne = function (id) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.model.findOne(id)];
+                    case 1: return [2 /*return*/, _a.sent()];
+                }
+            });
+        });
     };
     return proxyUs;
 }());

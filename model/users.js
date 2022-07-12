@@ -61,15 +61,15 @@ var Users = /** @class */ (function () {
             timestamps: false
         });
     }
-    // Metodo per inserire un nuovo user
-    Users.prototype.insertNewUsers = function (cf, username, password, tipo) {
+    // Questo metodo serve per inserire un nuovo elemento
+    Users.prototype.insertNewElement = function (Input) {
         return __awaiter(this, void 0, void 0, function () {
             var _a;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
                         _b.trys.push([0, 2, , 3]);
-                        return [4 /*yield*/, this.user.create({ cf: cf, username: username, password: password, tipo: tipo.toString() })];
+                        return [4 /*yield*/, this.user.create({ cf: Input.cf, username: Input.username, password: Input.password, tipo: Input.tipo.toString() })];
                     case 1:
                         _b.sent();
                         return [2 /*return*/, true];
@@ -93,7 +93,7 @@ var Users = /** @class */ (function () {
         });
     };
     // Metodo per prendere solo un risultato, infatti l'id è la Primary key della tabella
-    Users.prototype.getUser = function (id) {
+    Users.prototype.findOne = function (id) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
@@ -103,7 +103,7 @@ var Users = /** @class */ (function () {
             });
         });
     };
-    // Metodo per ottenere il modello
+    // Metodo per ottenere il modello della tabella
     Users.prototype.getModel = function () {
         return this.user;
     };
