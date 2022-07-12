@@ -231,8 +231,8 @@ export class proxyPr implements proxyInterfacePr {
         }
 
         let Vaccino = await this.modelV.getModel().findOne({ where: { id: vaccino }, query: { raw: true } });
-        let LowerBound = DataPre.plus({ day: Vaccino.validita });
-        let UpperBound = DataPre.minus({ day: Vaccino.validita });
+        let LowerBound = DataPre.minus({ day: Vaccino.validita });
+        let UpperBound = DataPre.plus({ day: Vaccino.validita });
 
         //controlla se prima e dopo la validita esiste un altro vaccinazione.
         let InRangeVax = AllVax.filter(Prenotazione=>{
