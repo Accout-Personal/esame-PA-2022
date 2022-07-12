@@ -31,6 +31,31 @@ Il servizio back-end realizzato permette di prenotare un vaccino, svolge anche a
  4. Questa è la fase conclusiva del progetto, dove sono stati messi insieme i servizi utilizzando docker, ed è stata realizzata la documentazione del progetto.
  
  # Dettagli delle richieste
+ La seguente tabella mostra le richieste possibili:
+ 
+ | Tipo  | Rotta | Utente | Token JWT |
+| ------------- | ------------- | ------------- | ------------- |
+| Get  | /login  | -  | No  |
+| Get  | /getCentro  | User  | Si  |
+| Get  | /getSlotCentro  | User  | Si  |
+| Post  | /prenota  | User  | Si  |
+| Post  | /cancella  | User  | Si  |
+| Post  | /modifica  | User  | Si  |
+| Get  | /myListPrenota  | User  | Si  |
+| Post  | /newCentro  | Admin  | Si  |
+| Post  | /newVaccino  | Admin  | Si  |
+| Get  | /listPrenota  | Admin  | Si  |
+| Post  | /verify  | Admin  | Si  |
+| Post  | /confirmVax  | Admin  | Si  |
+| Get  | /statCentro  | Admin  | Si  |
+| Get  | /getassenze  | Admin  | Si  |
+
+## Esempi di richieste
+```
+function test() {
+  console.log("notice the blank line before this function?");
+}
+```
  
  # Progettazione - Pattern
  In questa sezione riportiamo i pattern utilizzati con le motivazioni per cui sono stati scelti. Partiamo con i pattern architetturali, i quali definiscono la struttura del progetto e delle sue componenti, poi procediamo con i design pattern che descrivono le interazioni che ci sono tra le classi, il loro comportamento, e il modo in cui creano le istanze.
