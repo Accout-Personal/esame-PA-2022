@@ -46,8 +46,6 @@ export class proxyPr implements proxyInterfacePr {
         await this.checkAvailability(Input.data, Input.centro_vaccino, fascia);
         await this.checkSlot(Input.data, Input.centro_vaccino, Input.slot)
         await this.checkVaxValidity(Input.data, Input.vaccino, Input.user);
-
-
         return await this.model.insertNewElement({data: Input.data, fascia: fascia, slot: Input.slot, centro_vaccino: Input.centro_vaccino, vaccino: Input.vaccino, user: Input.user});
     }
     
@@ -295,7 +293,6 @@ export class proxyPr implements proxyInterfacePr {
             },
             include: ["user","vaccino"]
         });
-        
     }
 
     // Metodo per effettuare controlli sulla data
