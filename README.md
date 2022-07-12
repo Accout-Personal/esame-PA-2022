@@ -51,12 +51,77 @@ Il servizio back-end realizzato permette di prenotare un vaccino, svolge anche a
 | Get  | /getassenze  | Admin  | Si  |
 
 ## Esempi di richieste
+
+### Login
+Tramite questa richiesta è possibile effettuare il login. Se le credenziali sono corrette verrà restituito un token jwt.
 ```
-function test() {
-  console.log("notice the blank line before this function?");
+{
+    "username":"user1",
+    "password":"password"
+}
+* oppure
+{
+    "username":"admin1",
+    "password":"adminadmin"
 }
 ```
- 
+
+### Ottenere i centri vaccinali entro una certa distanza
+Tramite questa richiesta è possibile ottenere una lista di centri vaccinali, che non superano una certa distanza, definita dall'utente. La distanza viene calcolata in base alla posizione del centro vaccinale e delle coordinate inviate dall'utente stesso. Tutte le distanze sono calcolate in Km, inoltre la distanza viene arrotondata alla seconda cifra decimale. Il valore di order se uguale a true indica ordinamento crescente, uguale a false indica ordinamento decrescente.
+```
+{
+    "lat":43.5851,
+    "long":13.514147,
+    "dist":100,
+    "order":true
+}
+* Il parametro order di default assume valore true, quindi può essere omesso
+```
+L'utente può anche filtrare questo risultato specificando una data, in questo modo verranno selezionati solo i centri vaccinali che hanno una disponibilità residua maggiore di zero per quella data.
+```
+{
+    "lat":43.5851,
+    "long":13.514147,
+    "dist":100,
+    "data":"2022-07-23",
+    "disp":true
+}
+* Il parametro order di default assume valore true, quindi può essere omesso
+* Il parametro data di default assume come valore la data corrente, quindi può essere omesso
+```
+
+### Ottenere gli slot liberi per un centro vaccinale, specificando al massimo cinque date.
+Tramite questa richiesta l'utente può visualizzare gli slot liberi specificando un centro vaccinale, deve anche specificare una o più date, fino a un massimo di cinque. Per motivi applicativi vengono prese in considerazione solo le date ***strettamente maggiori*** della data odierna. Se tutte le date non sono valide viene restituito un risultato vuoto. L'utente può specificare una fascia oraria.
+```
+{
+    "centro":3,
+    "date":["2022-07-22","2022-12-31"],
+    "fascia":1,
+    "formato":"ora"
+}
+* Il parametro fascia, se non specificato, fa restituire tutti gli slot disponibili all'interno di entrambe le fascie. Può essere omesso.
+* Il parametro formato può ricevere come valore solo la stringa "ora", la quale permette di ottenere l'ora relativa ai vari slot disponibili. Se omesso, o se viene inserita una qualsiasi altra stringa, come risultato vengono restituiti gli slot, rappresentati con il loro numero, e non con l'ora. 
+```
+### Inserire una prenotazione
+Tramite questa richiesta è possibile inserire una prenotazione.
+```
+{
+    "data":"2022-07-25",
+    "centro_vac":2,
+    "slot":3,
+    "vaccino":6,
+    "formato":"json"
+}
+* Il parametro formato, se non specificato, farà restituire il risultato sotto forma di json. Può essere omesso. I valori che possono essere inseriti sono "json","pdf","qrcode". Se si inserisce un altra stringa verrà restituito il risultato sotto forma di json.
+```
+Come da requisiti è stato:
+1. effettuato un controllo per fare in modo che un utente possa prenotare solo una vaccinazione per un vaccino mai effettuato o se la copertura risulti scaduta alla data scelta dell’utente.
+2. viene fornito un identificatore di prenotazione; si può specificare se ritornare questo codice sotto forma di JSON o QR-code (immagine) o PDF (il pdf contiene tutti i dati richiesti dai requisiti, che sono il QR-code, la data ed ora scelta, il centro di vaccinazione ed il codice fiscale dell’utente).
+
+### Cancellare una prenotazione
+Tramite questa richiesta è possibile 
+
+
  # Progettazione - Pattern
  In questa sezione riportiamo i pattern utilizzati con le motivazioni per cui sono stati scelti. Partiamo con i pattern architetturali, i quali definiscono la struttura del progetto e delle sue componenti, poi procediamo con i design pattern che descrivono le interazioni che ci sono tra le classi, il loro comportamento, e il modo in cui creano le istanze.
  
