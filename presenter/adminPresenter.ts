@@ -6,31 +6,29 @@ import { slotToTime } from "../util/slotTotime";
 // Questa classe implementa il presenter per l'amministratore
 export class adminPresenter {
     // Questo metodo permette di inserire un nuovo centro vaccinale
-    public static async creaCentroVax(req, res) {
+    public static async creaCentroVax(req, res,next) {
 
         const centrVax = new proxyCV();
         try {
             await centrVax.insertNewElement({lati:req.body.lati, longi:req.body.longi, nome:req.body.nome, maxf1:req.body.maxf1, maxf2:req.body.maxf2});
             res.send({ message: "inserimento andatato con successo." });
         } catch (error) {
-            console.log(error);
-            res.status(400).send({ "message": error.message });
+            next(error);
         }
 
     }
     // Questo metodo permette di inserire un nuovo vaccino
-    public static async creaVaccino(req, res) {
+    public static async creaVaccino(req, res,next) {
         const Vaccini = new proxyVC();
         try {
             await Vaccini.insertNewElement({nome: req.body.nome, validita:req.body.validita})
             res.send({ message: "inserimento andatato con successo." });
         } catch (error) {
-            console.log(error);
-            res.status(400).send({ "message": error.message });
+            next(error);
         }
     }
     // Metodo che permette di ricevere un QRcode
-    public static async riceveQRCode(req, res) {
+    public static async riceveQRCode(req, res,next) {
         try {
             let result = await new proxyPr().getPrInfo(req);
             return res.send({
@@ -42,22 +40,22 @@ export class adminPresenter {
                 uuid: result.uuid
             });
         } catch (error) {
-            res.status(400).send({ "message": error.message });
+            next(error);
         }
 
     }
     // Metodo usato per validare l’utente in fase di accettazione 
-    public static async confermaUUID(req, res) {
+    public static async confermaUUID(req, res,next) {
         try {
             await new proxyPr().confermatUUID(req);
             res.status(200).send({ message: "confermato con successo" });
         } catch (error) {
-            res.status(400).send({ "message": error.message });
+            next(error);
         }
     }
     // Questo metodo ritorna la lista delle prenotazioni di un certo centro vaccinale e per una certa data.
     // Il risultato può essere restituito sotto forma di json o pdf.
-    public static async getListaCentroData(req, res) {
+    public static async getListaCentroData(req, res,next) {
         try {
             let body = req.body;
             let proxy = new proxyPr();
@@ -101,35 +99,33 @@ export class adminPresenter {
                     break;
                 }
                 default: {
-                    res.status(401).send({ message: "il formato non e' valido: il formato puo' essere solo di json o pdf" });
+                    next(new Error("il formato non e' valido: il formato puo' essere solo di json o pdf"));
                     break;
                 }
             }
         } catch (error) {
-            console.log(error)
-            return res.status(401).send({ message: error.message });
+            next(error);
         }
 
     }
     // Metodo per ottenere le statistiche positive di tutti i centri vaccinali
-    public static async getStatCentri(req, res) {
+    public static async getStatCentri(req, res,next) {
         try {
             let body = req.body;
             let result = await new proxyPr().getStatisticPositive(body.order);
             res.send(result);
         } catch (error) {
-            res.status(400).send({ message: error.message });
+            next(error);
         }
     }
     // Metodo per ottenere le statistiche negative di un centro vaccinale per un dato giorno
-    public static async getBadStat(req, res) {
+    public static async getBadStat(req, res,next) {
         try {
             let body = req.body;
             let result = await new proxyPr().getCountBadPrenotation(body.data, body.id);
             res.send({"assenze":result});
         } catch (error) {
-            console.log(error);
-            res.status(400).send({ message: error.message });
+            next(error);
         }
     }
 }
