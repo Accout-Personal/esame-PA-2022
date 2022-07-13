@@ -182,6 +182,10 @@ Tramite questa richiesta, solo l'amministratore può inserire un nuovo vaccino.
     "validita":30
 }
 ```
+
+Qui presenta un esempio di inserimento di un nuovo vaccino con successo
+<img src = "readmeImg/NewVaccinoSuccesso.png">
+
 ### Lista delle prenotazioni di un centro vaccinale
 Tramite questa richiesta, solo l'amministratore può visualizzare una lista di prenotazioni, specificando il centro vaccinale e la data di interesse. Per motivi applicativi la data inserita deve essere ***strettamente maggiore*** della data attuale. Tale lista può essere restituita in formato json o pdf/a.
 ```
@@ -200,7 +204,7 @@ Tramite questa richiesta, solo l'amministratore può verificare la correttezza d
 }
 * Esempio con json.
 ```
-Per inviare il qrcode sotto forma di immagine, se si usa thunder client, bisogna cliccare su Body, poi su Form, selezionare il file dal proprio computer e inserire "qrcode_img" come chiave.
+Per inviare il qrcode sotto forma di immagine (thunder client), bisogna cliccare su Body, poi su Form, selezionare il file dal proprio computer e inserire "qrcode_img" come chiave.
 
 ### Conferma di una prenotazione
 Tramite questa richiesta, solo l'amministratore può confermare una prenotazione. E' necessario passare il codice uuid in formato json o come qrcode (immagine).
@@ -210,10 +214,10 @@ Tramite questa richiesta, solo l'amministratore può confermare una prenotazione
 }
 * Esempio con json.
 ```
-Per inviare il qrcode sotto forma di immagine, se si usa thunder client, bisogna cliccare su Body, poi su Form, selezionare il file dal proprio computer e inserire "qrcode_img" come chiave.
+Per inviare il qrcode sotto forma di immagine (thunder client), bisogna cliccare su Body, poi su Form, selezionare il file dal proprio computer e inserire "qrcode_img" come chiave.
 
 ### Statistiche positive dei centri vaccinali
-Tramite questa richiesta, solo l'amministratore può visualizzare una lista di centri vaccinali, a cui vengono aggiunte le statistiche relative alle prenotazioni che hanno avuto esito positivo. Vengono scartati dalla lista tutti i centri vaccinali che non hanno prenotazioni con esito positivo. L'ordinamento avviene utilizzando la media ()
+Tramite questa richiesta, solo l'amministratore può visualizzare una lista di centri vaccinali, a cui vengono aggiunte le statistiche relative alle prenotazioni che hanno avuto esito positivo. Vengono scartati dalla lista tutti i centri vaccinali che non hanno prenotazioni con esito positivo. L'ordinamento avviene utilizzando la media (parametro utilizzato per la statistica).
 ```
 {
     "order":false
@@ -292,3 +296,4 @@ Infine, solo per le rotte dell'amministratore, è stato definito un'ulteriore [m
 Questo pattern consente di costruire oggetti complessi passo dopo passo. Il modello consente di produrre diversi tipi e rappresentazioni di un oggetto utilizzando lo stesso codice di costruzione.
 All'interno del progetto questo pattern è stato utilizzato per produrre due risultati principali. Il primo riguarda la lista dei centri vaccinali, su cui vengono eseguite diverse operazioni implementate nel build, in questo modo il presenter richiama in sequenza i metodi di interesse e produce il risultato richiesto dall'utente. Nel secondo caso abbiamo il BuildRes che contiene i metodi per produrre un certo tipo di risultato, il quale consiste nella risposta data all'utente dopo che ha effettuato una prenotazione con successo. Siccome l'utente può specificare tre tipi di formato per la risposta, è stato implementato un director che istanzia la classe buildRes, in seguito alla preferenza specificata dall'utente, il director chiama un metodo del buildRes e restituisce il risultato finale con il formato specificato dall'utente.
 Il builder e director è stato implementato nella cartella [builder](/presenter/builder).
+
