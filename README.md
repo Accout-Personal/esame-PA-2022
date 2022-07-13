@@ -225,7 +225,13 @@ Tramite questa richiesta, solo l'amministratore può visualizzare una lista di c
 * Il parametro order di default assume valore true, può essere omesso. Con il valore true abbiamo un ordinamento crescente, con false abbiamo un ordinamento decrescente.
 ```
 ### Statistiche negative di un centro vaccinale in un dato giorno
-Tramite questa richiesta, solo l'amministratore può visualizzare 
+Tramite questa richiesta, solo l'amministratore può visualizzare il totale delle prenotazioni che hanno avuto esito negativo, per una specifica data e per uno specifico centro vaccinale. La data inserita dovrà essere antecedente alla data corrente, in quanto le prenotazioni vengono automaticamente settate con esito negativo al termine di ogni giornata, quindi nel futuro non sono presenti.
+```
+{
+    "data":"2022-07-06",
+    "id":8
+}
+```
 
 # Progettazione - UML
 Di seguito vengono riportati i diagrammi UML:
@@ -299,15 +305,25 @@ All'interno del progetto questo pattern è stato utilizzato per produrre due ris
 Il builder e director è stato implementato nella cartella [builder](/presenter/builder).
 
 # Avvio del servizio
-    - Posizionarsi nella cartella clonata dal seguente repository.
-    - Sostituire JWT_SECRET_KEY nel file .env del tuo servizio.
+Prerequisiti:
+ - Connessione Internet per scaricare le librerie e immagini docker neccessarie. 
+ - (opzionale) Ambiente Docker installato sulla macchina da avviare il servizio.
+ - Ambiante o immagine compatibile con il Node JS v16.14.0.
+ - Posizionarsi nella cartella clonata dal seguente repository.
+ - Sostituire JWT_SECRET_KEY nel file .env del tuo servizio.
  ## tramite docker-compose
- -eseguire il seguente comando 
+ - richiede una connessione internet al primo avvio.
+ - eseguire il seguente comando 
  ```
  docker-compose up
  ```
 
  ## senza docker
-    Ed è neccessario avere già in possesso un servizio di database mysql.
-    Per avviare il servizio direttamente senza docker, è neccessario aggiungere un nuovo campo *MYSQL_HOST=databasehost* dove databasehost è il host del database del servizio.
+    Ed è neccessario avere già in possesso di un servizio di database mysql.
+    Per avviare il servizio direttamente senza docker, è neccessario aggiungere un nuovo campo *MYSQL_HOST=databasehost* dove databasehost è il host database del servizio.
+     - eseguire il seguente comando 
+    ```
+    tsc index.ts
+    node index.js
+    ```
     
