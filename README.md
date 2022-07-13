@@ -224,7 +224,8 @@ Tramite questa richiesta, solo l'amministratore può visualizzare una lista di c
 }
 * Il parametro order di default assume valore true, può essere omesso. Con il valore true abbiamo un ordinamento crescente, con false abbiamo un ordinamento decrescente.
 ```
-### 
+### Statistiche negative di un centro vaccinale in un dato giorno
+Tramite questa richiesta, solo l'amministratore può visualizzare 
 
 # Progettazione - UML
 Di seguito vengono riportati i diagrammi UML:
@@ -297,3 +298,16 @@ Questo pattern consente di costruire oggetti complessi passo dopo passo. Il mode
 All'interno del progetto questo pattern è stato utilizzato per produrre due risultati principali. Il primo riguarda la lista dei centri vaccinali, su cui vengono eseguite diverse operazioni implementate nel build, in questo modo il presenter richiama in sequenza i metodi di interesse e produce il risultato richiesto dall'utente. Nel secondo caso abbiamo il BuildRes che contiene i metodi per produrre un certo tipo di risultato, il quale consiste nella risposta data all'utente dopo che ha effettuato una prenotazione con successo. Siccome l'utente può specificare tre tipi di formato per la risposta, è stato implementato un director che istanzia la classe buildRes, in seguito alla preferenza specificata dall'utente, il director chiama un metodo del buildRes e restituisce il risultato finale con il formato specificato dall'utente.
 Il builder e director è stato implementato nella cartella [builder](/presenter/builder).
 
+# Avvio del servizio
+    - Posizionarsi nella cartella clonata dal seguente repository.
+    - Sostituire JWT_SECRET_KEY nel file .env del tuo servizio.
+ ## tramite docker-compose
+ -eseguire il seguente comando 
+ ```
+ docker-compose up
+ ```
+
+ ## senza docker
+    Ed è neccessario avere già in possesso un servizio di database mysql.
+    Per avviare il servizio direttamente senza docker, è neccessario aggiungere un nuovo campo *MYSQL_HOST=databasehost* dove databasehost è il host del database del servizio.
+    

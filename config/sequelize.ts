@@ -14,7 +14,8 @@ export class DBConnection {
                 idle: 10000,
                 acquire: 60000,
                 evict: 1000
-            }
+            },
+            logging: false
         });
     }
 
