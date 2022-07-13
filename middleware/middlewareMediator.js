@@ -6,6 +6,7 @@ var Route_2 = require("../Route");
 var adminAuth = require("./adminAuth");
 var auth = require("./auth");
 var error = require("./errors");
+var bodyParser = require("body-parser");
 // Qui abbiamo definito un mediator, dove viene specoficato l'ordine di esecuzione dei controlli.
 // Abbiamo specificato quali sono le rotte escluse dai controlli, e quali sono esclusivi per certe rotte.
 function mediate() {
@@ -17,6 +18,7 @@ function mediate() {
         path: [{ url: '/login' }]
     }));
     Route_1.AdminRoute.use(adminAuth.ControlloPrivilegio);
+    Route_2.app.use(bodyParser.json());
     (0, Route_2.createRouting)();
     Route_2.app.use(error.logErrors);
     Route_2.app.use(error.errorHandler);

@@ -215,6 +215,8 @@ Tramite questa richiesta, solo l'amministratore può confermare una prenotazione
 * Esempio con json.
 ```
 Per inviare il qrcode sotto forma di immagine (thunder client), bisogna cliccare su Body, poi su Form, selezionare il file dal proprio computer e inserire "qrcode_img" come chiave.
+L'esempio per inviare qrcode sotto forma di immagine (Thunder Client)
+<img src = "readmeImg/verifyWithQRCode.png">
 
 ### Statistiche positive dei centri vaccinali
 Tramite questa richiesta, solo l'amministratore può visualizzare una lista di centri vaccinali, a cui vengono aggiunte le statistiche relative alle prenotazioni che hanno avuto esito positivo. Vengono scartati dalla lista tutti i centri vaccinali che non hanno prenotazioni con esito positivo. L'ordinamento avviene utilizzando la media (parametro utilizzato per la statistica).
@@ -311,7 +313,7 @@ Prerequisiti:
  - Ambiante o immagine compatibile con il Node JS v16.14.0.
  - Posizionarsi nella cartella clonata dal seguente repository.
  - Sostituire JWT_SECRET_KEY nel file .env del tuo servizio.
- ## tramite docker-compose
+ ## tramite docker-compose (consiglio)
  - richiede una connessione internet al primo avvio.
  - eseguire il seguente comando 
  ```
@@ -327,3 +329,34 @@ Prerequisiti:
     node index.js
     ```
     
+# Note
+## Funzionalità aggiuntive
+### Scadenza JWT
+Durante lo sviluppo del codice sono state implementate delle funzionalità aggiuntive che non rientrano nelle richieste del progetto. Per aumentare il livello di sicurezza dell'applicazione abbiamo aggiunto un intervallo di tempo al token jwt, infatti, esso scade dopo questo intervallo, e non può più essere utilizzato per effettuare nuove richieste. Sarà necessario effettuare nuovamente il Login. Tale scadenza può essere cambiata tramite valore di *TOKEN_EXPIRE_TIME* situata nel file [.env](.env)
+### String Sanitizer
+E' stata implementata una funzione [stringSanitizer](/util/stringsanitizer.ts) che serviva per sanificare le stringhe da eventuali caratteri speciali, usata anch'essa per aumentare la sicurezza dell'applicazione. 
+
+### SlotTotime
+E' stata implementata una funzione [slotTotime](/util/slotTotime.ts) che permette di convertire gli slot in ora, permettendo all'utente di poter visualizzare l'ora corrispondente allo slot, ad esempio slot 1 corrisponde all'ora 9.00 (fascia 1 parte dalle 9 e finisce alle 13).
+### DailyJob
+E' stato implementato un [timer](/job/dailyjob.ts) che, arrivati ad una certa ora chiama una funzione che imposta lo stato di tutte le prenotazioni del giorno corrente, che non sono state accettate, a 2 (esito negativo).
+## Metodo per Registrazione utenti
+E' stato implementato il metodo register situato nel proxy [proxyUS](/model/Proxymodel/proxyUs.ts) per l'inserimento di un utente, ma non è stato collegato ad una rotta. Lo abbiamo utilizzato per popolare il database.
+## Fake mediator
+E' stata definita una classe [middlewareMediator](/middleware/middlewareMediator.ts) che ci è servita per definire l'ordine di esecuzione di tutti i middleware e delle rotte.
+
+# Test del progetto
+Collection utilizzato per testare varie rotte è contenuto nel file [(thunder-collection_centrovax.json)](/testCollection/thunder-collection_centrovax.json) situata all'interno della cartella [testCollection](/testCollection) directory di tale repository. Tutti i token JWT sono stati generati tramite la chiave nel file [.env](.env) JWT_SECRET_KEY '3rUDNzlsX5I9IQ4aTEApH8GJHja4JHX7PE5aSEYeyr3g122qKFN7hYX8aiZAasR'.
+
+# Strumenti Utilizzati
+- [Visual Studio Code](https://code.visualstudio.com/) - IDE
+    - [Thunder Client](https://www.thunderclient.com/) - L'estenzione per API Testing 
+    - [Live Share](https://visualstudio.microsoft.com/it/services/live-share/) -L'estenzione per collaborazione real-time 
+- [Docker](https://www.docker.com/) - Gestore di container
+
+### Autori
+* Zhang Yihang: [Github](https://github.com/Accout-Personal)
+* Scalella Simone: [Github](https://github.com/Simone-Scalella)
+
+
+
