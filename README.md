@@ -50,6 +50,8 @@ Il servizio back-end realizzato permette di prenotare un vaccino, svolge anche a
 | Get  | /statCentro  | Admin  | Si  |
 | Get  | /getassenze  | Admin  | Si  |
 
+L'amministratore può effettuare anche le operazioni dell'utente normale, ma non vale il viceversa.
+
 ## Esempi di richieste
 Escluso il login, tutte le altre richieste, devono avere un token jwt valido all'interno dell' Authorization header.
 
@@ -313,7 +315,7 @@ Prerequisiti:
  - Ambiante o immagine compatibile con il Node JS v16.14.0.
  - Posizionarsi nella cartella clonata dal seguente repository.
  - Sostituire JWT_SECRET_KEY nel file .env del tuo servizio.
- ## tramite docker-compose (consiglio)
+ ## tramite docker-compose (consigliato)
  - richiede una connessione internet al primo avvio.
  - eseguire il seguente comando 
  ```
@@ -339,7 +341,7 @@ E' stata implementata una funzione [stringSanitizer](/util/stringsanitizer.ts) c
 ### SlotTotime
 E' stata implementata una funzione [slotTotime](/util/slotTotime.ts) che permette di convertire gli slot in ora, permettendo all'utente di poter visualizzare l'ora corrispondente allo slot, ad esempio slot 1 corrisponde all'ora 9.00 (fascia 1 parte dalle 9 e finisce alle 13).
 ### DailyJob
-E' stato implementato un [timer](/job/dailyjob.ts) che, arrivati ad una certa ora chiama una funzione che imposta lo stato di tutte le prenotazioni del giorno corrente, che non sono state accettate, a 2 (esito negativo).
+E' stato implementato un [timer](/job/dailyjob.ts) con una liberia [node-schedule](https://www.npmjs.com/package/node-schedule) che, permette di eseguire una invalidazione(esito negativo) delle prenotazioni non accettate alle 21:00 di ogni giorno.
 ## Metodo per Registrazione utenti
 E' stato implementato il metodo register situato nel proxy [proxyUS](/model/Proxymodel/proxyUs.ts) per l'inserimento di un utente, ma non è stato collegato ad una rotta. Lo abbiamo utilizzato per popolare il database.
 ## Fake mediator
