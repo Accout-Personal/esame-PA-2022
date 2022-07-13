@@ -66,6 +66,10 @@ Tramite questa richiesta è possibile effettuare il login. Se le credenziali son
     "password":"adminadmin"
 }
 ```
+Qui presenta un esempio di login con messaggio di errore
+<img src = "readmeImg/LoginError.png">
+
+
 
 ### Ottenere i centri vaccinali entro una certa distanza
 Tramite questa richiesta è possibile ottenere una lista di centri vaccinali, che non superano una certa distanza, definita dall'utente. La distanza viene calcolata in base alla posizione del centro vaccinale e delle coordinate inviate dall'utente stesso. Tutte le distanze sono calcolate in Km, inoltre la distanza viene arrotondata alla seconda cifra decimale. Il valore di order se uguale a true indica ordinamento crescente, uguale a false indica ordinamento decrescente.
@@ -120,6 +124,20 @@ Tramite questa richiesta è possibile inserire una prenotazione.
 Come da requisiti è stato:
 1. effettuato un controllo per fare in modo che un utente possa prenotare solo una vaccinazione per un vaccino mai effettuato o se la copertura risulti scaduta alla data scelta dell’utente.
 2. viene fornito un identificatore di prenotazione; si può specificare se ritornare questo codice sotto forma di JSON o QR-code (immagine) o PDF (il pdf contiene tutti i dati richiesti dai requisiti, che sono il QR-code, la data ed ora scelta, il centro di vaccinazione ed il codice fiscale dell’utente).
+
+Qui presenta un esempio di successo della medesima l'operazione con il formato:
+* JSON
+<img src = "readmeImg/PrenotazioneJson.png">
+
+* QRCode
+<img src = "readmeImg/PrenotazioneQrCode.png">
+
+* [PDF](/readmeImg/PrenotazionePDF.pdf)
+<img src = "readmeImg/PDFPrenotazione.png">
+
+Qui presenta un esempio di errore della medesima l'operazione.
+<img src = "readmeImg/ErrorePrenotazione.png">
+
 
 ### Cancellare una prenotazione
 Tramite questa richiesta è possibile cancellare una prenotazione. Un utente può cancellare solo prenotazioni fatte da lui.
@@ -185,7 +203,23 @@ Tramite questa richiesta, solo l'amministratore può verificare la correttezza d
 Per inviare il qrcode sotto forma di immagine, se si usa thunder client, bisogna cliccare su Body, poi su Form, selezionare il file dal proprio computer e inserire "qrcode_img" come chiave.
 
 ### Conferma di una prenotazione
-Tramite questa richiesta, solo l'amministratore può confermare una prenotazione
+Tramite questa richiesta, solo l'amministratore può confermare una prenotazione. E' necessario passare il codice uuid in formato json o come qrcode (immagine).
+```
+{
+    "uuid":"a6534a52-29e2-4f64-8097-9cc0f78d5ff1"
+}
+* Esempio con json.
+```
+Per inviare il qrcode sotto forma di immagine, se si usa thunder client, bisogna cliccare su Body, poi su Form, selezionare il file dal proprio computer e inserire "qrcode_img" come chiave.
+
+### Statistiche positive dei centri vaccinali
+Tramite questa richiesta, solo l'amministratore può visualizzare una lista di centri vaccinali, a cui vengono aggiunte le statistiche relative alle prenotazioni che hanno avuto esito positivo. Vengono scartati dalla lista tutti i centri vaccinali che non hanno prenotazioni con esito positivo. L'ordinamento avviene utilizzando la media ()
+```
+{
+    "order":false
+}
+* Il parametro order di default assume valore true, può essere omesso. Con il valore true abbiamo un ordinamento crescente, con false abbiamo un ordinamento decrescente.
+```
 
 
 # Progettazione - UML
@@ -201,6 +235,7 @@ Di seguito vengono riportati i diagrammi UML:
 <img src = "readmeImg/DiagrammaAttivita.drawio.png">
 
 ## Il diagramma delle sequenze
+
 * **Middleware di user:**
 <img src = "readmeImg/sequenzemiddlewareuser.drawio.png">
 
