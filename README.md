@@ -224,7 +224,7 @@ Tramite questa richiesta, solo l'amministratore può visualizzare una lista di c
 }
 * Il parametro order di default assume valore true, può essere omesso. Con il valore true abbiamo un ordinamento crescente, con false abbiamo un ordinamento decrescente.
 ```
-
+### 
 
 # Progettazione - UML
 Di seguito vengono riportati i diagrammi UML:
