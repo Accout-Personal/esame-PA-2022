@@ -145,8 +145,26 @@ Tramite questa richiesta è possibile visualizzare la lista delle proprie prenot
 {
 }
 ```
-### 
-
+### Inserire un nuovo centro vaccinale
+Tramite questa richiesta, solo l'amministratore può inserire un nuovo centro vaccinale.
+```
+{
+    "lati":41.9983273,
+    "longi":14.9939366,
+    "nome":"Farmacia di Termoli",
+    "maxf1":10,
+    "maxf2":12
+}
+```
+### Inserire un nuovo vaccino
+Tramite questa richiesta, solo l'amministratore può inserire un nuovo vaccino.
+```
+{
+    "nome":"vaccino2",
+    "validita":30
+}
+```
+### Lista delle prenotazioni di un centro vaccinale
 
  # Progettazione - Pattern
  In questa sezione riportiamo i pattern utilizzati con le motivazioni per cui sono stati scelti. Partiamo con i pattern architetturali, i quali definiscono la struttura del progetto e delle sue componenti, poi procediamo con i design pattern che descrivono le interazioni che ci sono tra le classi, il loro comportamento, e il modo in cui creano le istanze.
@@ -161,21 +179,23 @@ Questo è un pattern architetturale implementato indirettamente, serve per strat
 
 ## Singleton
 Questo è un Creational Design Pattern, esso serve per assicurarsi che di una classe si abbia una sola istanza accessibile globalmente. E' stato utilizzato questo pattern per instaurare una connessione al database, in questo modo siamo sicuri di lavorare sempre con la stessa istanza di connessione.
+Il singleton è implementato nel file [sequelize.ts](/config/sequelize.ts).
 
 ## Proxy
 Questo è uno Structural design pattern che fornisce un oggetto utilizzato per controllare l'accesso ad un altro oggetto, il proxy e l'oggetto controllato implementano la stessa interfaccia, in maniera tale da essere intercambiabili in modo trasparente.
 E' stato utilizzato questo pattern all'interno del progetto per controllare le chiamate fatte ai metodi dei model. E' stato definito un proxy per ogni model, esso serve per implementare il controllo e la sanificazione dei dati di input inseriti dall'utente. Vengono effettuati diversi controlli relativi ai tipi di dato, al valore che tali dati assumono, sono stati effettuati controlli relativi alla validità dei dati, ad esempio non si può cancellare una prenotazione che non esiste, e altri ancora di questo tipo. Il presenter comunica con i model solo attraverso i proxy.
+I proxy sono implementati nella cartella [proxymodel](/model/Proxymodel).
 
 ## Chain of Responsibility (COR)
 Questo fa parte dei Behavioural Design Pattern, esso consente di passare le richieste lungo una catena di controllori. Alla ricezione di una richiesta, ciascun controllore decide di elaborare la richiesta e, successivamente, decide di passarla o meno al controllore successivo della catena. In express, questo pattern è realizzato tramite le funzionalità dei middleware i quali rappresentano i veri e propri anelli della catena.
 Tale pattern è stato utilizzato per filtrare le richieste HTTP, in modo da far arrivare al presenter solamente quelle che soddisfavano tutti i requisiti che sono stati imposti.
 Le rotte si dividono in rotte per l'utente normale e rotte per l'admin. In entrambe le rotte, escluso il Login, è stata definita una catena di middleware composta da:
-- Middleware per il controllo del formato del json.
-- Middleware per il controllo della presenza del token jwt
-- Middleware per il controllo della validità del token jwt
+- Middleware per il controllo del formato del json attraverso un pacchetto [body-parser](https://www.npmjs.com/package/body-parser) .
+- Middleware per il controllo della presenza del token jwt contenuto nel file [Auth.ts](/middleware/Auth.ts).
+- Middleware per il controllo della validità del token jwt sempre contenuto nel file [Auth.ts](/middleware/Auth.ts).
 
 Infine, solo per le rotte dell'amministratore, è stato definito un'ulteriore middleware per il controllo del tipo, cioè dei privilegi (se il tipo è 0 questo utente è uno user semplice, se è 1 questo utente è un amministratore).
 
-## Build
+## Builder
 Questo pattern consente di costruire oggetti complessi passo dopo passo. Il modello consente di produrre diversi tipi e rappresentazioni di un oggetto utilizzando lo stesso codice di costruzione.
 All'interno del progetto questo pattern è stato utilizzato per produrre due risultati principali. Il primo riguarda la lista dei centri vaccinali, su cui vengono eseguite diverse operazioni implementate nel build, in questo modo il presenter richiama in sequenza i metodi di interesse e produce il risultato richiesto dall'utente. Nel secondo caso abbiamo il BuildRes che contiene i metodi per produrre un certo tipo di risultato, il quale consiste nella risposta data all'utente dopo che ha effettuato una prenotazione con successo. Siccome l'utente può specificare tre tipi di formato per la risposta, è stato implementato un director che istanzia la classe buildRes, in seguito alla preferenza specificata dall'utente, il director chiama un metodo del buildRes e restituisce il risultato finale con il formato specificato dall'utente.
