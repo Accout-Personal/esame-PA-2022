@@ -165,11 +165,65 @@ Tramite questa richiesta, solo l'amministratore può inserire un nuovo vaccino.
 }
 ```
 ### Lista delle prenotazioni di un centro vaccinale
+Tramite questa richiesta, solo l'amministratore può visualizzare una lista di prenotazioni, specificando il centro vaccinale e la data di interesse. Per motivi applicativi la data inserita deve essere ***strettamente maggiore*** della data attuale. Tale lista può essere restituita in formato json o pdf/a.
+```
+{
+    "centro":2,
+    "data":"2022-07-23",
+    "formato":"pdf"
+}
+* Il parametro formato può essere omesso, in quel caso il risultato viene restituito sotto forma di json. Tale parametro ammette solo due valori che sono "pdf" o "json".
+```
+### Verifica di un codice di prenotazione
+Tramite questa richiesta, solo l'amministratore può verificare la correttezza di un codice uuid. Tale codice può essere inviato sotto forma di json o di qrcode (immagine).
+```
+{
+    "uuid":"a6534a52-29e2-4f64-8097-9cc0f78d5ff1"
+}
+* Esempio con json.
+```
+Per inviare il qrcode sotto forma di immagine, se si usa thunder client, bisogna cliccare su Body, poi su Form, selezionare il file dal proprio computer e inserire "qrcode_img" come chiave.
 
- # Progettazione - Pattern
- In questa sezione riportiamo i pattern utilizzati con le motivazioni per cui sono stati scelti. Partiamo con i pattern architetturali, i quali definiscono la struttura del progetto e delle sue componenti, poi procediamo con i design pattern che descrivono le interazioni che ci sono tra le classi, il loro comportamento, e il modo in cui creano le istanze.
+
+# Progettazione - UML
+Di seguito vengono riportati i diagrammi UML:
+- Use Case Diagram
+- Interaction Overview Diagram
+- Sequence Diagram
+
+## Il diagramma dei casi d'uso
+<img src = "readmeImg/UseCase.png">
+
+## Interaction Overview diagram
+<img src = "readmeImg/DiagrammaAttivita.drawio.png">
+
+## Il diagramma delle sequenze
+* **Middleware di user:**
+<img src = "readmeImg/sequenzemiddlewareuser.drawio.png">
+
+* **Middleware di admin:**
+<img src = "readmeImg/sequenze middleware admin.drawio.png">
+
+* **Middleware con errore:**
+<img src = "readmeImg/sequenze middleware error.drawio.png">
+
+* **Middleware con errore al presenter:**
+<img src = "readmeImg/sequenze middleware error presenter.drawio.png">
+
+* **Chiamata POST /user/Prenota :**
+<img src = "readmeImg/sequeze prenota.drawio.png">
+* Nota: Alcune componenti non di scopo non sono stati illustrati per mantenere la leggibilità del diagramma.
+
+* **Chiamata POST /admin/verify :**
+<img src = "readmeImg/sequeze verify.drawio.png">
+
+* **Chiamata POST /user/getSlotCentro :**
+<img src = "sequeze getcentroSlot.drawio.png">
+
+# Progettazione - Pattern
+In questa sezione riportiamo i pattern utilizzati con le motivazioni per cui sono stati scelti. Partiamo coni pattern architetturali, i quali definiscono la struttura del progetto e delle sue componenti, poiprocediamo con i design pattern che descrivono le interazioni che ci sono tra le classi, il lorocomportamento, e il modo in cui creano le istanze.
  
- ## MVP
+## MVP
 Questo è il pattern architetturale scelto per implementare il progetto. Questo pattern ci permette di implementare un'importante principio di buona programmazione, che è quello della separazione delle componenti, e separazione dei ruoli. Questo pattern è una evoluzione del pattern MVC, nel quale ci sono tre componenti principali, che sono il model, il controller e la view. Per questo progetto la view non viene considerata, in quanto è stato implementato solo il back-end dell'applicazione, senza front-end. Il pattern MVP differisce dal MVC perchè la componente view e model sono completamente separate, infatti, il model comunica solo con il presenter, la view comunica solo con il presenter, e il presenter comunica con entrambi.
 Utilizzando questo pattern solo la componente model interagisce con il database, infatti è presente un model per ogni tabella, in questo modo è stato evitato il problema del god object, cioè si è evitato di avere una componente troppo grande e difficile da gestire.
 Il presenter chiama i metodi del model per ottenere i dati di interesse che saranno poi utilizzati per costruire il risultato che viene restituito al client.
@@ -194,8 +248,9 @@ Le rotte si dividono in rotte per l'utente normale e rotte per l'admin. In entra
 - Middleware per il controllo della presenza del token jwt contenuto nel file [Auth.ts](/middleware/Auth.ts).
 - Middleware per il controllo della validità del token jwt sempre contenuto nel file [Auth.ts](/middleware/Auth.ts).
 
-Infine, solo per le rotte dell'amministratore, è stato definito un'ulteriore middleware per il controllo del tipo, cioè dei privilegi (se il tipo è 0 questo utente è uno user semplice, se è 1 questo utente è un amministratore).
+Infine, solo per le rotte dell'amministratore, è stato definito un'ulteriore [middleware](/middleware/AdminAuth.ts). per il controllo del tipo, cioè dei privilegi (se il tipo è 0 questo utente è uno user semplice, se è 1 questo utente è un amministratore).
 
 ## Builder
 Questo pattern consente di costruire oggetti complessi passo dopo passo. Il modello consente di produrre diversi tipi e rappresentazioni di un oggetto utilizzando lo stesso codice di costruzione.
 All'interno del progetto questo pattern è stato utilizzato per produrre due risultati principali. Il primo riguarda la lista dei centri vaccinali, su cui vengono eseguite diverse operazioni implementate nel build, in questo modo il presenter richiama in sequenza i metodi di interesse e produce il risultato richiesto dall'utente. Nel secondo caso abbiamo il BuildRes che contiene i metodi per produrre un certo tipo di risultato, il quale consiste nella risposta data all'utente dopo che ha effettuato una prenotazione con successo. Siccome l'utente può specificare tre tipi di formato per la risposta, è stato implementato un director che istanzia la classe buildRes, in seguito alla preferenza specificata dall'utente, il director chiama un metodo del buildRes e restituisce il risultato finale con il formato specificato dall'utente.
+Il builder e director è stato implementato nella cartella [builder](/presenter/builder).

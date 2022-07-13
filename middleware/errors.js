@@ -3,6 +3,7 @@
 exports.__esModule = true;
 exports.errorHandler = exports.logErrors = void 0;
 function logErrors(err, req, res, next) {
+    console.log(err);
     next(err);
 }
 exports.logErrors = logErrors;
@@ -10,6 +11,6 @@ function errorHandler(err, req, res, next) {
     if (res.headersSent) {
         return next(err);
     }
-    res.status(403).send({ "errore": err.message });
+    res.status(400).send({ "errore": err.message });
 }
 exports.errorHandler = errorHandler;

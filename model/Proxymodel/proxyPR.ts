@@ -75,7 +75,7 @@ export class proxyPr implements proxyInterfacePr {
     public async getListaPr(userid?: number, centro?: number, data?: string) {
         let datasanitized = stringSanitizer(data);
         if (typeof centro !== 'undefined' || typeof datasanitized !== 'undefined') {
-            if (typeof (datasanitized) !== 'string' || !(DateTime.fromISO(datasanitized).isValid) || DateTime.now > DateTime.fromISO(datasanitized))
+            if (typeof (datasanitized) !== 'string' || !(DateTime.fromISO(datasanitized).isValid) || DateTime.now() > DateTime.fromISO(datasanitized))
                 throw new Error('La data che hai inserito non è corretta');
             await this.TypeCheckCV(centro);
         }

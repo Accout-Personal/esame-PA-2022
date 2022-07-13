@@ -51,7 +51,7 @@ var userPresenter = /** @class */ (function () {
     function userPresenter() {
     }
     // Metodo per effettuare il login 
-    userPresenter.login = function (req, res) {
+    userPresenter.login = function (req, res, next) {
         return __awaiter(this, void 0, void 0, function () {
             var proxy;
             return __generator(this, function (_a) {
@@ -61,11 +61,11 @@ var userPresenter = /** @class */ (function () {
                         res.send({ token: jwt.sign({ user: { "username": value.username, "tipo": value.tipo, "id": value.id } }, process.env.JWT_SECRET_KEY, { expiresIn: process.env.TOKEN_EXPIRE_TIME }) });
                     }
                     else
-                        res.status(401).send({ message: "credenziale invalido" });
+                        next(new Error("credenziale invalido"));
                     return;
                 })["catch"](function (error) {
                     console.log(error);
-                    res.status(401).send({ message: "credenziale invalido" });
+                    next(new Error("credenziale invalido"));
                 });
                 return [2 /*return*/];
             });
@@ -73,21 +73,25 @@ var userPresenter = /** @class */ (function () {
     };
     ;
     // Metodo per registrare un nuovo utente
-    userPresenter.register = function (req, res) {
+    userPresenter.register = function (req, res, next) {
         return __awaiter(this, void 0, void 0, function () {
             var proxy;
             return __generator(this, function (_a) {
                 proxy = new proxyUs_1.proxyUs();
-                proxy.insertNewElement({ cf: req.body.cf,
+                proxy.insertNewElement({
+                    cf: req.body.cf,
                     username: req.body.username,
                     password: req.body.password,
-                    tipo: 0 }).then(function (value) {
+                    tipo: 0
+                }).then(function (value) {
                     if (value) {
                         res.send({ message: "successo." });
                     }
                     else {
                         res.send({ message: "fallito." });
                     }
+                })["catch"](function (error) {
+                    next(error);
                 });
                 return [2 /*return*/];
             });
@@ -95,7 +99,7 @@ var userPresenter = /** @class */ (function () {
     };
     ;
     // Metodo per inserire una nuova prenotazione
-    userPresenter.prenota = function (req, res) {
+    userPresenter.prenota = function (req, res, next) {
         return __awaiter(this, void 0, void 0, function () {
             var Proxy, body, value, error_1;
             return __generator(this, function (_a) {
@@ -110,16 +114,14 @@ var userPresenter = /** @class */ (function () {
                     case 2:
                         value = _a.sent();
                         return [4 /*yield*/, directorRes_1.directorRes.respose(res, value, body.formato)["catch"](function (err) {
-                                console.log(err);
-                                res.status(400).send({ "errore": err.message });
+                                next(err);
                             })];
                     case 3:
                         _a.sent();
                         return [3 /*break*/, 5];
                     case 4:
                         error_1 = _a.sent();
-                        console.log(error_1);
-                        res.status(400).send({ "errore": error_1.message });
+                        next(error_1);
                         return [3 /*break*/, 5];
                     case 5:
                         ;
@@ -129,7 +131,7 @@ var userPresenter = /** @class */ (function () {
         });
     };
     // Questo metodo serve per modificare una prenotazione
-    userPresenter.modificaPre = function (req, res) {
+    userPresenter.modificaPre = function (req, res, next) {
         return __awaiter(this, void 0, void 0, function () {
             var Proxy, body, error_2;
             return __generator(this, function (_a) {
@@ -148,8 +150,7 @@ var userPresenter = /** @class */ (function () {
                         return [3 /*break*/, 4];
                     case 3:
                         error_2 = _a.sent();
-                        console.log(error_2);
-                        res.status(401).send({ "errore": error_2.message });
+                        next(error_2);
                         return [3 /*break*/, 4];
                     case 4: return [2 /*return*/];
                 }
@@ -157,18 +158,17 @@ var userPresenter = /** @class */ (function () {
         });
     };
     // Questo metodo serve per eliminare una prenotazione
-    userPresenter.cancellaPre = function (req, res) {
+    userPresenter.cancellaPre = function (req, res, next) {
         var Proxy = new proxyPR_1.proxyPr();
         var body = req.body;
         Proxy.cancellaPre(body.id, req.user.user.id).then(function (value) {
             res.status(200).send({ "message": "cancellato con successo" });
         })["catch"](function (error) {
-            console.log(error);
-            res.status(401).send({ "errore": error.message });
+            next(error);
         });
     };
     //filtro centro per la distanza e disponibilita'
-    userPresenter.getCentro = function (req, res) {
+    userPresenter.getCentro = function (req, res, next) {
         return __awaiter(this, void 0, void 0, function () {
             var body, user, proxy, builder, result, result, error_3;
             return __generator(this, function (_a) {
@@ -218,8 +218,8 @@ var userPresenter = /** @class */ (function () {
                     case 5: return [3 /*break*/, 7];
                     case 6:
                         error_3 = _a.sent();
-                        console.log(error_3);
-                        return [2 /*return*/, res.status(400).send({ "errore": error_3.message })];
+                        next(error_3);
+                        return [3 /*break*/, 7];
                     case 7:
                         ;
                         return [2 /*return*/];
@@ -228,7 +228,7 @@ var userPresenter = /** @class */ (function () {
         });
     };
     //filtro centro per i max 5 giorni
-    userPresenter.getSlotsCentro = function (req, res) {
+    userPresenter.getSlotsCentro = function (req, res, next) {
         return __awaiter(this, void 0, void 0, function () {
             var body, user, proxy, builder, result, error_4;
             return __generator(this, function (_a) {
@@ -257,8 +257,8 @@ var userPresenter = /** @class */ (function () {
                         return [3 /*break*/, 3];
                     case 2:
                         error_4 = _a.sent();
-                        console.log(error_4);
-                        return [2 /*return*/, res.status(400).send({ "errore": error_4.message })];
+                        next(error_4);
+                        return [3 /*break*/, 3];
                     case 3:
                         ;
                         return [2 /*return*/];
@@ -267,17 +267,23 @@ var userPresenter = /** @class */ (function () {
         });
     };
     // Questo metodo restituisce le prenotazioni effettuate da un utente
-    userPresenter.getMyPre = function (req, res) {
+    userPresenter.getMyPre = function (req, res, next) {
         return __awaiter(this, void 0, void 0, function () {
-            var proxy, list;
+            var proxy, list, error_5;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
+                        _a.trys.push([0, 2, , 3]);
                         proxy = new proxyPR_1.proxyPr();
                         return [4 /*yield*/, proxy.getListaPr(req.user.user.id)];
                     case 1:
                         list = _a.sent();
                         return [2 /*return*/, res.send(list)];
+                    case 2:
+                        error_5 = _a.sent();
+                        next(error_5);
+                        return [3 /*break*/, 3];
+                    case 3: return [2 /*return*/];
                 }
             });
         });

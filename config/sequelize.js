@@ -7,8 +7,14 @@ var DBConnection = /** @class */ (function () {
     function DBConnection() {
         this.connection = new sequelize_1.Sequelize(process.env.DATABASE_NAME, process.env.DATABASE_USER, process.env.DATABASE_PASSWORD, {
             dialect: 'mysql',
-            host: process.env.DATABASE_HOST,
-            logging: false
+            host: process.env.MYSQL_HOST,
+            pool: {
+                max: 1000,
+                min: 0,
+                idle: 10000,
+                acquire: 60000,
+                evict: 1000
+            }
         });
     }
     DBConnection.getInstance = function () {

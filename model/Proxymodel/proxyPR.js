@@ -151,7 +151,7 @@ var proxyPr = /** @class */ (function () {
                     case 0:
                         datasanitized = (0, stringsanitizer_1.stringSanitizer)(data);
                         if (!(typeof centro !== 'undefined' || typeof datasanitized !== 'undefined')) return [3 /*break*/, 2];
-                        if (typeof (datasanitized) !== 'string' || !(luxon_1.DateTime.fromISO(datasanitized).isValid) || luxon_1.DateTime.now > luxon_1.DateTime.fromISO(datasanitized))
+                        if (typeof (datasanitized) !== 'string' || !(luxon_1.DateTime.fromISO(datasanitized).isValid) || luxon_1.DateTime.now() > luxon_1.DateTime.fromISO(datasanitized))
                             throw new Error('La data che hai inserito non è corretta');
                         return [4 /*yield*/, this.TypeCheckCV(centro)];
                     case 1:
@@ -322,7 +322,7 @@ var proxyPr = /** @class */ (function () {
     // Oppure, se si sta prenotando ad un vaccino già ricevuto, pero', dopo il relativo periodo di validità.
     proxyPr.prototype.checkVaxValidity = function (data, vaccino, user, excludeid) {
         return __awaiter(this, void 0, void 0, function () {
-            var DataPre, queryBody, LastVax, LastVaxTime, Vaccino;
+            var DataPre, queryBody, AllVax, Vaccino, LowerBound, UpperBound, InRangeVax;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -337,24 +337,29 @@ var proxyPr = /** @class */ (function () {
                                 order: [['data', 'DESC']]
                             })];
                     case 1:
-                        LastVax = _a.sent();
+                        AllVax = _a.sent();
                         // Devo escludere la prenotazione attuale, durante la modifica, per escludere il controllo sul periodo di validità del vaccino
                         if (typeof excludeid !== 'undefined') {
-                            LastVax = LastVax.filter(function (element) {
+                            AllVax = AllVax.filter(function (element) {
                                 return element.id != excludeid;
                             });
                         }
                         //mai vaccinato
-                        if (JSON.parse(JSON.stringify(LastVax)).length == 0) {
+                        if (JSON.parse(JSON.stringify(AllVax)).length == 0) {
                             return [2 /*return*/];
                         }
-                        LastVaxTime = luxon_1.DateTime.fromISO(LastVax[0].data);
                         return [4 /*yield*/, this.modelV.getModel().findOne({ where: { id: vaccino }, query: { raw: true } })];
                     case 2:
                         Vaccino = _a.sent();
-                        //il vaccino e' ancora effettivo.
-                        if (DataPre < LastVaxTime.plus({ day: Vaccino.validita }))
-                            throw Error("il vaccino ancora e' effettivo");
+                        LowerBound = DataPre.minus({ day: Vaccino.validita });
+                        UpperBound = DataPre.plus({ day: Vaccino.validita });
+                        InRangeVax = AllVax.filter(function (Prenotazione) {
+                            var date = luxon_1.DateTime.fromISO(Prenotazione.data);
+                            return LowerBound < date && date < UpperBound;
+                        });
+                        if (JSON.parse(JSON.stringify(InRangeVax)).length > 0) {
+                            throw new Error("il vaccino è ancora effettivo");
+                        }
                         return [2 /*return*/];
                 }
             });
