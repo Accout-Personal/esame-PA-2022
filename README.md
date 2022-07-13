@@ -51,6 +51,7 @@ Il servizio back-end realizzato permette di prenotare un vaccino, svolge anche a
 | Get  | /getassenze  | Admin  | Si  |
 
 ## Esempi di richieste
+Escluso il login, tutte le altre richieste, devono avere un token jwt valido all'interno dell' Authorization header.
 
 ### Login
 Tramite questa richiesta è possibile effettuare il login. Se le credenziali sono corrette verrà restituito un token jwt.
@@ -139,6 +140,12 @@ Tramite questa richiesta è possibile modificare una prenotazione. Si possono mo
 }
 ```
 
+### Lista personale delle prenotazioni
+Tramite questa richiesta è possibile visualizzare la lista delle proprie prenotazioni, in questa richiesta non ci sono parametri da inviare.
+```
+{
+}
+```
 
  # Progettazione - Pattern
  In questa sezione riportiamo i pattern utilizzati con le motivazioni per cui sono stati scelti. Partiamo con i pattern architetturali, i quali definiscono la struttura del progetto e delle sue componenti, poi procediamo con i design pattern che descrivono le interazioni che ci sono tra le classi, il loro comportamento, e il modo in cui creano le istanze.
