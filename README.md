@@ -100,7 +100,8 @@ Tramite questa richiesta l'utente può visualizzare gli slot liberi specificando
     "formato":"ora"
 }
 * Il parametro fascia, se non specificato, fa restituire tutti gli slot disponibili all'interno di entrambe le fascie. Può essere omesso.
-* Il parametro formato può ricevere come valore solo la stringa "ora", la quale permette di ottenere l'ora relativa ai vari slot disponibili. Se omesso, o se viene inserita una qualsiasi altra stringa, come risultato vengono restituiti gli slot, rappresentati con il loro numero, e non con l'ora. 
+* Il parametro formato può ricevere come valore solo la stringa "ora", la quale permette di ottenere l'ora relativa ai vari slot disponibili.
+* Se omesso, o se viene inserita una qualsiasi altra stringa, come risultato vengono restituiti gli slot, rappresentati con il loro numero, e non con l'ora. 
 ```
 ### Inserire una prenotazione
 Tramite questa richiesta è possibile inserire una prenotazione.
@@ -112,14 +113,31 @@ Tramite questa richiesta è possibile inserire una prenotazione.
     "vaccino":6,
     "formato":"json"
 }
-* Il parametro formato, se non specificato, farà restituire il risultato sotto forma di json. Può essere omesso. I valori che possono essere inseriti sono "json","pdf","qrcode". Se si inserisce un altra stringa verrà restituito il risultato sotto forma di json.
+* Il parametro formato, se non specificato, farà restituire il risultato sotto forma di json. Può essere omesso.
+* I valori che possono essere inseriti sono "json","pdf","qrcode". Se si inserisce un altra stringa verrà restituito il risultato sotto forma di json.
 ```
 Come da requisiti è stato:
 1. effettuato un controllo per fare in modo che un utente possa prenotare solo una vaccinazione per un vaccino mai effettuato o se la copertura risulti scaduta alla data scelta dell’utente.
 2. viene fornito un identificatore di prenotazione; si può specificare se ritornare questo codice sotto forma di JSON o QR-code (immagine) o PDF (il pdf contiene tutti i dati richiesti dai requisiti, che sono il QR-code, la data ed ora scelta, il centro di vaccinazione ed il codice fiscale dell’utente).
 
 ### Cancellare una prenotazione
-Tramite questa richiesta è possibile 
+Tramite questa richiesta è possibile cancellare una prenotazione. Un utente può cancellare solo prenotazioni fatte da lui.
+```
+{
+    "id":144
+}
+```
+### Modificare una prenotazione
+Tramite questa richiesta è possibile modificare una prenotazione. Si possono modificare solo prenotazioni fatte dall'utente stesso, inoltre valgono gli stessi vincoli definiti per l'inserimento. L'unico parametro obbligatorio è l'id della prenotazione, tutti gli altri parametri che appartengono alla prenotazione, possono essere omessi, in quel caso, durante la modifica, vengono utilizzati i vecchi valori, quindi quel campo non cambia. Nel database cambiano solo i valori dei parametri specificati nella richiesta.
+```
+{
+    "id":168,
+    "data":"2023-07-22",
+    "slot":3,
+    "vaccino":7,
+    "centro_vac":2
+}
+```
 
 
  # Progettazione - Pattern
