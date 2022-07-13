@@ -1,6 +1,6 @@
 import * as express from 'express';
 import { userPresenter } from './presenter/userPresenter';
-import * as bodyParser from 'body-parser';
+
 import { adminPresenter } from './presenter/adminPresenter';
 
 export const app = express()
@@ -11,7 +11,7 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage: storage })
 
 export function createRouting() {
-    app.use(bodyParser.json());
+    
     app.use('/user', UserRoute);
     app.use('/admin', AdminRoute);
 
