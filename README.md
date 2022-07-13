@@ -184,6 +184,9 @@ Tramite questa richiesta, solo l'amministratore può verificare la correttezza d
 ```
 Per inviare il qrcode sotto forma di immagine, se si usa thunder client, bisogna cliccare su Body, poi su Form, selezionare il file dal proprio computer e inserire "qrcode_img" come chiave.
 
+### Conferma di una prenotazione
+Tramite questa richiesta, solo l'amministratore può confermare una prenotazione
+
 
 # Progettazione - UML
 Di seguito vengono riportati i diagrammi UML:
@@ -218,7 +221,7 @@ Di seguito vengono riportati i diagrammi UML:
 <img src = "readmeImg/sequeze verify.drawio.png">
 
 * **Chiamata POST /user/getSlotCentro :**
-<img src = "sequeze getcentroSlot.drawio.png">
+<img src = "readmeImg/sequeze getcentroSlot.drawio.png">
 
 # Progettazione - Pattern
 In questa sezione riportiamo i pattern utilizzati con le motivazioni per cui sono stati scelti. Partiamo coni pattern architetturali, i quali definiscono la struttura del progetto e delle sue componenti, poiprocediamo con i design pattern che descrivono le interazioni che ci sono tra le classi, il lorocomportamento, e il modo in cui creano le istanze.
